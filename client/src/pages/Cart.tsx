@@ -8,8 +8,10 @@ import { useLocalCart } from "@/hooks/useLocalCart";
 import { toast } from "sonner";
 
 export default function Cart() {
-  const { data: cartItems, isLoading, refetch } = trpc.cart.getItems.useQuery();
   const { isAuthenticated } = useAuth();
+  const { data: cartItems, isLoading, refetch } = trpc.cart.getItems.useQuery(undefined, {
+    enabled: isAuthenticated, // Only fetch when authenticated
+  });
   const { cartItems: localCartItems, updateQuantity: updateLocalQuantity, removeItem: removeLocalItem, clearCart: clearLocalCart, getTotalPrice } = useLocalCart();
   const updateQuantity = trpc.cart.updateQuantity.useMutation();
   const removeItem = trpc.cart.removeItem.useMutation();

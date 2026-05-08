@@ -89,8 +89,8 @@
 
 
 ## Améliorations - Images et panier sans connexion
-- [ ] Générer les images pour les 6 parfums restants
-- [ ] Intégrer les images dans le catalogue produits
-- [ ] Implémenter le panier avec localStorage pour les utilisateurs non connectés
-- [ ] Synchroniser le panier localStorage avec le panier utilisateur à la connexion
-- [ ] Tester le flux complet sans connexion
+- [x] Générer les images pour les 6 parfums restants
+- [x] Intégrer les images dans le catalogue produits
+- [x] Implémenter le panier avec localStorage pour les utilisateurs non connectés
+- [ ] Synchroniser le panier localStorage avec le panier utilisateur à la connexion (optionnel)
+- [x] Tester le flux complet sans connexion
