@@ -3,13 +3,18 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Link } from "wouter";
 import { Leaf, Trash2, Plus, Minus } from "lucide-react";
+import { useAuth } from "@/_core/hooks/useAuth";
+import { useLocalCart } from "@/hooks/useLocalCart";
 import { toast } from "sonner";
 
 export default function Cart() {
   const { data: cartItems, isLoading, refetch } = trpc.cart.getItems.useQuery();
+  const { isAuthenticated } = useAuth();
+  const { cartItems: localCartItems, updateQuantity: updateLocalQuantity, removeItem: removeLocalItem, clearCart: clearLocalCart, getTotalPrice } = useLocalCart();
   const updateQuantity = trpc.cart.updateQuantity.useMutation();
   const removeItem = trpc.cart.removeItem.useMutation();
   const clearCart = trpc.cart.clear.useMutation();
+  const displayItems = isAuthenticated ? cartItems : localCartItems;
 
   const handleUpdateQuantity = (cartItemId: number, newQuantity: number) => {
     if (newQuantity < 1) return;
@@ -52,10 +57,12 @@ export default function Cart() {
     });
   };
 
-  const totalAmount = (cartItems || []).reduce(
-    (sum, item) => sum + (item.product?.price || 0) * item.quantity,
-    0
-  );
+  const totalAmount = isAuthenticated
+    ? (cartItems || []).reduce(
+        (sum, item) => sum + (item.product?.price || 0) * item.quantity,
+        0
+      )
+    : getTotalPrice();
 
   return (
     <div className="min-h-screen flex flex-col bg-white">
@@ -84,9 +91,9 @@ export default function Cart() {
         <div className="container max-w-4xl">
           <h2 className="text-4xl font-light text-gray-900 mb-8">Votre Panier</h2>
 
-          {isLoading ? (
+          {isLoading && isAuthenticated ? (
             <p className="text-gray-600">Chargement du panier...</p>
-          ) : !cartItems || cartItems.length === 0 ? (
+          ) : !displayItems || displayItems.length === 0 ? (
             <div className="text-center py-12">
               <p className="text-gray-600 mb-6">Votre panier est vide</p>
               <Link href="/products">
@@ -99,24 +106,30 @@ export default function Cart() {
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
               {/* Cart Items */}
               <div className="lg:col-span-2 space-y-4">
-                {cartItems.map((item) => (
-                  <Card key={item.id} className="p-6">
+                {displayItems?.map((item) => (
+                  <Card key={isAuthenticated ? (item as any).id : (item as any).productId} className="p-6">
                     <div className="flex justify-between items-start mb-4">
                       <div>
                         <h3 className="text-lg font-light text-gray-900">
-                          {item.product?.name}
+                          {isAuthenticated ? (item as any).product?.name : (item as any).name}
                         </h3>
                         <p className="text-sm text-gray-500">Décant 50ml</p>
                       </div>
                       <p className="text-lg font-light text-gray-900">
-                        €{((item.product?.price || 0) / 100).toFixed(2)}
+                        €{((isAuthenticated ? (item as any).product?.price || 0 : (item as any).price) / 100).toFixed(2)}
                       </p>
                     </div>
 
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
                         <button
-                          onClick={() => handleUpdateQuantity(item.id, item.quantity - 1)}
+                          onClick={() => {
+                            if (isAuthenticated) {
+                              handleUpdateQuantity((item as any).id, item.quantity - 1);
+                            } else {
+                              updateLocalQuantity((item as any).productId, item.quantity - 1);
+                            }
+                          }}
                           className="p-1 hover:bg-gray-100 rounded transition"
                           disabled={item.quantity <= 1}
                         >
@@ -124,7 +137,13 @@ export default function Cart() {
                         </button>
                         <span className="w-8 text-center">{item.quantity}</span>
                         <button
-                          onClick={() => handleUpdateQuantity(item.id, item.quantity + 1)}
+                          onClick={() => {
+                            if (isAuthenticated) {
+                              handleUpdateQuantity((item as any).id, item.quantity + 1);
+                            } else {
+                              updateLocalQuantity((item as any).productId, item.quantity + 1);
+                            }
+                          }}
                           className="p-1 hover:bg-gray-100 rounded transition"
                         >
                           <Plus className="w-4 h-4" />
@@ -132,7 +151,13 @@ export default function Cart() {
                       </div>
 
                       <button
-                        onClick={() => handleRemoveItem(item.id)}
+                        onClick={() => {
+                          if (isAuthenticated) {
+                            handleRemoveItem((item as any).id);
+                          } else {
+                            removeLocalItem((item as any).productId);
+                          }
+                        }}
                         className="p-2 hover:bg-red-50 rounded transition text-red-600"
                       >
                         <Trash2 className="w-4 h-4" />
@@ -174,7 +199,14 @@ export default function Cart() {
                     </Link>
 
                     <button
-                      onClick={handleClearCart}
+                      onClick={() => {
+                        if (isAuthenticated) {
+                          handleClearCart();
+                        } else {
+                          clearLocalCart();
+                          toast.success("Panier vidé");
+                        }
+                      }}
                       className="w-full py-2 text-sm text-gray-600 hover:text-gray-900 transition"
                     >
                       Vider le panier

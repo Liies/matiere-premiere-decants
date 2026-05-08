@@ -10,7 +10,7 @@ export const imageAssets = {
     compressed: "https://d2xsxph8kpxj0f.cloudfront.net/310519663634453748/oKjLk7qKw3XzkAh8kgeZU3/hero-background-PCDVJYemm2nGWjBWLNJARj.webp",
   },
 
-  // Perfume bottles
+  // Perfume bottles - all 10 products
   perfumes: {
     vanillaPowder: {
       original: "https://d2xsxph8kpxj0f.cloudfront.net/310519663634453748/oKjLk7qKw3XzkAh8kgeZU3/perfume-bottle-1-PVHeC2L3Qx4rzpJs2nzm6J.png",
@@ -28,5 +28,48 @@ export const imageAssets = {
       original: "https://d2xsxph8kpxj0f.cloudfront.net/310519663634453748/oKjLk7qKw3XzkAh8kgeZU3/perfume-bottle-4-mFLspMK8ytwUFWEBB43pdR.png",
       compressed: "https://d2xsxph8kpxj0f.cloudfront.net/310519663634453748/oKjLk7qKw3XzkAh8kgeZU3/perfume-bottle-4-PwaeMt7kKnzSiwR9YRnx5a.webp",
     },
+    santalAustral: {
+      original: "https://d2xsxph8kpxj0f.cloudfront.net/310519663634453748/oKjLk7qKw3XzkAh8kgeZU3/perfume-bottle-5-Jq8wKP5sRBmagFqRYHTPYD.png",
+      compressed: "https://d2xsxph8kpxj0f.cloudfront.net/310519663634453748/oKjLk7qKw3XzkAh8kgeZU3/perfume-bottle-5-iFzbbPKrSeqHZr3jJAtyDE.webp",
+    },
+    encensSuave: {
+      original: "https://d2xsxph8kpxj0f.cloudfront.net/310519663634453748/oKjLk7qKw3XzkAh8kgeZU3/perfume-bottle-6-er3GZPQtQ77AdLHtgMWeH5.png",
+      compressed: "https://d2xsxph8kpxj0f.cloudfront.net/310519663634453748/oKjLk7qKw3XzkAh8kgeZU3/perfume-bottle-6-SL76TZnfPg6kRv6EWjfUhM.webp",
+    },
+    metalLavender: {
+      original: "https://d2xsxph8kpxj0f.cloudfront.net/310519663634453748/oKjLk7qKw3XzkAh8kgeZU3/perfume-bottle-7-houfjETAmgLMzheDuB3ncg.png",
+      compressed: "https://d2xsxph8kpxj0f.cloudfront.net/310519663634453748/oKjLk7qKw3XzkAh8kgeZU3/perfume-bottle-7-d9koEGvu4nJKDYtJQfaXj.webp",
+    },
+    boisDebene: {
+      original: "https://d2xsxph8kpxj0f.cloudfront.net/310519663634453748/oKjLk7qKw3XzkAh8kgeZU3/perfume-bottle-8-82Az3zAtfFZUHJFqcHiLAm.png",
+      compressed: "https://d2xsxph8kpxj0f.cloudfront.net/310519663634453748/oKjLk7qKw3XzkAh8kgeZU3/perfume-bottle-8-JvXrbYLjDVvWMNPXBSMYUi.webp",
+    },
+    ambroxan: {
+      original: "https://d2xsxph8kpxj0f.cloudfront.net/310519663634453748/oKjLk7qKw3XzkAh8kgeZU3/perfume-bottle-9-SN8GAG4SHv6Gtae8DWoa8v.png",
+      compressed: "https://d2xsxph8kpxj0f.cloudfront.net/310519663634453748/oKjLk7qKw3XzkAh8kgeZU3/perfume-bottle-9-c6rgN4BiwZLCe9meEp4kyY.webp",
+    },
+    vetiverExtraordinaire: {
+      original: "https://d2xsxph8kpxj0f.cloudfront.net/310519663634453748/oKjLk7qKw3XzkAh8kgeZU3/perfume-bottle-10-irJNjvaxRib6RsC23GwBFA.png",
+      compressed: "https://d2xsxph8kpxj0f.cloudfront.net/310519663634453748/oKjLk7qKw3XzkAh8kgeZU3/perfume-bottle-10-3VbqZZBZcuPWaksUVpN7EZ.webp",
+    },
   },
+};
+
+// Mapping product IDs to image assets
+export const getProductImage = (productId: number) => {
+  const imageMap: Record<number, keyof typeof imageAssets.perfumes> = {
+    1: "vanillaPowder",
+    2: "crystalSaffron",
+    3: "radicalRose",
+    4: "falconLeather",
+    5: "santalAustral",
+    6: "encensSuave",
+    7: "metalLavender",
+    8: "boisDebene",
+    9: "ambroxan",
+    10: "vetiverExtraordinaire",
+  };
+
+  const key = imageMap[productId];
+  return key ? imageAssets.perfumes[key] : null;
 };
