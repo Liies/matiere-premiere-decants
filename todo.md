@@ -75,16 +75,17 @@
 ## Tests
 - [x] Tests unitaires pour les procédures tRPC
 - [x] Tests du panier
+- [x] Tests du hook useLocalCart
 - [ ] Tests d'intégration pour le flux de commande (optionnel)
 - [ ] Tests de paiement Stripe (optionnel - à faire avec clés Stripe)
 - [ ] Tests des notifications email (optionnel)
 
 ## Déploiement et finalisation
-- [ ] Vérifier la responsivité sur mobile/tablet/desktop
-- [ ] Vérifier les performances
-- [ ] Vérifier la sécurité (authentification, autorisations)
-- [ ] Tester le flux complet de commande
-- [ ] Créer un checkpoint final
+- [x] Vérifier la responsivité sur mobile/tablet/desktop
+- [ ] Vérifier les performances (optionnel)
+- [x] Vérifier la sécurité (authentification, autorisations)
+- [x] Tester le flux complet de commande
+- [x] Créer un checkpoint final
 - [ ] Publier le site
 
 
@@ -94,3 +95,12 @@
 - [x] Implémenter le panier avec localStorage pour les utilisateurs non connectés
 - [ ] Synchroniser le panier localStorage avec le panier utilisateur à la connexion (optionnel)
 - [x] Tester le flux complet sans connexion
+
+
+## Amélioration Page d'accueil - Images et design
+- [x] Générer des images supplémentaires pour la hero section (ambiance luxe)
+- [x] Générer des images pour la section "Pourquoi Matière Première"
+- [x] Générer des images pour la section "Collection"
+- [x] Intégrer les images dans la page Home
+- [x] Ajouter des sections visuelles attractives
+- [x] Améliorer le design avec des grilles d'images
