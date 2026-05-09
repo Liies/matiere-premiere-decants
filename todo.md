@@ -117,3 +117,27 @@
 - [x] Ajouter des animations de texte (reveal, typewriter)
 - [x] Implémenter le scroll-triggered animations avec Intersection Observer
 - [x] Créer la page HomePremium avec design Apple-inspired
+
+
+## Contenu enrichi - Descriptions et histoire
+- [ ] Ajouter descriptions détaillées pour chaque parfum
+- [ ] Créer des profils complets pour les nez créatifs
+- [ ] Ajouter des notes olfactives détaillées (tête, cœur, fond)
+- [ ] Créer une section blog/articles sur la parfumerie
+
+## Améliorations design - Animations et sections
+- [ ] Ajouter des animations sur les cartes produits (hover effects)
+- [ ] Créer des sections avec animations de révélation de texte
+- [ ] Ajouter des animations de chargement (skeleton screens)
+- [ ] Améliorer les transitions entre pages
+- [ ] Ajouter des micro-interactions (boutons, formulaires)
+
+## Pages supplémentaires
+- [x] Page À propos (About) - Histoire détaillée de la marque
+- [x] Page FAQ - Questions fréquemment posées
+- [x] Page Contact - Formulaire de contact
+- [x] Page Conditions d'utilisation (Terms)
+- [x] Page Politique de confidentialité (Privacy)
+- [ ] Page Livraison et retours (optionnel)
+- [x] Mettre à jour la navigation pour inclure ces pages
+- [x] Ajouter les liens dans le footer
