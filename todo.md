@@ -104,3 +104,16 @@
 - [x] Intégrer les images dans la page Home
 - [x] Ajouter des sections visuelles attractives
 - [x] Améliorer le design avec des grilles d'images
+
+
+## Page d'accueil Premium Style Apple
+- [x] Générer des images pour l'histoire de Matière Première
+- [x] Générer des images pour les nez/créateurs
+- [x] Générer des images pour les sections produits
+- [x] Créer des sections avec scroll animations (parallax, fade-in, scale)
+- [x] Implémenter les transitions fluides entre sections
+- [x] Créer une section "Notre Histoire" avec timeline
+- [x] Créer une section "Les Nez" avec profils des créateurs
+- [x] Ajouter des animations de texte (reveal, typewriter)
+- [x] Implémenter le scroll-triggered animations avec Intersection Observer
+- [x] Créer la page HomePremium avec design Apple-inspired
