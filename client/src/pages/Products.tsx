@@ -1,8 +1,9 @@
 import { trpc } from "@/lib/trpc";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Link } from "wouter";
-import { Leaf, ShoppingCart } from "lucide-react";
+import Header from "@/components/Header";
+import Footer from "@/components/Footer";
+import { ShoppingCart, Leaf } from "lucide-react";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { toast } from "sonner";
 import { useState } from "react";
@@ -41,25 +42,7 @@ export default function Products() {
 
   return (
     <div className="min-h-screen flex flex-col bg-white">
-      {/* Header */}
-      <header className="border-b border-gray-200">
-        <div className="container flex items-center justify-between py-6">
-          <Link href="/" className="flex items-center gap-2 hover:opacity-70 transition">
-            <Leaf className="w-6 h-6 text-gray-900" />
-            <h1 className="text-2xl font-light tracking-wider text-gray-900">
-              Matière Première
-            </h1>
-          </Link>
-          <nav className="flex items-center gap-8">
-            <Link href="/products" className="text-sm text-gray-900 font-medium">
-              Catalogue
-            </Link>
-            <Link href="/cart" className="text-sm text-gray-600 hover:text-gray-900 transition">
-              Panier
-            </Link>
-          </nav>
-        </div>
-      </header>
+      <Header />
 
       {/* Content */}
       <main className="flex-1 py-12 px-4">
@@ -157,12 +140,7 @@ export default function Products() {
         </div>
       </main>
 
-      {/* Footer */}
-      <footer className="border-t border-gray-200 py-8 px-4 mt-12">
-        <div className="container text-center text-sm text-gray-600">
-          <p>© 2026 Matière Première. Tous droits réservés.</p>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 }

@@ -1,8 +1,10 @@
 import { useEffect, useRef, useState } from "react";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { Button } from "@/components/ui/button";
+import Header from "@/components/Header";
+import Footer from "@/components/Footer";
 import { Link } from "wouter";
-import { ArrowRight, Leaf } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 
 export default function HomePremium() {
   const { user, isAuthenticated } = useAuth();
@@ -47,30 +49,7 @@ export default function HomePremium() {
 
   return (
     <div className="min-h-screen bg-white">
-      {/* Header */}
-      <header className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-200">
-        <div className="container flex items-center justify-between py-4">
-          <div className="flex items-center gap-2">
-            <Leaf className="w-5 h-5 text-gray-900" />
-            <h1 className="text-lg font-light tracking-wider text-gray-900">
-              Matière Première
-            </h1>
-          </div>
-          <nav className="flex items-center gap-6">
-            <Link href="/products" className="text-sm text-gray-600 hover:text-gray-900 transition">
-              Catalogue
-            </Link>
-            <Link href="/cart" className="text-sm text-gray-600 hover:text-gray-900 transition">
-              Panier
-            </Link>
-            {isAuthenticated && (
-              <Link href="/account" className="text-sm text-gray-600 hover:text-gray-900 transition">
-                Compte
-              </Link>
-            )}
-          </nav>
-        </div>
-      </header>
+      <Header />
 
       {/* Hero Section */}
       <section className="pt-32 pb-24 px-4 relative overflow-hidden">
@@ -306,44 +285,7 @@ export default function HomePremium() {
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="border-t border-gray-200 py-12 px-4 bg-gray-50">
-        <div className="container">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
-            <div>
-              <h3 className="text-sm font-light text-gray-900 mb-4">À Propos</h3>
-              <ul className="space-y-2 text-sm text-gray-600 font-light">
-                <li><Link href="/about" className="hover:text-gray-900 transition">Notre Histoire</Link></li>
-                <li><Link href="/about" className="hover:text-gray-900 transition">Notre Philosophie</Link></li>
-              </ul>
-            </div>
-            <div>
-              <h3 className="text-sm font-light text-gray-900 mb-4">Support</h3>
-              <ul className="space-y-2 text-sm text-gray-600 font-light">
-                <li><Link href="/faq" className="hover:text-gray-900 transition">FAQ</Link></li>
-                <li><Link href="/contact" className="hover:text-gray-900 transition">Contact</Link></li>
-              </ul>
-            </div>
-            <div>
-              <h3 className="text-sm font-light text-gray-900 mb-4">Légal</h3>
-              <ul className="space-y-2 text-sm text-gray-600 font-light">
-                <li><Link href="/terms" className="hover:text-gray-900 transition">Conditions</Link></li>
-                <li><Link href="/privacy" className="hover:text-gray-900 transition">Confidentialité</Link></li>
-              </ul>
-            </div>
-            <div>
-              <h3 className="text-sm font-light text-gray-900 mb-4">Suivez-nous</h3>
-              <ul className="space-y-2 text-sm text-gray-600 font-light">
-                <li><a href="#" className="hover:text-gray-900 transition">Instagram</a></li>
-                <li><a href="#" className="hover:text-gray-900 transition">Facebook</a></li>
-              </ul>
-            </div>
-          </div>
-          <div className="border-t border-gray-200 pt-8 text-center text-sm text-gray-600">
-            <p>© 2026 Matière Première. Tous droits réservés.</p>
-          </div>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 }

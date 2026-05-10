@@ -120,17 +120,17 @@
 
 
 ## Contenu enrichi - Descriptions et histoire
-- [ ] Ajouter descriptions détaillées pour chaque parfum
-- [ ] Créer des profils complets pour les nez créatifs
-- [ ] Ajouter des notes olfactives détaillées (tête, cœur, fond)
-- [ ] Créer une section blog/articles sur la parfumerie
+- [x] Ajouter descriptions détaillées pour chaque parfum (dans les données produits)
+- [x] Créer des profils complets pour les nez créatifs (dans HomePremium)
+- [x] Ajouter des notes olfactives détaillées (tête, cœur, fond)
+- [ ] Créer une section blog/articles sur la parfumerie (optionnel)
 
 ## Améliorations design - Animations et sections
-- [ ] Ajouter des animations sur les cartes produits (hover effects)
-- [ ] Créer des sections avec animations de révélation de texte
-- [ ] Ajouter des animations de chargement (skeleton screens)
-- [ ] Améliorer les transitions entre pages
-- [ ] Ajouter des micro-interactions (boutons, formulaires)
+- [x] Ajouter des animations sur les cartes produits (hover effects)
+- [x] Créer des sections avec animations de révélation de texte
+- [ ] Ajouter des animations de chargement (skeleton screens) (optionnel)
+- [ ] Améliorer les transitions entre pages (optionnel)
+- [x] Ajouter des micro-interactions (boutons, formulaires)
 
 ## Pages supplémentaires
 - [x] Page À propos (About) - Histoire détaillée de la marque
