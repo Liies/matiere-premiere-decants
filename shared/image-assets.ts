@@ -7,12 +7,12 @@ export const imageAssets = {
   // Master noses / Perfumers
   noses: {
     nose1: {
-      original: "https://d2xsxph8kpxj0f.cloudfront.net/310519663634453748/oKjLk7qKw3XzkAh8kgeZU3/mp-nose-1-MTB2RLE3koTnfT5vN8Dajk.webp",
-      compressed: "https://d2xsxph8kpxj0f.cloudfront.net/310519663634453748/oKjLk7qKw3XzkAh8kgeZU3/mp-nose-1-MTB2RLE3koTnfT5vN8Dajk.webp",
+      original: "https://d2xsxph8kpxj0f.cloudfront.net/310519663634453748/oKjLk7qKw3XzkAh8kgeZU3/master-perfumer-1-3cNkMXpa4BXpmkkqg6L48p.png",
+      compressed: "https://d2xsxph8kpxj0f.cloudfront.net/310519663634453748/oKjLk7qKw3XzkAh8kgeZU3/master-perfumer-1-DyHG5tY2bGnUxJzwm8fetf.webp",
     },
     nose2: {
-      original: "https://d2xsxph8kpxj0f.cloudfront.net/310519663634453748/oKjLk7qKw3XzkAh8kgeZU3/mp-nose-2-9KxYzL5mPqRnStVwXyZaBc.webp",
-      compressed: "https://d2xsxph8kpxj0f.cloudfront.net/310519663634453748/oKjLk7qKw3XzkAh8kgeZU3/mp-nose-2-9KxYzL5mPqRnStVwXyZaBc.webp",
+      original: "https://d2xsxph8kpxj0f.cloudfront.net/310519663634453748/oKjLk7qKw3XzkAh8kgeZU3/master-perfumer-2-c2m8ts5Ayzs2rL44959btg.png",
+      compressed: "https://d2xsxph8kpxj0f.cloudfront.net/310519663634453748/oKjLk7qKw3XzkAh8kgeZU3/master-perfumer-2-GwBHKZTdcVqPQ2X4nzYnKS.webp",
     },
   },
   // Hero background

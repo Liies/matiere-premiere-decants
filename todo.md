@@ -104,6 +104,7 @@
 - [x] Intégrer les images dans la page Home
 - [x] Ajouter des sections visuelles attractives
 - [x] Améliorer le design avec des grilles d'images
+- [x] Corriger l'affichage des images des nez parfumeurs
 
 
 ## Page d'accueil Premium Style Apple
