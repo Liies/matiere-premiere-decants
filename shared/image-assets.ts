@@ -4,6 +4,17 @@
  */
 
 export const imageAssets = {
+  // Master noses / Perfumers
+  noses: {
+    nose1: {
+      original: "https://d2xsxph8kpxj0f.cloudfront.net/310519663634453748/oKjLk7qKw3XzkAh8kgeZU3/mp-nose-1-MTB2RLE3koTnfT5vN8Dajk.webp",
+      compressed: "https://d2xsxph8kpxj0f.cloudfront.net/310519663634453748/oKjLk7qKw3XzkAh8kgeZU3/mp-nose-1-MTB2RLE3koTnfT5vN8Dajk.webp",
+    },
+    nose2: {
+      original: "https://d2xsxph8kpxj0f.cloudfront.net/310519663634453748/oKjLk7qKw3XzkAh8kgeZU3/mp-nose-2-9KxYzL5mPqRnStVwXyZaBc.webp",
+      compressed: "https://d2xsxph8kpxj0f.cloudfront.net/310519663634453748/oKjLk7qKw3XzkAh8kgeZU3/mp-nose-2-9KxYzL5mPqRnStVwXyZaBc.webp",
+    },
+  },
   // Hero background
   heroBackground: {
     original: "https://d2xsxph8kpxj0f.cloudfront.net/310519663634453748/oKjLk7qKw3XzkAh8kgeZU3/hero-background-KCepfVwVdQ7xS3BFJzZun6.png",
@@ -53,6 +64,16 @@ export const imageAssets = {
       compressed: "https://d2xsxph8kpxj0f.cloudfront.net/310519663634453748/oKjLk7qKw3XzkAh8kgeZU3/perfume-bottle-10-3VbqZZBZcuPWaksUVpN7EZ.webp",
     },
   },
+};
+
+// Get nose image by ID
+export const getNoseImage = (noseId: number) => {
+  const imageMap: Record<number, keyof typeof imageAssets.noses> = {
+    1: "nose1",
+    2: "nose2",
+  };
+  const key = imageMap[noseId];
+  return key ? imageAssets.noses[key] : null;
 };
 
 // Mapping product IDs to image assets

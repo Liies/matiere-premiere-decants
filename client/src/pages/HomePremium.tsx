@@ -3,6 +3,7 @@ import { useAuth } from "@/_core/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import { getNoseImage } from "@shared/image-assets";
 import { Link } from "wouter";
 import { ArrowRight } from "lucide-react";
 
@@ -198,11 +199,18 @@ export default function HomePremium() {
                 visibleSections["noses"] ? "translate-y-0 opacity-100" : "translate-y-12 opacity-0"
               }`}
             >
-              <img
-                src="https://d2xsxph8kpxj0f.cloudfront.net/310519663634453748/oKjLk7qKw3XzkAh8kgeZU3/mp-nose-1-MTB2RLE3koTnfT5vN8Dajk.webp"
-                alt="Master Perfumer"
-                className="w-full h-96 object-cover rounded-lg shadow-lg"
-              />
+              {(() => {
+                const image = getNoseImage(1);
+                return image ? (
+                  <img
+                    src={image.compressed}
+                    alt="Master Perfumer"
+                    className="w-full h-96 object-cover rounded-lg shadow-lg"
+                  />
+                ) : (
+                  <div className="w-full h-96 bg-gray-200 rounded-lg shadow-lg" />
+                );
+              })()}
               <div>
                 <h3 className="text-2xl font-light text-gray-900 mb-2">
                   Maître Parfumeur I
@@ -219,14 +227,21 @@ export default function HomePremium() {
             {/* Nose 2 */}
             <div
               className={`space-y-6 transition-all duration-1000 ${
-                visibleSections["noses"] ? "translate-y-0 opacity-100 delay-200" : "translate-y-12 opacity-0"
+                visibleSections["noses"] ? "translate-y-0 opacity-100" : "translate-y-12 opacity-0"
               }`}
             >
-              <img
-                src="https://d2xsxph8kpxj0f.cloudfront.net/310519663634453748/oKjLk7qKw3XzkAh8kgeZU3/mp-nose-2-9y4p9ttvnhbojwMCYMNMm9.webp"
-                alt="Master Perfumer"
-                className="w-full h-96 object-cover rounded-lg shadow-lg"
-              />
+              {(() => {
+                const image = getNoseImage(2);
+                return image ? (
+                  <img
+                    src={image.compressed}
+                    alt="Master Perfumer"
+                    className="w-full h-96 object-cover rounded-lg shadow-lg"
+                  />
+                ) : (
+                  <div className="w-full h-96 bg-gray-200 rounded-lg shadow-lg" />
+                );
+              })()}
               <div>
                 <h3 className="text-2xl font-light text-gray-900 mb-2">
                   Maître Parfumeur II
