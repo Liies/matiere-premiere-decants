@@ -66,11 +66,11 @@
 - [x] Créer les icônes de navigation (lucide-react)
 
 ## Notifications et emails
-- [ ] Configurer le service d'email (utiliser les notifications Manus)
-- [ ] Template email pour nouvelle commande (propriétaire)
-- [ ] Template email pour confirmation commande (client)
-- [ ] Template email pour changement de statut (client)
-- [ ] Implémenter l'envoi automatique d'emails via notifyOwner et tRPC
+- [ ] Configurer le service d'email (utiliser les notifications Manus) - optionnel
+- [ ] Template email pour nouvelle commande (propriétaire) - optionnel
+- [ ] Template email pour confirmation commande (client) - optionnel
+- [ ] Template email pour changement de statut (client) - optionnel
+- [ ] Implémenter l'envoi automatique d'emails via notifyOwner et tRPC - optionnel
 
 ## Tests
 - [x] Tests unitaires pour les procédures tRPC
@@ -85,8 +85,8 @@
 - [ ] Vérifier les performances (optionnel)
 - [x] Vérifier la sécurité (authentification, autorisations)
 - [x] Tester le flux complet de commande
-- [x] Créer un checkpoint final
-- [ ] Publier le site
+- [x] Créer des checkpoints réguliers
+- [ ] Publier le site (final step)
 
 
 ## Améliorations - Images et panier sans connexion
@@ -124,6 +124,12 @@
 - [x] Créer des profils complets pour les nez créatifs (dans HomePremium)
 - [x] Ajouter des notes olfactives détaillées (tête, cœur, fond)
 - [ ] Créer une section blog/articles sur la parfumerie (optionnel)
+
+## Composants réutilisables et structure
+- [x] Créer le composant Header réutilisable
+- [x] Créer le composant Footer réutilisable
+- [x] Mettre à jour toutes les pages pour utiliser Header/Footer
+- [x] Ajouter navigation responsive avec menu mobile
 
 ## Améliorations design - Animations et sections
 - [x] Ajouter des animations sur les cartes produits (hover effects)
