@@ -148,3 +148,22 @@
 - [ ] Page Livraison et retours (optionnel)
 - [x] Mettre à jour la navigation pour inclure ces pages
 - [x] Ajouter les liens dans le footer
+
+
+## Page détail produit
+- [ ] Créer la page ProductDetail avec route dynamique
+- [ ] Afficher l'image du parfum avec zoom
+- [ ] Afficher la description complète
+- [ ] Afficher les notes olfactives (tête, cœur, fond)
+- [ ] Ajouter le bouton "Ajouter au panier"
+- [ ] Ajouter les produits similaires
+- [ ] Ajouter les animations de révélation
+
+## Animations avancées
+- [ ] Ajouter des animations de parallax sur la page d'accueil
+- [ ] Ajouter des animations de fade-in au scroll
+- [ ] Ajouter des animations de scale/zoom au hover
+- [ ] Ajouter des animations de texte (typewriter, reveal)
+- [ ] Ajouter des animations sur les cartes produits
+- [ ] Améliorer les transitions entre pages
+- [ ] Ajouter des animations de chargement (skeleton screens)

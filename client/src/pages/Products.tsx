@@ -59,7 +59,8 @@ export default function Products() {
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {products?.map((product) => (
-                <Card key={product.id} className="overflow-hidden hover:shadow-lg transition">
+                <a href={`/product/${product.id}`} className="block">
+                <Card key={product.id} className="overflow-hidden hover:shadow-lg transition cursor-pointer">
                   <div className="space-y-4">
                     {/* Product Image */}
                     <div className="w-full h-48 bg-gray-100 rounded-lg overflow-hidden flex items-center justify-center">
@@ -134,6 +135,7 @@ export default function Products() {
                     </div>
                   </div>
                 </Card>
+                </a>
               ))}
             </div>
           )}
