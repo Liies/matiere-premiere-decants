@@ -24,44 +24,44 @@ export const imageAssets = {
   // Perfume bottles - all 10 products
   perfumes: {
     vanillaPowder: {
-      original: "https://d2xsxph8kpxj0f.cloudfront.net/310519663634453748/oKjLk7qKw3XzkAh8kgeZU3/perfume-bottle-1-PVHeC2L3Qx4rzpJs2nzm6J.png",
-      compressed: "https://d2xsxph8kpxj0f.cloudfront.net/310519663634453748/oKjLk7qKw3XzkAh8kgeZU3/perfume-bottle-1-oVVxUZ32gMZB6NFZ7A8egs.webp",
+      original: "/manus-storage/perfume-bottle-1_35573870.png",
+      compressed: "/manus-storage/perfume-bottle-1_35573870.png",
     },
     crystalSaffron: {
-      original: "https://d2xsxph8kpxj0f.cloudfront.net/310519663634453748/oKjLk7qKw3XzkAh8kgeZU3/perfume-bottle-2-jzUDb2TmSmcTQQahzcqeLy.png",
-      compressed: "https://d2xsxph8kpxj0f.cloudfront.net/310519663634453748/oKjLk7qKw3XzkAh8kgeZU3/perfume-bottle-2-nSHfmStFgtoGpKqREHf8WM.webp",
+      original: "/manus-storage/perfume-bottle-2_439724d1.png",
+      compressed: "/manus-storage/perfume-bottle-2_439724d1.png",
     },
     radicalRose: {
-      original: "https://d2xsxph8kpxj0f.cloudfront.net/310519663634453748/oKjLk7qKw3XzkAh8kgeZU3/perfume-bottle-3-JyAqPBC5ARQdxtDMKhzgy9.png",
-      compressed: "https://d2xsxph8kpxj0f.cloudfront.net/310519663634453748/oKjLk7qKw3XzkAh8kgeZU3/perfume-bottle-3-gB5RtWj43fCpXHfLG3ypD3.webp",
+      original: "/manus-storage/perfume-bottle-3_1ae129bd.png",
+      compressed: "/manus-storage/perfume-bottle-3_1ae129bd.png",
     },
     falconLeather: {
-      original: "https://d2xsxph8kpxj0f.cloudfront.net/310519663634453748/oKjLk7qKw3XzkAh8kgeZU3/perfume-bottle-4-mFLspMK8ytwUFWEBB43pdR.png",
-      compressed: "https://d2xsxph8kpxj0f.cloudfront.net/310519663634453748/oKjLk7qKw3XzkAh8kgeZU3/perfume-bottle-4-PwaeMt7kKnzSiwR9YRnx5a.webp",
+      original: "/manus-storage/perfume-bottle-4_fcaada5e.png",
+      compressed: "/manus-storage/perfume-bottle-4_fcaada5e.png",
     },
     santalAustral: {
-      original: "https://d2xsxph8kpxj0f.cloudfront.net/310519663634453748/oKjLk7qKw3XzkAh8kgeZU3/perfume-bottle-5-Jq8wKP5sRBmagFqRYHTPYD.png",
-      compressed: "https://d2xsxph8kpxj0f.cloudfront.net/310519663634453748/oKjLk7qKw3XzkAh8kgeZU3/perfume-bottle-5-iFzbbPKrSeqHZr3jJAtyDE.webp",
+      original: "/manus-storage/perfume-bottle-5_678deeea.png",
+      compressed: "/manus-storage/perfume-bottle-5_678deeea.png",
     },
     encensSuave: {
-      original: "https://d2xsxph8kpxj0f.cloudfront.net/310519663634453748/oKjLk7qKw3XzkAh8kgeZU3/perfume-bottle-6-er3GZPQtQ77AdLHtgMWeH5.png",
-      compressed: "https://d2xsxph8kpxj0f.cloudfront.net/310519663634453748/oKjLk7qKw3XzkAh8kgeZU3/perfume-bottle-6-SL76TZnfPg6kRv6EWjfUhM.webp",
+      original: "/manus-storage/perfume-bottle-6_0534406a.png",
+      compressed: "/manus-storage/perfume-bottle-6_0534406a.png",
     },
     metalLavender: {
-      original: "https://d2xsxph8kpxj0f.cloudfront.net/310519663634453748/oKjLk7qKw3XzkAh8kgeZU3/perfume-bottle-7-houfjETAmgLMzheDuB3ncg.png",
-      compressed: "https://d2xsxph8kpxj0f.cloudfront.net/310519663634453748/oKjLk7qKw3XzkAh8kgeZU3/perfume-bottle-7-d9koEGvu4nJKDYtJQfaXj.webp",
+      original: "/manus-storage/perfume-bottle-7_0cca3472.png",
+      compressed: "/manus-storage/perfume-bottle-7_0cca3472.png",
     },
     boisDebene: {
-      original: "https://d2xsxph8kpxj0f.cloudfront.net/310519663634453748/oKjLk7qKw3XzkAh8kgeZU3/perfume-bottle-8-82Az3zAtfFZUHJFqcHiLAm.png",
-      compressed: "https://d2xsxph8kpxj0f.cloudfront.net/310519663634453748/oKjLk7qKw3XzkAh8kgeZU3/perfume-bottle-8-JvXrbYLjDVvWMNPXBSMYUi.webp",
+      original: "/manus-storage/perfume-bottle-8_c154a2b0.png",
+      compressed: "/manus-storage/perfume-bottle-8_c154a2b0.png",
     },
     ambroxan: {
-      original: "https://d2xsxph8kpxj0f.cloudfront.net/310519663634453748/oKjLk7qKw3XzkAh8kgeZU3/perfume-bottle-9-SN8GAG4SHv6Gtae8DWoa8v.png",
-      compressed: "https://d2xsxph8kpxj0f.cloudfront.net/310519663634453748/oKjLk7qKw3XzkAh8kgeZU3/perfume-bottle-9-c6rgN4BiwZLCe9meEp4kyY.webp",
+      original: "/manus-storage/perfume-bottle-9_6d12d513.png",
+      compressed: "/manus-storage/perfume-bottle-9_6d12d513.png",
     },
     vetiverExtraordinaire: {
-      original: "https://d2xsxph8kpxj0f.cloudfront.net/310519663634453748/oKjLk7qKw3XzkAh8kgeZU3/perfume-bottle-10-irJNjvaxRib6RsC23GwBFA.png",
-      compressed: "https://d2xsxph8kpxj0f.cloudfront.net/310519663634453748/oKjLk7qKw3XzkAh8kgeZU3/perfume-bottle-10-3VbqZZBZcuPWaksUVpN7EZ.webp",
+      original: "/manus-storage/perfume-bottle-10_8dfc5687.png",
+      compressed: "/manus-storage/perfume-bottle-10_8dfc5687.png",
     },
   },
 };
