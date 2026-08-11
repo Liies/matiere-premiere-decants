@@ -5818,3 +5818,4 @@
 - [x] Découper les pages secondaires en chargement différé
 - [x] Vérifier le build et les tests après le découpage
 - [x] Sauvegarder un checkpoint de l’optimisation
+- [x] Séparer les dépendances vendor volumineuses du chunk applicatif
