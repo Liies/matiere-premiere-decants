@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://matiere50ml-okjlk7qk.manus.space/sitemap.xml

@@ -5802,4 +5802,13 @@
 - [x] Gérer les états sans résultat et la fermeture de la liste
 - [x] Ajouter les tests de l’autocomplétion
 - [x] Vérifier le rendu dans le preview
-- [ ] Sauvegarder un checkpoint après validation
+- [x] Sauvegarder un checkpoint après validation
+
+
+## Finitions de livraison — SEO et contrôle final
+- [x] Ajouter les métadonnées SEO essentielles en français
+- [x] Ajouter les métadonnées de partage social et la couleur de thème
+- [x] Ajouter un fichier robots.txt minimal
+- [x] Vérifier les tests, TypeScript et le rendu après ces finitions
+- [x] Sauvegarder le checkpoint final après validation
+- [x] Ajouter un sitemap.xml avec les routes publiques
