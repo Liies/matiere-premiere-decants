@@ -415,3 +415,57 @@
     @apply transition-all duration-300;
   }
 }
+
+
+@keyframes cartIconBounce {
+  0% { transform: translateY(0) scale(1); }
+  35% { transform: translateY(-4px) scale(1.08) rotate(-6deg); }
+  70% { transform: translateY(1px) scale(0.96) rotate(3deg); }
+  100% { transform: translateY(0) scale(1); }
+}
+
+@keyframes cartAddedRipple {
+  0% { opacity: 0.34; transform: scale(0.2); }
+  70% { opacity: 0.12; transform: scale(2.4); }
+  100% { opacity: 0; transform: scale(3.2); }
+}
+
+@keyframes cartAddedCheck {
+  0% { opacity: 0; transform: scale(0.5) translateX(5px); }
+  55% { opacity: 1; transform: scale(1.15) translateX(0); }
+  100% { opacity: 1; transform: scale(1) translateX(0); }
+}
+
+@layer utilities {
+  .cart-icon-bounce {
+    animation: cartIconBounce 0.75s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .cart-added-ripple {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 5rem;
+    height: 5rem;
+    border-radius: 9999px;
+    background: rgba(255, 255, 255, 0.55);
+    pointer-events: none;
+    animation: cartAddedRipple 0.9s ease-out forwards;
+  }
+
+  .cart-added-check {
+    position: relative;
+    z-index: 10;
+    margin-left: 0.15rem;
+    color: rgba(255, 255, 255, 0.9);
+    animation: cartAddedCheck 0.45s ease-out 0.1s both;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cart-icon-bounce,
+  .cart-added-ripple,
+  .cart-added-check {
+    animation: none !important;
+  }
+}

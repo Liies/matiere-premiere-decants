@@ -14,3 +14,10 @@ Le fallback visuel à base d'icône Leaf est présent dans `ProductImage` si l'a
 La fiche `/product/1` affiche bien l'image `/manus-storage/perfume-bottle-1_35573870.png`, le prix `85,00 €` et les images des produits similaires avec des prix cohérents.
 
 La fiche `/product/10` affiche bien l'image `/manus-storage/perfume-bottle-10_8dfc5687.png` pour Cologne Cédrat, le prix `80,00 €` et les produits similaires. Le mapping fonctionne donc aussi pour un produit en fin de catalogue, pas seulement pour le premier produit.
+
+
+## Validation des nouvelles interactions
+
+Le catalogue `/products` affiche les huit familles olfactives sous forme de boutons multi-sélection. L’activation de « Boisé » recalculait immédiatement le catalogue et affichait « 7 parfums correspondants ». L’activation supplémentaire de « Floral » conservait une sélection multiple active et le compteur attendu selon la règle « au moins une note correspondante ».
+
+La fiche `/product/1` affiche après clic le message « Vanilla Powder ajouté au panier », le bouton passe brièvement à « Ajouté au panier » avec l’icône animée, le ripple visuel et la confirmation toast. Le bouton revient ensuite à son état initial. Les contrôles Vitest et TypeScript étaient verts avant cette vérification visuelle.

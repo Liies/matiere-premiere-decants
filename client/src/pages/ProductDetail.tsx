@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useRoute } from 'wouter';
 import { ArrowLeft, ShoppingCart, Heart, Leaf } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -50,6 +50,9 @@ export default function ProductDetail() {
   const [isWishlisted, setIsWishlisted] = useState(false);
   const [quantity, setQuantity] = useState(1);
   const [scrollY, setScrollY] = useState(0);
+  const [isAddingToCart, setIsAddingToCart] = useState(false);
+  const [showAddedFeedback, setShowAddedFeedback] = useState(false);
+  const addFeedbackTimer = useRef<number | null>(null);
 
   const { addToCart } = useLocalCart();
 
@@ -71,11 +74,24 @@ export default function ProductDetail() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  useEffect(() => {
+    return () => {
+      if (addFeedbackTimer.current) window.clearTimeout(addFeedbackTimer.current);
+    };
+  }, []);
+
   const handleAddToCart = () => {
-    if (!product) return;
-    
-    // Add to local cart
+    if (!product || isAddingToCart) return;
+
     addToCart(product, quantity);
+    setIsAddingToCart(true);
+    setShowAddedFeedback(true);
+
+    if (addFeedbackTimer.current) window.clearTimeout(addFeedbackTimer.current);
+    addFeedbackTimer.current = window.setTimeout(() => {
+      setIsAddingToCart(false);
+      setShowAddedFeedback(false);
+    }, 950);
   };
 
   if (isLoading) {
@@ -199,10 +215,16 @@ export default function ProductDetail() {
               <div className="flex gap-4">
                 <Button
                   onClick={handleAddToCart}
-                  className="flex-1 bg-gray-900 hover:bg-gray-800 text-white py-3 rounded-lg flex items-center justify-center gap-2 transition-all hover:shadow-lg"
+                  disabled={isAddingToCart}
+                  aria-live="polite"
+                  className={`relative flex-1 overflow-hidden bg-gray-900 hover:bg-gray-800 text-white py-3 rounded-lg flex items-center justify-center gap-2 transition-all hover:shadow-lg ${
+                    isAddingToCart ? "scale-[0.98] bg-gray-800" : ""
+                  }`}
                 >
-                  <ShoppingCart className="w-5 h-5" />
-                  Ajouter au panier
+                  {showAddedFeedback && <span className="cart-added-ripple" aria-hidden="true" />}
+                  <ShoppingCart className={`relative z-10 w-5 h-5 ${isAddingToCart ? "cart-icon-bounce" : ""}`} />
+                  <span className="relative z-10">{isAddingToCart ? "Ajouté au panier" : "Ajouter au panier"}</span>
+                  {showAddedFeedback && <span className="cart-added-check" aria-hidden="true">✓</span>}
                 </Button>
                 <button
                   onClick={() => setIsWishlisted(!isWishlisted)}

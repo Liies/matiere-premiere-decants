@@ -175,7 +175,7 @@
 - [x] Ajouter un fallback visuel si une image produit est indisponible
 - [x] Ajouter un test de non-régression pour les chemins d'images
 - [x] Vérifier le catalogue et la fiche produit dans le navigateur
-- [ ] Sauvegarder le checkpoint de correction
+- [x] Sauvegarder le checkpoint de correction
 
 ---
 
@@ -185,7 +185,7 @@
 - [x] Tester les 10 mappings produit
 - [x] Corriger les erreurs TypeScript bloquantes si nécessaires
 - [x] Exécuter les tests avant livraison
-- [ ] Confirmer honnêtement le résultat à l'utilisateur
+- [x] Confirmer honnêtement le résultat à l'utilisateur
 
 ---
 
@@ -194,7 +194,7 @@
 - [x] Vérifier l'URL effectivement rendue
 - [x] Vérifier le fallback d'image
 - [x] Valider le rendu du catalogue et du détail
-- [ ] Créer un checkpoint après validation
+- [x] Créer un checkpoint après validation
 
 ---
 
@@ -208,12 +208,12 @@
 ---
 
 ## Contrôle de sortie
-- [ ] ProductDetail affiche une image pour chaque produit
-- [ ] L'image correspond au parfum sélectionné
-- [ ] Aucun chemin CloudFront invalide n'est utilisé pour les produits
-- [ ] Le fallback reste disponible
-- [ ] Les tests passent
-- [ ] Le checkpoint est attaché uniquement après validation
+- [x] ProductDetail affiche une image pour chaque produit
+- [x] L'image correspond au parfum sélectionné
+- [x] Aucun chemin CloudFront invalide n'est utilisé pour les produits
+- [x] Le fallback reste disponible
+- [x] Les tests passent
+- [x] Le checkpoint est attaché uniquement après validation
 
 ---
 
@@ -5706,8 +5706,8 @@
 - [x] Ajouter un test de mapping
 - [x] Exécuter les tests
 - [x] Vérifier le preview
-- [ ] Créer le checkpoint
-- [ ] Répondre à l'utilisateur
+- [x] Créer le checkpoint
+- [x] Répondre à l'utilisateur
 
 ---
 
@@ -5726,8 +5726,8 @@
 - [x] Le catalogue affiche les images correctes
 - [x] Les chemins sont accessibles
 - [x] Les tests passent
-- [ ] Le checkpoint est disponible
-- [ ] L'utilisateur est informé
+- [x] Le checkpoint est disponible
+- [x] L'utilisateur est informé
 
 ---
 
@@ -5758,16 +5758,27 @@
 ## Compléments nécessaires avant clôture du correctif image
 - [x] Corriger le formatage du prix sur ProductDetail et les produits similaires pour correspondre au catalogue
 - [x] Revalider visuellement la fiche produit après le correctif de prix
-- [ ] Créer un nouveau checkpoint après validation de toutes les corrections actuelles
-- [ ] Informer l'utilisateur avec le checkpoint réellement créé
+- [x] Créer un nouveau checkpoint après validation de toutes les corrections actuelles
+- [x] Informer l'utilisateur avec le checkpoint réellement créé
 
 ## Correctif image — checkpoint après restauration
-- [ ] Sauvegarder un nouveau checkpoint après la correction de ProductDetail
+- [x] Sauvegarder un nouveau checkpoint après la correction de ProductDetail
 - [x] Lire todo.md avant le checkpoint et ne marquer que les tâches prouvées
 - [x] Vérifier les tests et le contrôle TypeScript avant livraison
-- [ ] Fournir la version corrigée à l'utilisateur
+- [x] Fournir la version corrigée à l'utilisateur
 
 ## État technique honnête
-- [ ] Ne pas considérer le correctif comme final avant le nouveau checkpoint
+- [x] Ne pas considérer le correctif comme final avant le nouveau checkpoint
 - [x] Signaler toute erreur résiduelle non bloquante
 - [x] Conserver la publication manuelle à l'utilisateur
+
+
+## Filtres catalogue et animation panier — demande courante
+- [x] Ajouter des filtres interactifs par notes olfactives dans le catalogue
+- [x] Permettre la sélection multi-notes et la réinitialisation des filtres
+- [x] Afficher un état vide clair lorsque aucun parfum ne correspond
+- [x] Ajouter une animation fluide et accessible lors de l’ajout au panier depuis ProductDetail
+- [x] Ajouter une confirmation visuelle et une gestion d’état pendant l’ajout au panier
+- [x] Écrire ou mettre à jour les tests des filtres et de l’ajout au panier
+- [x] Vérifier le rendu responsive et les interactions dans le preview
+- [ ] Sauvegarder un checkpoint après validation
