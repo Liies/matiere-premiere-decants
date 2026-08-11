@@ -18,3 +18,11 @@ export function searchProductsByName<T extends NamedProduct>(products: T[], quer
     normalizeCatalogSearchText(product.name).includes(normalizedQuery),
   );
 }
+
+export function getCatalogSuggestions<T extends NamedProduct>(
+  products: T[],
+  query: string,
+  limit = 6,
+) {
+  return searchProductsByName(products, query).slice(0, Math.max(0, limit));
+}

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { searchProductsByName } from "../shared/catalog-search";
+import { getCatalogSuggestions, searchProductsByName } from "../shared/catalog-search";
 import { MATIERE_PREMIERE_PRODUCTS } from "../shared/products-data";
 
 describe("recherche catalogue par nom", () => {
@@ -21,5 +21,22 @@ describe("recherche catalogue par nom", () => {
 
   it("retourne une liste vide quand aucun nom ne correspond", () => {
     expect(searchProductsByName(MATIERE_PREMIERE_PRODUCTS, "rose noire")).toEqual([]);
+  });
+
+  it("limite les suggestions et conserve l'ordre du catalogue", () => {
+    const suggestions = getCatalogSuggestions(MATIERE_PREMIERE_PRODUCTS, "a", 3);
+
+    expect(suggestions).toHaveLength(3);
+    expect(suggestions.map((product) => product.name)).toEqual([
+      "Vanilla Powder",
+      "Crystal Saffron",
+      "Radical Rose",
+    ]);
+  });
+
+  it("retourne les suggestions liées aux parfums filtrés par la saisie", () => {
+    const suggestions = getCatalogSuggestions(MATIERE_PREMIERE_PRODUCTS, "metal");
+
+    expect(suggestions.map((product) => product.name)).toEqual(["Metal Lavender"]);
   });
 });

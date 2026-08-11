@@ -5791,4 +5791,15 @@
 - [x] Ajouter une action pour effacer rapidement la recherche
 - [x] Ajouter les tests de la logique de recherche
 - [x] Vérifier le rendu responsive et le preview
+- [x] Sauvegarder un checkpoint après validation
+
+
+## Autocomplétion recherche catalogue — demande courante
+- [x] Générer des suggestions de parfums à partir de la saisie
+- [x] Afficher les suggestions dans une liste élégante et responsive
+- [x] Permettre la sélection d’une suggestion pour ouvrir la fiche produit
+- [x] Ajouter la navigation au clavier et les attributs ARIA nécessaires
+- [x] Gérer les états sans résultat et la fermeture de la liste
+- [x] Ajouter les tests de l’autocomplétion
+- [x] Vérifier le rendu dans le preview
 - [ ] Sauvegarder un checkpoint après validation

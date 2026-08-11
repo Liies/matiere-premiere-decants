@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, type KeyboardEvent as ReactKeyboardEvent } from "react";
 import { trpc } from "@/lib/trpc";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -11,7 +11,7 @@ import { toast } from "sonner";
 import { getProductImage } from "@shared/image-assets";
 import { useLocalCart } from "@/hooks/useLocalCart";
 import { filterProductsByNotes, OLFACTORY_FILTERS } from "@shared/olfactory";
-import { searchProductsByName } from "@shared/catalog-search";
+import { getCatalogSuggestions, searchProductsByName } from "@shared/catalog-search";
 
 export default function Products() {
   const { data: products, isLoading } = trpc.products.list.useQuery();
@@ -21,13 +21,51 @@ export default function Products() {
   const [selectedQuantity, setSelectedQuantity] = useState<Record<number, number>>({});
   const [selectedFilters, setSelectedFilters] = useState<string[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
+  const [isSearchFocused, setIsSearchFocused] = useState(false);
+  const [activeSuggestionIndex, setActiveSuggestionIndex] = useState(-1);
 
   type CatalogProduct = NonNullable<typeof products>[number];
-  const filteredProducts = useMemo<CatalogProduct[]>(() => {
-    if (!products) return [];
-    const noteMatches = filterProductsByNotes<CatalogProduct>(products, selectedFilters);
-    return searchProductsByName(noteMatches, searchQuery);
-  }, [products, selectedFilters, searchQuery]);
+  const noteMatchedProducts = useMemo<CatalogProduct[]>(
+    () => (products ? filterProductsByNotes<CatalogProduct>(products, selectedFilters) : []),
+    [products, selectedFilters],
+  );
+  const filteredProducts = useMemo<CatalogProduct[]>(
+    () => searchProductsByName(noteMatchedProducts, searchQuery),
+    [noteMatchedProducts, searchQuery],
+  );
+  const searchSuggestions = useMemo<CatalogProduct[]>(() => {
+    if (!searchQuery.trim()) return [];
+    return getCatalogSuggestions(noteMatchedProducts, searchQuery, 6);
+  }, [noteMatchedProducts, searchQuery]);
+
+  const selectSuggestion = (product: CatalogProduct) => {
+    setSearchQuery(product.name);
+    setIsSearchFocused(false);
+    setActiveSuggestionIndex(-1);
+    window.location.assign(`/product/${product.id}`);
+  };
+
+  const handleSearchKeyDown = (event: ReactKeyboardEvent<HTMLInputElement>) => {
+    if (!searchSuggestions.length) {
+      if (event.key === "Escape") setIsSearchFocused(false);
+      return;
+    }
+
+    if (event.key === "ArrowDown") {
+      event.preventDefault();
+      setActiveSuggestionIndex((current) => Math.min(current + 1, searchSuggestions.length - 1));
+    } else if (event.key === "ArrowUp") {
+      event.preventDefault();
+      setActiveSuggestionIndex((current) => Math.max(current - 1, 0));
+    } else if (event.key === "Enter" && activeSuggestionIndex >= 0) {
+      event.preventDefault();
+      const suggestion = searchSuggestions[activeSuggestionIndex];
+      if (suggestion) selectSuggestion(suggestion);
+    } else if (event.key === "Escape") {
+      setIsSearchFocused(false);
+      setActiveSuggestionIndex(-1);
+    }
+  };
 
   const handleAddToCart = (product: any) => {
     const quantity = selectedQuantity[product.id] || 1;
@@ -72,20 +110,76 @@ export default function Products() {
                 id="catalog-search"
                 type="search"
                 value={searchQuery}
-                onChange={(event) => setSearchQuery(event.target.value)}
+                onChange={(event) => {
+                  setSearchQuery(event.target.value);
+                  setActiveSuggestionIndex(-1);
+                }}
+                onFocus={() => setIsSearchFocused(true)}
+                onBlur={() => window.setTimeout(() => setIsSearchFocused(false), 120)}
+                onKeyDown={handleSearchKeyDown}
                 placeholder="Rechercher un parfum par son nom…"
                 autoComplete="off"
+                role="combobox"
+                aria-autocomplete="list"
+                aria-expanded={isSearchFocused && searchQuery.trim().length > 0}
+                aria-controls="catalog-search-suggestions"
+                aria-activedescendant={
+                  activeSuggestionIndex >= 0
+                    ? `catalog-search-option-${searchSuggestions[activeSuggestionIndex]?.id}`
+                    : undefined
+                }
                 className="w-full rounded-full border border-gray-200 bg-gray-50 py-3 pl-12 pr-12 text-gray-900 outline-none transition-all placeholder:text-gray-400 focus:border-gray-900 focus:bg-white focus:ring-2 focus:ring-gray-900/10"
               />
               {searchQuery && (
                 <button
                   type="button"
-                  onClick={() => setSearchQuery("")}
+                  onMouseDown={(event) => event.preventDefault()}
+                  onClick={() => {
+                    setSearchQuery("");
+                    setActiveSuggestionIndex(-1);
+                  }}
                   aria-label="Effacer la recherche"
                   className="absolute right-3 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full text-gray-500 hover:bg-gray-200 hover:text-gray-900"
                 >
                   <X className="h-4 w-4" aria-hidden="true" />
                 </button>
+              )}
+
+              {isSearchFocused && searchQuery.trim() && (
+                <div
+                  id="catalog-search-suggestions"
+                  role="listbox"
+                  aria-label="Suggestions de parfums"
+                  className="absolute left-0 right-0 top-[calc(100%+0.5rem)] z-30 overflow-hidden rounded-2xl border border-gray-200 bg-white p-2 shadow-xl animate-fade-in"
+                >
+                  {searchSuggestions.length > 0 ? (
+                    searchSuggestions.map((suggestion, index) => (
+                      <button
+                        key={suggestion.id}
+                        id={`catalog-search-option-${suggestion.id}`}
+                        type="button"
+                        role="option"
+                        aria-selected={activeSuggestionIndex === index}
+                        onMouseDown={(event) => event.preventDefault()}
+                        onMouseEnter={() => setActiveSuggestionIndex(index)}
+                        onClick={() => selectSuggestion(suggestion)}
+                        className={`flex w-full items-center justify-between rounded-xl px-4 py-3 text-left transition-colors ${
+                          activeSuggestionIndex === index ? "bg-gray-100" : "hover:bg-gray-50"
+                        }`}
+                      >
+                        <span>
+                          <span className="block text-sm text-gray-900">{suggestion.name}</span>
+                          <span className="block text-xs text-gray-500">Décant 50ml · Voir la fiche</span>
+                        </span>
+                        <span className="text-xs uppercase tracking-[0.16em] text-gray-400">Ouvrir</span>
+                      </button>
+                    ))
+                  ) : (
+                    <p className="px-4 py-3 text-sm text-gray-500" role="status">
+                      Aucune suggestion pour « {searchQuery} »
+                    </p>
+                  )}
+                </div>
               )}
             </div>
           </section>
