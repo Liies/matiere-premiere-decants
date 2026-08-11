@@ -21,6 +21,7 @@ import {
 } from "./db";
 import { nanoid } from "nanoid";
 import { notifyOwner } from "./_core/notification";
+import { contactMessageSchema, CONTACT_SUBJECT_LABELS } from "@shared/contact";
 
 const ORDER_STATUS = z.enum(["pending", "paid", "processing", "shipped", "delivered", "cancelled"]);
 
@@ -38,6 +39,29 @@ export const appRouter = router({
   }),
 
   // Products procedures
+  contact: router({
+    submit: publicProcedure
+      .input(contactMessageSchema)
+      .mutation(async ({ input }) => {
+        const notificationSent = await notifyOwner({
+          title: `Nouveau message de contact — ${CONTACT_SUBJECT_LABELS[input.subject]}`,
+          content: [
+            `Nom : ${input.name}`,
+            `Email : ${input.email}`,
+            `Sujet : ${CONTACT_SUBJECT_LABELS[input.subject]}`,
+            "",
+            input.message,
+          ].join("\n"),
+        });
+
+        if (!notificationSent) {
+          throw new Error("Le message n’a pas pu être transmis. Veuillez réessayer.");
+        }
+
+        return { success: true } as const;
+      }),
+  }),
+
   products: router({
     list: publicProcedure.query(async () => {
       const products = await getAllProducts();

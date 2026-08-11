@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useAuth } from "@/_core/hooks/useAuth";
+import { trpc } from "@/lib/trpc";
 import { Button } from "@/components/ui/button";
 import Footer from "@/components/Footer";
 import { Link } from "wouter";
@@ -8,6 +9,7 @@ import { toast } from "sonner";
 
 export default function Contact() {
   const { isAuthenticated } = useAuth();
+  const submitContact = trpc.contact.submit.useMutation();
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -31,11 +33,13 @@ export default function Contact() {
     setIsSubmitting(true);
 
     try {
-      // Simulate form submission
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      await submitContact.mutateAsync({
+        ...formData,
+        subject: formData.subject as "commande" | "produit" | "livraison" | "autre",
+      });
       toast.success("Message envoyé avec succès ! Nous vous répondrons bientôt.");
       setFormData({ name: "", email: "", subject: "", message: "" });
-    } catch (error) {
+    } catch {
       toast.error("Erreur lors de l'envoi du message. Veuillez réessayer.");
     } finally {
       setIsSubmitting(false);

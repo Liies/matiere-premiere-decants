@@ -5819,3 +5819,12 @@
 - [x] Vérifier le build et les tests après le découpage
 - [x] Sauvegarder un checkpoint de l’optimisation
 - [x] Séparer les dépendances vendor volumineuses du chunk applicatif
+
+
+## Formulaire de contact — amélioration opérationnelle
+- [x] Ajouter une procédure publique tRPC pour recevoir les messages de contact
+- [x] Valider et limiter les champs côté serveur
+- [x] Envoyer une notification au propriétaire sans exposer de secret au navigateur
+- [x] Remplacer la simulation du formulaire par l’appel tRPC
+- [x] Ajouter les tests de validation du formulaire de contact
+- [x] Vérifier le flux dans la preview et sauvegarder un checkpoint
