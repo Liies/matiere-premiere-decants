@@ -21,3 +21,8 @@ La fiche `/product/10` affiche bien l'image `/manus-storage/perfume-bottle-10_8d
 Le catalogue `/products` affiche les huit familles olfactives sous forme de boutons multi-sélection. L’activation de « Boisé » recalculait immédiatement le catalogue et affichait « 7 parfums correspondants ». L’activation supplémentaire de « Floral » conservait une sélection multiple active et le compteur attendu selon la règle « au moins une note correspondante ».
 
 La fiche `/product/1` affiche après clic le message « Vanilla Powder ajouté au panier », le bouton passe brièvement à « Ajouté au panier » avec l’icône animée, le ripple visuel et la confirmation toast. Le bouton revient ensuite à son état initial. Les contrôles Vitest et TypeScript étaient verts avant cette vérification visuelle.
+
+
+## Validation de la recherche catalogue
+
+Le catalogue `/products` affiche le champ `catalog-search` avec le placeholder « Rechercher un parfum par son nom… ». La saisie de « Vanilla » filtre instantanément la collection à un seul résultat, Vanilla Powder, et affiche le compteur « 1 parfum correspondant ». Le bouton d’effacement apparaît dans le champ et les filtres olfactifs restent visibles sous la recherche.

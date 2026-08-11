@@ -5,12 +5,13 @@ import { Card } from "@/components/ui/card";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import { ShoppingCart, Leaf, SlidersHorizontal, X } from "lucide-react";
+import { ShoppingCart, Leaf, Search, SlidersHorizontal, X } from "lucide-react";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { toast } from "sonner";
 import { getProductImage } from "@shared/image-assets";
 import { useLocalCart } from "@/hooks/useLocalCart";
 import { filterProductsByNotes, OLFACTORY_FILTERS } from "@shared/olfactory";
+import { searchProductsByName } from "@shared/catalog-search";
 
 export default function Products() {
   const { data: products, isLoading } = trpc.products.list.useQuery();
@@ -19,12 +20,14 @@ export default function Products() {
   const addToCart = trpc.cart.addItem.useMutation();
   const [selectedQuantity, setSelectedQuantity] = useState<Record<number, number>>({});
   const [selectedFilters, setSelectedFilters] = useState<string[]>([]);
+  const [searchQuery, setSearchQuery] = useState("");
 
   type CatalogProduct = NonNullable<typeof products>[number];
-  const filteredProducts = useMemo<CatalogProduct[]>(
-    () => (products ? filterProductsByNotes<CatalogProduct>(products, selectedFilters) : []),
-    [products, selectedFilters],
-  );
+  const filteredProducts = useMemo<CatalogProduct[]>(() => {
+    if (!products) return [];
+    const noteMatches = filterProductsByNotes<CatalogProduct>(products, selectedFilters);
+    return searchProductsByName(noteMatches, searchQuery);
+  }, [products, selectedFilters, searchQuery]);
 
   const handleAddToCart = (product: any) => {
     const quantity = selectedQuantity[product.id] || 1;
@@ -58,6 +61,34 @@ export default function Products() {
             <h2 className="text-4xl font-light text-gray-900 mb-2">Catalogue Complet</h2>
             <p className="text-gray-600">Découvrez nos 10 parfums de niche en décants 50ml</p>
           </div>
+
+          <section aria-labelledby="catalog-search-title" className="mb-6 animate-slide-up">
+            <label id="catalog-search-title" htmlFor="catalog-search" className="sr-only">
+              Rechercher un parfum par son nom
+            </label>
+            <div className="relative max-w-2xl">
+              <Search className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" aria-hidden="true" />
+              <input
+                id="catalog-search"
+                type="search"
+                value={searchQuery}
+                onChange={(event) => setSearchQuery(event.target.value)}
+                placeholder="Rechercher un parfum par son nom…"
+                autoComplete="off"
+                className="w-full rounded-full border border-gray-200 bg-gray-50 py-3 pl-12 pr-12 text-gray-900 outline-none transition-all placeholder:text-gray-400 focus:border-gray-900 focus:bg-white focus:ring-2 focus:ring-gray-900/10"
+              />
+              {searchQuery && (
+                <button
+                  type="button"
+                  onClick={() => setSearchQuery("")}
+                  aria-label="Effacer la recherche"
+                  className="absolute right-3 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full text-gray-500 hover:bg-gray-200 hover:text-gray-900"
+                >
+                  <X className="h-4 w-4" aria-hidden="true" />
+                </button>
+              )}
+            </div>
+          </section>
 
           <section
             aria-labelledby="olfactory-filter-title"
@@ -109,9 +140,9 @@ export default function Products() {
             </ToggleGroup>
 
             <p className="mt-4 text-xs text-gray-500" aria-live="polite">
-              {selectedFilters.length === 0
-                ? `${products?.length ?? 0} parfums affichés`
-                : `${filteredProducts.length} parfum${filteredProducts.length > 1 ? "s" : ""} correspondant${filteredProducts.length > 1 ? "s" : ""}`}
+              {searchQuery || selectedFilters.length > 0
+                ? `${filteredProducts.length} parfum${filteredProducts.length > 1 ? "s" : ""} correspondant${filteredProducts.length > 1 ? "s" : ""}`
+                : `${products?.length ?? 0} parfums affichés`}
             </p>
           </section>
 
@@ -128,7 +159,14 @@ export default function Products() {
               <p className="mx-auto mb-6 max-w-md text-gray-500">
                 Essayez une autre famille olfactive ou réinitialisez les filtres pour retrouver toute la collection.
               </p>
-              <Button type="button" variant="outline" onClick={() => setSelectedFilters([])}>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => {
+                  setSelectedFilters([]);
+                  setSearchQuery("");
+                }}
+              >
                 Voir toute la collection
               </Button>
             </div>

@@ -5781,4 +5781,14 @@
 - [x] Ajouter une confirmation visuelle et une gestion d’état pendant l’ajout au panier
 - [x] Écrire ou mettre à jour les tests des filtres et de l’ajout au panier
 - [x] Vérifier le rendu responsive et les interactions dans le preview
+- [x] Sauvegarder un checkpoint après validation
+
+
+## Recherche catalogue — demande courante
+- [x] Ajouter une barre de recherche en temps réel par nom de parfum
+- [x] Combiner la recherche avec les filtres olfactifs existants
+- [x] Afficher un compteur de résultats et un état vide explicite
+- [x] Ajouter une action pour effacer rapidement la recherche
+- [x] Ajouter les tests de la logique de recherche
+- [x] Vérifier le rendu responsive et le preview
 - [ ] Sauvegarder un checkpoint après validation
