@@ -1,27 +1,38 @@
+import { lazy, Suspense } from "react";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import NotFound from "@/pages/NotFound";
 import { Route, Switch } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
-import Home from "./pages/Home";
-import HomePremium from "./pages/HomePremium";
-import Products from "./pages/Products";
-import Cart from "./pages/Cart";
-import Checkout from "./pages/Checkout";
-import Account from "./pages/Account";
-import Admin from "./pages/Admin";
-import About from "./pages/About";
-import FAQ from "./pages/FAQ";
-import Contact from "./pages/Contact";
-import Terms from "./pages/Terms";
-import Privacy from "./pages/Privacy";
-import ProductDetail from "./pages/ProductDetail";
+const Home = lazy(() => import("./pages/Home"));
+const HomePremium = lazy(() => import("./pages/HomePremium"));
+
+const Products = lazy(() => import("./pages/Products"));
+const Cart = lazy(() => import("./pages/Cart"));
+const Checkout = lazy(() => import("./pages/Checkout"));
+const Account = lazy(() => import("./pages/Account"));
+const Admin = lazy(() => import("./pages/Admin"));
+const About = lazy(() => import("./pages/About"));
+const FAQ = lazy(() => import("./pages/FAQ"));
+const Contact = lazy(() => import("./pages/Contact"));
+const Terms = lazy(() => import("./pages/Terms"));
+const Privacy = lazy(() => import("./pages/Privacy"));
+const ProductDetail = lazy(() => import("./pages/ProductDetail"));
+
+function PageLoading() {
+  return (
+    <main className="flex min-h-[60vh] items-center justify-center bg-white px-6 text-sm uppercase tracking-[0.2em] text-gray-500">
+      Chargement de la collection…
+    </main>
+  );
+}
 
 function Router() {
   // make sure to consider if you need authentication for certain routes
   return (
-    <Switch>
+    <Suspense fallback={<PageLoading />}>
+      <Switch>
       <Route path={"/"} component={HomePremium} />
       <Route path={"/home-classic"} component={Home} />
       <Route path={"/products"} component={Products} />
@@ -36,9 +47,10 @@ function Router() {
       <Route path={"/privacy"} component={Privacy} />
       <Route path={"/product/:id"} component={ProductDetail} />
       <Route path={"/404"} component={NotFound} />
-      {/* Final fallback route */}
-      <Route component={NotFound} />
-    </Switch>
+        {/* Final fallback route */}
+        <Route component={NotFound} />
+      </Switch>
+    </Suspense>
   );
 }
 

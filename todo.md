@@ -5812,3 +5812,9 @@
 - [x] Vérifier les tests, TypeScript et le rendu après ces finitions
 - [x] Sauvegarder le checkpoint final après validation
 - [x] Ajouter un sitemap.xml avec les routes publiques
+
+
+## Optimisation de performance — finalisation
+- [x] Découper les pages secondaires en chargement différé
+- [x] Vérifier le build et les tests après le découpage
+- [x] Sauvegarder un checkpoint de l’optimisation
