@@ -1,4 +1,4 @@
-import { useMemo, useState, type KeyboardEvent as ReactKeyboardEvent } from "react";
+import { useEffect, useMemo, useRef, useState, type KeyboardEvent as ReactKeyboardEvent } from "react";
 import { trpc } from "@/lib/trpc";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -12,6 +12,7 @@ import { getProductImage } from "@shared/image-assets";
 import { useLocalCart } from "@/hooks/useLocalCart";
 import { filterProductsByNotes, OLFACTORY_FILTERS } from "@shared/olfactory";
 import { getCatalogSuggestions, searchProductsByName } from "@shared/catalog-search";
+import { CART_CONFIRMATION_DURATION_MS } from "@shared/cart-feedback";
 
 export default function Products() {
   const { data: products, isLoading } = trpc.products.list.useQuery();
@@ -23,6 +24,8 @@ export default function Products() {
   const [searchQuery, setSearchQuery] = useState("");
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const [activeSuggestionIndex, setActiveSuggestionIndex] = useState(-1);
+  const [recentlyAddedProductId, setRecentlyAddedProductId] = useState<number | null>(null);
+  const addFeedbackTimer = useRef<number | null>(null);
 
   type CatalogProduct = NonNullable<typeof products>[number];
   const noteMatchedProducts = useMemo<CatalogProduct[]>(
@@ -37,6 +40,20 @@ export default function Products() {
     if (!searchQuery.trim()) return [];
     return getCatalogSuggestions(noteMatchedProducts, searchQuery, 6);
   }, [noteMatchedProducts, searchQuery]);
+
+  useEffect(() => {
+    return () => {
+      if (addFeedbackTimer.current) window.clearTimeout(addFeedbackTimer.current);
+    };
+  }, []);
+
+  const confirmAddedProduct = (productId: number) => {
+    setRecentlyAddedProductId(productId);
+    if (addFeedbackTimer.current) window.clearTimeout(addFeedbackTimer.current);
+    addFeedbackTimer.current = window.setTimeout(() => {
+      setRecentlyAddedProductId(null);
+    }, CART_CONFIRMATION_DURATION_MS);
+  };
 
   const selectSuggestion = (product: CatalogProduct) => {
     setSearchQuery(product.name);
@@ -67,15 +84,19 @@ export default function Products() {
     }
   };
 
-  const handleAddToCart = (product: any) => {
+  const handleAddToCart = (product: CatalogProduct) => {
     const quantity = selectedQuantity[product.id] || 1;
+    const handleSuccessfulAddition = () => {
+      setSelectedQuantity((prev) => ({ ...prev, [product.id]: 1 }));
+      confirmAddedProduct(product.id);
+    };
+
     if (isAuthenticated && user) {
       addToCart.mutate(
         { productId: product.id, quantity },
         {
           onSuccess: () => {
-            setSelectedQuantity((prev) => ({ ...prev, [product.id]: 1 }));
-            toast.success("Article ajouté au panier");
+            handleSuccessfulAddition();
           },
           onError: (error: any) => {
             toast.error(error.message || "Erreur lors de l'ajout au panier");
@@ -83,8 +104,8 @@ export default function Products() {
         },
       );
     } else {
-      addToLocalCart(product, quantity);
-      setSelectedQuantity((prev) => ({ ...prev, [product.id]: 1 }));
+      addToLocalCart(product, quantity, { announce: false });
+      handleSuccessfulAddition();
     }
   };
 
@@ -343,10 +364,26 @@ export default function Products() {
                           type="button"
                           onClick={() => handleAddToCart(product)}
                           disabled={addToCart.isPending || product.stock === 0}
-                          className="bg-gray-900 hover:bg-gray-800 text-white font-light whitespace-nowrap"
+                          aria-live="polite"
+                          className={`relative overflow-hidden bg-gray-900 text-white font-light whitespace-nowrap transition-all hover:bg-gray-800 hover:shadow-lg ${
+                            recentlyAddedProductId === product.id ? "scale-[0.97] bg-gray-800" : ""
+                          }`}
                         >
-                          <ShoppingCart className="w-4 h-4 mr-2" aria-hidden="true" />
-                          Ajouter
+                          {recentlyAddedProductId === product.id && (
+                            <span className="cart-added-ripple" aria-hidden="true" />
+                          )}
+                          <ShoppingCart
+                            className={`relative z-10 mr-2 h-4 w-4 ${
+                              recentlyAddedProductId === product.id ? "cart-icon-bounce" : ""
+                            }`}
+                            aria-hidden="true"
+                          />
+                          <span className="relative z-10">
+                            {recentlyAddedProductId === product.id ? "Ajouté" : "Ajouter"}
+                          </span>
+                          {recentlyAddedProductId === product.id && (
+                            <span className="cart-added-check" aria-hidden="true">✓</span>
+                          )}
                         </Button>
                       </div>
                     </div>

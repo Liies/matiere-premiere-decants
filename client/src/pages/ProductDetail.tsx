@@ -9,6 +9,7 @@ import { useLocalCart } from '@/hooks/useLocalCart';
 import { toast } from 'sonner';
 import { getProductImage } from '@shared/image-assets';
 import { formatPrice } from '@shared/price';
+import { CART_CONFIRMATION_DURATION_MS, getCartConfirmationLabel } from '@shared/cart-feedback';
 
 function ProductImage({
   productId,
@@ -83,7 +84,7 @@ export default function ProductDetail() {
   const handleAddToCart = () => {
     if (!product || isAddingToCart) return;
 
-    addToCart(product, quantity);
+    addToCart(product, quantity, { announce: false });
     setIsAddingToCart(true);
     setShowAddedFeedback(true);
 
@@ -91,7 +92,7 @@ export default function ProductDetail() {
     addFeedbackTimer.current = window.setTimeout(() => {
       setIsAddingToCart(false);
       setShowAddedFeedback(false);
-    }, 950);
+    }, CART_CONFIRMATION_DURATION_MS);
   };
 
   if (isLoading) {
@@ -223,7 +224,7 @@ export default function ProductDetail() {
                 >
                   {showAddedFeedback && <span className="cart-added-ripple" aria-hidden="true" />}
                   <ShoppingCart className={`relative z-10 w-5 h-5 ${isAddingToCart ? "cart-icon-bounce" : ""}`} />
-                  <span className="relative z-10">{isAddingToCart ? "Ajouté au panier" : "Ajouter au panier"}</span>
+                  <span className="relative z-10">{getCartConfirmationLabel(isAddingToCart)}</span>
                   {showAddedFeedback && <span className="cart-added-check" aria-hidden="true">✓</span>}
                 </Button>
                 <button

@@ -5828,3 +5828,10 @@
 - [x] Remplacer la simulation du formulaire par l’appel tRPC
 - [x] Ajouter les tests de validation du formulaire de contact
 - [x] Vérifier le flux dans la preview et sauvegarder un checkpoint
+
+## Confirmation animée d’ajout au panier — demande courante
+- [x] Harmoniser la confirmation inline sur le catalogue et les fiches produit
+- [x] Ajouter un état de confirmation par produit dans le catalogue
+- [x] Préserver l’accessibilité, les états de chargement et prefers-reduced-motion
+- [x] Ajouter ou mettre à jour les tests associés
+- [x] Vérifier le rendu dans le preview et sauvegarder un checkpoint
