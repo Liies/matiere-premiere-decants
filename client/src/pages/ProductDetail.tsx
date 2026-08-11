@@ -1,12 +1,49 @@
 import { useEffect, useState } from 'react';
 import { useRoute } from 'wouter';
-import { ArrowLeft, ShoppingCart, Heart } from 'lucide-react';
+import { ArrowLeft, ShoppingCart, Heart, Leaf } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { trpc } from '@/lib/trpc';
 import { useLocalCart } from '@/hooks/useLocalCart';
 import { toast } from 'sonner';
+import { getProductImage } from '@shared/image-assets';
+import { formatPrice } from '@shared/price';
+
+function ProductImage({
+  productId,
+  fallbackUrl,
+  alt,
+  className,
+}: {
+  productId: number;
+  fallbackUrl?: string | null;
+  alt: string;
+  className: string;
+}) {
+  const [hasError, setHasError] = useState(false);
+  const mappedImage = getProductImage(productId);
+  const storageFallback = fallbackUrl?.startsWith('/manus-storage/') ? fallbackUrl : null;
+  const src = mappedImage?.compressed ?? storageFallback;
+
+  if (!src || hasError) {
+    return (
+      <div className="w-full h-full flex items-center justify-center bg-gray-50" role="img" aria-label={alt}>
+        <Leaf className="w-16 h-16 text-gray-300" aria-hidden="true" />
+      </div>
+    );
+  }
+
+  return (
+    <img
+      src={src}
+      alt={alt}
+      className={className}
+      loading="lazy"
+      onError={() => setHasError(true)}
+    />
+  );
+}
 
 export default function ProductDetail() {
   const [match, params] = useRoute('/product/:id');
@@ -92,8 +129,9 @@ export default function ProductDetail() {
                 transform: `scale(${1 + scrollY * 0.0001})`,
               }}
             >
-              <img
-                src={product.imageUrl || '/placeholder.png'}
+              <ProductImage
+                productId={product.id}
+                fallbackUrl={product.imageUrl}
                 alt={product.name}
                 className="w-full h-full object-cover"
               />
@@ -112,7 +150,7 @@ export default function ProductDetail() {
               </h1>
               <p className="text-xl text-gray-600 mb-6">{product.description}</p>
               <div className="text-3xl font-light text-gray-900">
-                {product.price.toFixed(2)}€
+                {formatPrice(product.price)}
               </div>
             </div>
 
@@ -196,8 +234,9 @@ export default function ProductDetail() {
                   style={{ animationDelay: `${idx * 100}ms` }}
                 >
                   <div className="aspect-square rounded-lg overflow-hidden bg-gray-50 mb-4 transition-transform duration-300 group-hover:scale-105">
-                    <img
-                      src={p.imageUrl || '/placeholder.png'}
+                    <ProductImage
+                      productId={p.id}
+                      fallbackUrl={p.imageUrl}
                       alt={p.name}
                       className="w-full h-full object-cover"
                     />
@@ -205,7 +244,7 @@ export default function ProductDetail() {
                   <h3 className="text-lg font-light text-gray-900 group-hover:text-gray-600 transition-colors">
                     {p.name}
                   </h3>
-                  <p className="text-gray-600">{p.price.toFixed(2)}€</p>
+                  <p className="text-gray-600">{formatPrice(p.price)}</p>
                 </a>
               ))}
             </div>
