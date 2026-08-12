@@ -5972,4 +5972,4 @@
 - [x] Reconstituer l’incident et documenter la cause racine
 - [x] Documenter les fichiers corrigés, tests et vérifications visuelles
 - [x] Référencer la version corrigée sauvegardée
-- [ ] Sauvegarder un checkpoint du dossier d’incident
+- [x] Sauvegarder un checkpoint du dossier d’incident
