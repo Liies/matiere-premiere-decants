@@ -5868,3 +5868,10 @@
 - [x] Préserver le bouton visible et utilisable sur mobile
 - [x] Respecter prefers-reduced-motion, vérifier les tests et le build
 - [x] Sauvegarder un checkpoint de la micro-interaction
+
+## Révélation des notes olfactives — demande courante
+- [x] Déclencher l’apparition séquencée des notes au scroll de la fiche produit
+- [x] Différencier visuellement tête, cœur et fond sans alourdir la lecture
+- [x] Respecter prefers-reduced-motion et conserver les notes immédiatement lisibles
+- [x] Vérifier le rendu, les tests et le build
+- [x] Sauvegarder un checkpoint de la révélation olfactive

@@ -10,6 +10,7 @@ import { toast } from 'sonner';
 import { getProductImage } from '@shared/image-assets';
 import { formatPrice } from '@shared/price';
 import { CART_CONFIRMATION_DURATION_MS, getCartConfirmationLabel } from '@shared/cart-feedback';
+import { getOlfactoryRevealDelay } from '@shared/olfactory-reveal';
 
 function ProductImage({
   productId,
@@ -54,6 +55,8 @@ export default function ProductDetail() {
   const [isAddingToCart, setIsAddingToCart] = useState(false);
   const [showAddedFeedback, setShowAddedFeedback] = useState(false);
   const addFeedbackTimer = useRef<number | null>(null);
+  const olfactoryNotesRef = useRef<HTMLDivElement | null>(null);
+  const [areOlfactoryNotesRevealed, setAreOlfactoryNotesRevealed] = useState(false);
 
   const { addToCart } = useLocalCart();
 
@@ -80,6 +83,31 @@ export default function ProductDetail() {
       if (addFeedbackTimer.current) window.clearTimeout(addFeedbackTimer.current);
     };
   }, []);
+
+  useEffect(() => {
+    const notesSection = olfactoryNotesRef.current;
+    if (!notesSection || !product) return;
+
+    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (reduceMotion || !("IntersectionObserver" in window)) {
+      setAreOlfactoryNotesRevealed(true);
+      return;
+    }
+
+    setAreOlfactoryNotesRevealed(false);
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setAreOlfactoryNotesRevealed(true);
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.25 },
+    );
+
+    observer.observe(notesSection);
+    return () => observer.disconnect();
+  }, [product?.id]);
 
   const handleAddToCart = () => {
     if (!product || isAddingToCart) return;
@@ -173,25 +201,32 @@ export default function ProductDetail() {
             </div>
 
             {/* Olfactory Notes */}
-            <div className="mb-8 space-y-5 animate-fade-in-delay sm:space-y-6">
-              <div className="border-l border-gray-200 pl-4 transition-colors duration-500 hover:border-gray-900">
-                <h3 className="mb-3 text-sm uppercase tracking-widest text-gray-500">
-                  Notes de tête
-                </h3>
-                <p className="text-gray-700">{product.topNotes}</p>
-              </div>
-              <div className="border-l border-gray-200 pl-4 transition-colors duration-500 hover:border-gray-900">
-                <h3 className="mb-3 text-sm uppercase tracking-widest text-gray-500">
-                  Notes de cœur
-                </h3>
-                <p className="text-gray-700">{product.heartNotes}</p>
-              </div>
-              <div className="border-l border-gray-200 pl-4 transition-colors duration-500 hover:border-gray-900">
-                <h3 className="mb-3 text-sm uppercase tracking-widest text-gray-500">
-                  Notes de fond
-                </h3>
-                <p className="text-gray-700">{product.baseNotes}</p>
-              </div>
+            <div ref={olfactoryNotesRef} className="mb-8 space-y-5 sm:space-y-6">
+              {[
+                { label: "Notes de tête", notes: product.topNotes, number: "01" },
+                { label: "Notes de cœur", notes: product.heartNotes, number: "02" },
+                { label: "Notes de fond", notes: product.baseNotes, number: "03" },
+              ].map((note, index) => (
+                <div
+                  key={note.label}
+                  className={`group/note flex gap-4 border-l pl-4 transition-all duration-700 ease-out motion-reduce:translate-y-0 motion-reduce:transition-none ${
+                    areOlfactoryNotesRevealed
+                      ? "translate-y-0 border-gray-900 opacity-100"
+                      : "translate-y-3 border-gray-200 opacity-0"
+                  }`}
+                  style={{ transitionDelay: `${getOlfactoryRevealDelay(index)}ms` }}
+                >
+                  <span className="pt-0.5 text-[0.65rem] font-medium tracking-[0.18em] text-gray-400" aria-hidden="true">
+                    {note.number}
+                  </span>
+                  <div>
+                    <h3 className="mb-2 text-sm uppercase tracking-widest text-gray-500 transition-colors duration-300 group-hover/note:text-gray-900">
+                      {note.label}
+                    </h3>
+                    <p className="text-gray-700">{note.notes}</p>
+                  </div>
+                </div>
+              ))}
             </div>
 
             {/* Actions */}
