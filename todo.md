@@ -5943,4 +5943,4 @@
 - [x] Tester les échecs : panier vide, prix altéré, produit absent et stock insuffisant
 - [x] Tester les notifications simulées et l’absence de blocage du flux de commande
 - [x] Exécuter Vitest, TypeScript et le build de production
-- [ ] Sauvegarder un checkpoint de la couverture d’intégration commande
+- [x] Sauvegarder un checkpoint de la couverture d’intégration commande
