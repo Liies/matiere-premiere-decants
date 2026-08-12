@@ -6018,4 +6018,4 @@
 - [x] Examiner les styles actuels du halo de survol
 - [x] Réduire l’intensité, l’ampleur et l’opacité du halo
 - [x] Vérifier le rendu, le mouvement réduit, les tests et le build
-- [ ] Sauvegarder la version publiée
+- [x] Sauvegarder la version publiée
