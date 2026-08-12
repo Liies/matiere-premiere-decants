@@ -6025,4 +6025,4 @@
 - [x] Retirer le flacon sous le bouton « Explorer la collection »
 - [x] Rééquilibrer la hauteur et les espacements du hero
 - [x] Vérifier le rendu, les tests et le build
-- [ ] Sauvegarder la version publiée
+- [x] Sauvegarder la version publiée
