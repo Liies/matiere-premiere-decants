@@ -5959,3 +5959,11 @@
 - [x] Corriger les goulots de performance à impact significatif
 - [x] Valider tests, TypeScript et build de production après optimisation
 - [x] Sauvegarder un checkpoint de l’audit de performance
+
+## Transitions entre pages — demande courante
+- [x] Auditer le routage et les animations globales existantes
+- [x] Ajouter une transition de sortie et d’entrée sobre entre les pages
+- [x] Préserver une navigation immédiate sur panier et checkout
+- [x] Respecter prefers-reduced-motion et tester les transitions
+- [x] Vérifier TypeScript et build de production
+- [ ] Sauvegarder un checkpoint des transitions

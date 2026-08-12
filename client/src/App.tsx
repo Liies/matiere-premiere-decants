@@ -1,13 +1,14 @@
-import { lazy, Suspense, useCallback, useEffect, useState } from "react";
+import { type ReactNode, lazy, Suspense, useCallback, useEffect, useState } from "react";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import NotFound from "@/pages/NotFound";
-import { Route, Switch } from "wouter";
+import { Route, Switch, useLocation } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import InitialLoader from "./components/InitialLoader";
 import { getInitialAnchorTargetId, INITIAL_LOADER_SESSION_KEY, shouldShowInitialLoader } from "@shared/initial-loader";
 import { useCartSyncOnSignIn } from "@/hooks/useCartSyncOnSignIn";
+import { PAGE_TRANSITION_DURATION_MS, shouldUseInstantPageTransition } from "@shared/page-transition";
 const Home = lazy(() => import("./pages/Home"));
 const loadHomePremium = () => import("./pages/HomePremium");
 const HomePremium = lazy(loadHomePremium);
@@ -39,10 +40,64 @@ function CartSyncOnSignIn() {
   return null;
 }
 
+function prefersReducedMotion() {
+  return typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+}
+
+function PageTransition({ location, children }: { location: string; children: ReactNode }) {
+  const [displayedChildren, setDisplayedChildren] = useState(children);
+  const [displayedLocation, setDisplayedLocation] = useState(location);
+  const [isLeaving, setIsLeaving] = useState(false);
+
+  useEffect(() => {
+    if (location === displayedLocation) {
+      setDisplayedChildren(children);
+      return;
+    }
+
+    const instant = prefersReducedMotion()
+      || shouldUseInstantPageTransition(location)
+      || shouldUseInstantPageTransition(displayedLocation);
+
+    if (instant) {
+      setDisplayedChildren(children);
+      setDisplayedLocation(location);
+      setIsLeaving(false);
+      return;
+    }
+
+    setIsLeaving(true);
+    const timer = window.setTimeout(() => {
+      setDisplayedChildren(children);
+      setDisplayedLocation(location);
+      setIsLeaving(false);
+      window.scrollTo({ top: 0, behavior: "auto" });
+    }, PAGE_TRANSITION_DURATION_MS);
+
+    return () => window.clearTimeout(timer);
+  }, [children, displayedLocation, location]);
+
+  return (
+    <div className={isLeaving ? "page-transition page-transition-leaving" : "page-transition"}>
+      {displayedChildren}
+    </div>
+  );
+}
+
 function Router() {
   // make sure to consider if you need authentication for certain routes
   return (
     <Suspense fallback={<PageLoading />}>
+      <RouteTransitionSwitch />
+    </Suspense>
+  );
+}
+
+function RouteTransitionSwitch() {
+  const [location] = useLocation();
+
+  return (
+    <PageTransition location={location}>
       <Switch>
       <Route path={"/"} component={HomePremium} />
       <Route path={"/home-classic"} component={Home} />
@@ -63,7 +118,7 @@ function Router() {
         {/* Final fallback route */}
         <Route component={NotFound} />
       </Switch>
-    </Suspense>
+    </PageTransition>
   );
 }
 

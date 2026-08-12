@@ -32,3 +32,8 @@
 
 - Le panier authentifié continue de charger sans erreur après ajout du déclencheur global de synchronisation.
 - Les entrées existantes en double d’un même produit sont prises en compte dans le plan de fusion et sont normalisées en une quantité unique dès qu’une synchronisation invitée réussit.
+
+## Transitions entre pages
+
+- Le catalogue se charge correctement après une navigation depuis l’accueil avec le conteneur de transition global.
+- L’accès au panier reste direct et ne présente aucun délai de sortie, conformément à la règle de parcours d’achat rapide.
