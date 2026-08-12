@@ -5929,7 +5929,7 @@
 - [x] Déclencher les emails automatiquement après commande et changement de statut
 - [x] Tester les modèles, erreurs et l’absence d’échec de commande si l’email échoue
 - [x] Vérifier TypeScript et build de production
-- [ ] Sauvegarder un checkpoint de l’email transactionnel
+- [x] Sauvegarder un checkpoint de l’email transactionnel
 
 ## Emails transactionnels en simulation — demande courante
 - [x] Créer un adaptateur d’email à bascule simulation / Resend
