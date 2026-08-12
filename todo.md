@@ -5967,3 +5967,9 @@
 - [x] Respecter prefers-reduced-motion et tester les transitions
 - [x] Vérifier TypeScript et build de production
 - [x] Sauvegarder un checkpoint des transitions
+
+## Dossier d’incident — demande courante
+- [x] Reconstituer l’incident et documenter la cause racine
+- [x] Documenter les fichiers corrigés, tests et vérifications visuelles
+- [x] Référencer la version corrigée sauvegardée
+- [ ] Sauvegarder un checkpoint du dossier d’incident
