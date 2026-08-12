@@ -5966,4 +5966,4 @@
 - [x] Préserver une navigation immédiate sur panier et checkout
 - [x] Respecter prefers-reduced-motion et tester les transitions
 - [x] Vérifier TypeScript et build de production
-- [ ] Sauvegarder un checkpoint des transitions
+- [x] Sauvegarder un checkpoint des transitions
