@@ -30,8 +30,10 @@ export default function Products() {
   const [recentlyAddedProductKey, setRecentlyAddedProductKey] = useState<string | null>(null);
   const [wishlistAnimationKey, setWishlistAnimationKey] = useState<string | null>(null);
   const [flippedProductId, setFlippedProductId] = useState<number | null>(null);
+  const [hoverFlippedProductId, setHoverFlippedProductId] = useState<number | null>(null);
   const addFeedbackTimer = useRef<number | null>(null);
   const wishlistAnimationTimer = useRef<number | null>(null);
+  const hoverFlipTimer = useRef<number | null>(null);
 
   type CatalogProduct = NonNullable<typeof products>[number];
   const noteMatchedProducts = useMemo<CatalogProduct[]>(
@@ -51,6 +53,7 @@ export default function Products() {
     return () => {
       if (addFeedbackTimer.current) window.clearTimeout(addFeedbackTimer.current);
       if (wishlistAnimationTimer.current) window.clearTimeout(wishlistAnimationTimer.current);
+      if (hoverFlipTimer.current) window.clearTimeout(hoverFlipTimer.current);
     };
   }, []);
 
@@ -80,6 +83,26 @@ export default function Products() {
 
   const isProductRecentlyAdded = (product: CatalogProduct) =>
     recentlyAddedProductKey === getCartFeedbackKey(product);
+
+  const clearHoverFlipTimer = () => {
+    if (hoverFlipTimer.current) {
+      window.clearTimeout(hoverFlipTimer.current);
+      hoverFlipTimer.current = null;
+    }
+  };
+
+  const scheduleHoverFlip = (productId: number) => {
+    clearHoverFlipTimer();
+    hoverFlipTimer.current = window.setTimeout(() => {
+      setHoverFlippedProductId(productId);
+      hoverFlipTimer.current = null;
+    }, 1200);
+  };
+
+  const cancelHoverFlip = (productId: number) => {
+    clearHoverFlipTimer();
+    setHoverFlippedProductId((current) => (current === productId ? null : current));
+  };
 
   const handleToggleWishlist = (product: CatalogProduct) => {
     toggleWishlist(product.id);
@@ -327,6 +350,8 @@ export default function Products() {
                   key={getCartFeedbackKey(product)}
                   className="catalog-product-card group/product-card overflow-hidden border-gray-200 transition-all duration-500 animate-fade-in hover:-translate-y-1 hover:shadow-xl motion-reduce:transform-none motion-reduce:transition-none"
                   style={{ animationDelay: `${Math.min(index, 5) * 70}ms` }}
+                  onMouseEnter={() => scheduleHoverFlip(product.id)}
+                  onMouseLeave={() => cancelHoverFlip(product.id)}
                 >
                   <div className="space-y-4 p-4 sm:p-5">
                     <div className="relative">
@@ -342,6 +367,7 @@ export default function Products() {
                       <div
                         data-testid={`catalog-flip-card-${product.id}`}
                         data-flipped={flippedProductId === product.id}
+                        data-hover-flipped={hoverFlippedProductId === product.id}
                         className="catalog-flip-card"
                       >
                         <div className="catalog-flip-card-inner">

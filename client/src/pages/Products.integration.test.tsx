@@ -132,4 +132,34 @@ describe("intégration catalogue — panier et souhaits", () => {
     expect(vanillaFlipCard.getAttribute("data-flipped")).toBe("true");
     expect(screen.getByRole("button", { name: "Masquer les notes" }).getAttribute("aria-expanded")).toBe("true");
   });
+
+  it("attend 1,2 seconde de survol et annule le retournement si la souris quitte la carte", () => {
+    vi.useFakeTimers();
+    render(<Products />);
+
+    const vanillaFlipCard = screen.getByTestId("catalog-flip-card-1");
+    const vanillaCard = vanillaFlipCard.closest(".catalog-product-card");
+    expect(vanillaCard).toBeTruthy();
+
+    fireEvent.mouseEnter(vanillaCard!);
+    act(() => {
+      vi.advanceTimersByTime(900);
+    });
+    expect(vanillaFlipCard.getAttribute("data-hover-flipped")).toBe("false");
+
+    fireEvent.mouseLeave(vanillaCard!);
+    act(() => {
+      vi.advanceTimersByTime(600);
+    });
+    expect(vanillaFlipCard.getAttribute("data-hover-flipped")).toBe("false");
+
+    fireEvent.mouseEnter(vanillaCard!);
+    act(() => {
+      vi.advanceTimersByTime(1200);
+    });
+    expect(vanillaFlipCard.getAttribute("data-hover-flipped")).toBe("true");
+
+    fireEvent.mouseLeave(vanillaCard!);
+    expect(vanillaFlipCard.getAttribute("data-hover-flipped")).toBe("false");
+  });
 });

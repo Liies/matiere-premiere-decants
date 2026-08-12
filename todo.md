@@ -5996,3 +5996,11 @@
 - [x] Ajouter une couverture Vitest pour le contrat de présentation
 - [x] Vérifier le rendu, les mouvements réduits, les tests et le build
 - [x] Sauvegarder la version publiée
+
+## Délai avant retournement catalogue — demande courante
+- [x] Examiner le déclenchement actuel du retournement et ses tests
+- [x] Ajouter un délai de survol annulable avant le retournement
+- [x] Préserver le retournement immédiat au focus clavier et au toucher
+- [x] Tester le délai, l’annulation à la sortie et les parcours accessibles
+- [x] Vérifier le rendu, les tests et le build
+- [ ] Sauvegarder la version publiée
