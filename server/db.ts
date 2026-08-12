@@ -1,8 +1,9 @@
-import { and, eq } from "drizzle-orm";
+import { and, asc, eq, gt, gte, sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import { InsertUser, users, products, cartItems, cartSyncReceipts, orders, orderItems, InsertOrder, InsertOrderItem } from "../drizzle/schema";
+import { InsertUser, users, brands, products, cartItems, cartSyncReceipts, orders, orderItems, InsertOrder, InsertOrderItem, sourceBottles, variants } from "../drizzle/schema";
 import { ENV } from './_core/env';
 import { buildCartSyncPlan } from "@shared/cart-sync";
+import { consolidateOrderLines, requiredMilliliters, type RequestedOrderLine } from "@shared/inventory";
 
 let _db: ReturnType<typeof drizzle> | null = null;
 
@@ -99,6 +100,33 @@ export async function getAllProducts() {
   return db.select().from(products);
 }
 
+export async function getCatalogProducts() {
+  const db = await getDb();
+  if (!db) return [];
+  return db
+    .select({ product: products, brand: brands })
+    .from(products)
+    .leftJoin(brands, eq(products.brandId, brands.id));
+}
+
+export async function getBrands() {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(brands).where(eq(brands.isActive, true)).orderBy(asc(brands.sortOrder));
+}
+
+export async function getProductVariants(productId: number) {
+  const db = await getDb();
+  if (!db) return [];
+
+  const [productVariants, bottles] = await Promise.all([
+    db.select().from(variants).where(and(eq(variants.productId, productId), eq(variants.isActive, true))).orderBy(asc(variants.sizeMl)),
+    db.select({ remainingMl: sourceBottles.remainingMl }).from(sourceBottles).where(and(eq(sourceBottles.productId, productId), gt(sourceBottles.remainingMl, "0"))),
+  ]);
+  const availableMl = bottles.reduce((sum, bottle) => sum + Number(bottle.remainingMl), 0);
+  return productVariants.map((variant) => ({ ...variant, availableQuantity: Math.floor(availableMl / variant.sizeMl) }));
+}
+
 export async function getProductBySlug(slug: string) {
   const db = await getDb();
   if (!db) return undefined;
@@ -113,6 +141,21 @@ export async function getProductById(id: number) {
   return result.length > 0 ? result[0] : undefined;
 }
 
+export async function getProductByBrandSlug(brandSlug: string, productSlug: string) {
+  const db = await getDb();
+  if (!db) return undefined;
+
+  const rows = await db
+    .select({ product: products, brand: brands })
+    .from(products)
+    .innerJoin(brands, eq(products.brandId, brands.id))
+    .where(and(eq(brands.slug, brandSlug), eq(products.slug, productSlug)))
+    .limit(1);
+  const row = rows[0];
+  if (!row) return undefined;
+  return { ...row.product, brand: row.brand, variants: await getProductVariants(row.product.id) };
+}
+
 export type ProductCatalogUpdate = {
   name: string;
   description: string;
@@ -124,6 +167,30 @@ export async function updateProductCatalog(id: number, values: ProductCatalogUpd
   const db = await getDb();
   if (!db) return;
   await db.update(products).set(values).where(eq(products.id, id));
+}
+
+export async function createCatalogVariant(values: {
+  productId: number;
+  sizeMl: number;
+  sku: string;
+  priceCents: number;
+}) {
+  const db = await getDb();
+  if (!db) throw new Error("La mise à jour de l’inventaire est indisponible");
+  await db.insert(variants).values(values);
+}
+
+export async function recordSourceBottle(values: {
+  productId: number;
+  batchRef?: string;
+  capacityMl: number;
+  remainingMl: string;
+  purchasePriceCents: number;
+  purchasedAt?: Date;
+}) {
+  const db = await getDb();
+  if (!db) throw new Error("La mise à jour de l’inventaire est indisponible");
+  await db.insert(sourceBottles).values(values);
 }
 
 /**
@@ -154,6 +221,27 @@ export async function addCartItem(userId: number, productId: number, quantity: n
   }
 
   await db.insert(cartItems).values({ userId, productId, quantity });
+}
+
+export async function addCartVariant(userId: number, productId: number, variantId: number, quantity: number) {
+  const db = await getDb();
+  if (!db) return;
+
+  const existingItems = await db
+    .select()
+    .from(cartItems)
+    .where(and(eq(cartItems.userId, userId), eq(cartItems.variantId, variantId)));
+
+  if (existingItems.length > 0) {
+    const mergedQuantity = existingItems.reduce((total, item) => total + item.quantity, quantity);
+    await db.update(cartItems).set({ quantity: mergedQuantity }).where(eq(cartItems.id, existingItems[0].id));
+    for (const duplicate of existingItems.slice(1)) {
+      await db.delete(cartItems).where(eq(cartItems.id, duplicate.id));
+    }
+    return;
+  }
+
+  await db.insert(cartItems).values({ userId, productId, variantId, quantity });
 }
 
 export async function updateCartItemQuantity(id: number, quantity: number) {
@@ -253,6 +341,126 @@ export async function createOrder(order: InsertOrder) {
   if (!db) return;
   const result = await db.insert(orders).values(order);
   return result;
+}
+
+export class InventoryUnavailableError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "InventoryUnavailableError";
+  }
+}
+
+type CreateReservedOrderInput = Omit<InsertOrder, "status" | "totalAmount"> & {
+  lines: RequestedOrderLine[];
+};
+
+export type ReservedOrderResult = {
+  orderId: number;
+  orderNumber: string;
+  totalAmount: number;
+  items: Array<{ productName: string; quantity: number; unitPrice: number }>;
+};
+
+/**
+ * La commande, ses lignes et la décrémentation du stock sont réalisées dans une seule
+ * transaction. Un format de décant consomme des millilitres de flacons source ; la voie
+ * produit est conservée le temps de migrer les paniers historiques.
+ */
+export async function createReservedOrder(input: CreateReservedOrderInput): Promise<ReservedOrderResult> {
+  const db = await getDb();
+  if (!db) throw new Error("La création de commande est temporairement indisponible");
+
+  const { lines: rawLines, ...orderValues } = input;
+  const lines = consolidateOrderLines(rawLines);
+  if (lines.length === 0) throw new InventoryUnavailableError("Aucun article dans la commande");
+
+  return db.transaction(async (tx) => {
+    let totalAmount = 0;
+    const orderItemsToInsert: Array<{
+      productId: number;
+      variantId?: number;
+      productName: string;
+      quantity: number;
+      unitPrice: number;
+    }> = [];
+
+    for (const line of lines) {
+      if (line.variantId) {
+        const variantRows = await tx.select().from(variants).where(eq(variants.id, line.variantId)).limit(1);
+        const variant = variantRows[0];
+        if (!variant || !variant.isActive || variant.productId !== line.productId) {
+          throw new InventoryUnavailableError("Format de décant indisponible");
+        }
+
+        const productRows = await tx.select().from(products).where(eq(products.id, variant.productId)).limit(1);
+        const product = productRows[0];
+        if (!product || product.status !== "available") {
+          throw new InventoryUnavailableError("Parfum indisponible");
+        }
+
+        let remainingToReserve = requiredMilliliters(variant.sizeMl, line.quantity);
+        const bottles = await tx
+          .select()
+          .from(sourceBottles)
+          .where(and(eq(sourceBottles.productId, product.id), gt(sourceBottles.remainingMl, "0")))
+          .orderBy(asc(sourceBottles.purchasedAt));
+        const totalAvailableMl = bottles.reduce((sum, bottle) => sum + Number(bottle.remainingMl), 0);
+        if (totalAvailableMl < remainingToReserve) {
+          throw new InventoryUnavailableError(`Stock insuffisant pour ${product.name}`);
+        }
+
+        for (const bottle of bottles) {
+          if (remainingToReserve <= 0) break;
+          const volumeToReserve = Math.min(Number(bottle.remainingMl), remainingToReserve);
+          const updateResult = await tx
+            .update(sourceBottles)
+            .set({ remainingMl: sql`${sourceBottles.remainingMl} - ${volumeToReserve}` })
+            .where(and(eq(sourceBottles.id, bottle.id), gte(sourceBottles.remainingMl, String(volumeToReserve))));
+          const affectedRows = Number((updateResult as unknown as [{ affectedRows?: number }])[0]?.affectedRows ?? 0);
+          if (affectedRows !== 1) {
+            throw new InventoryUnavailableError(`Stock insuffisant pour ${product.name}`);
+          }
+          remainingToReserve -= volumeToReserve;
+        }
+
+        totalAmount += variant.priceCents * line.quantity;
+        orderItemsToInsert.push({ productId: product.id, variantId: variant.id, productName: product.name, quantity: line.quantity, unitPrice: variant.priceCents });
+        continue;
+      }
+
+      const productRows = await tx.select().from(products).where(eq(products.id, line.productId)).limit(1);
+      const product = productRows[0];
+      if (!product || product.status !== "available") {
+        throw new InventoryUnavailableError("Parfum indisponible");
+      }
+
+      const updateResult = await tx
+        .update(products)
+        .set({ stock: sql`${products.stock} - ${line.quantity}` })
+        .where(and(eq(products.id, product.id), gte(products.stock, line.quantity)));
+      const affectedRows = Number((updateResult as unknown as [{ affectedRows?: number }])[0]?.affectedRows ?? 0);
+      if (affectedRows !== 1) {
+        throw new InventoryUnavailableError(`Stock insuffisant pour ${product.name}`);
+      }
+
+      totalAmount += product.price * line.quantity;
+      orderItemsToInsert.push({ productId: product.id, productName: product.name, quantity: line.quantity, unitPrice: product.price });
+    }
+
+    const orderResult = await tx.insert(orders).values({ ...orderValues, status: "awaiting_payment", totalAmount });
+    const orderId = Number((orderResult as unknown as [{ insertId?: number }])[0]?.insertId);
+    if (!orderId) throw new Error("Impossible de créer la commande");
+
+    await tx.insert(orderItems).values(orderItemsToInsert.map((item) => ({ orderId, ...item })));
+    await tx.delete(cartItems).where(eq(cartItems.userId, input.userId));
+
+    return {
+      orderId,
+      orderNumber: input.orderNumber,
+      totalAmount,
+      items: orderItemsToInsert.map(({ productName, quantity, unitPrice }) => ({ productName, quantity, unitPrice })),
+    };
+  });
 }
 
 export async function getOrderById(id: number) {

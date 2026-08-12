@@ -113,6 +113,7 @@ function RouteTransitionSwitch() {
       <Route path={"/terms"} component={Terms} />
       <Route path={"/privacy"} component={Privacy} />
       <Route path={"/wishlist"} component={Wishlist} />
+      <Route path={"/parfum/:brand/:slug"} component={ProductDetail} />
       <Route path={"/product/:id"} component={ProductDetail} />
       <Route path={"/404"} component={NotFound} />
         {/* Final fallback route */}

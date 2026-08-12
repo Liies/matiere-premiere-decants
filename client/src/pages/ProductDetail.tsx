@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { useRoute } from 'wouter';
+import { Link, useRoute } from 'wouter';
 import { ArrowLeft, ShoppingCart, Heart, Leaf } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Header from '@/components/Header';
@@ -12,6 +12,7 @@ import { formatPrice } from '@shared/price';
 import { CART_CONFIRMATION_DURATION_MS, getCartConfirmationLabel } from '@shared/cart-feedback';
 import { getOlfactoryRevealDelay } from '@shared/olfactory-reveal';
 import { useWishlist } from '@/hooks/useWishlist';
+import { useAuth } from '@/_core/hooks/useAuth';
 
 function ProductImage({
   productId,
@@ -49,9 +50,11 @@ function ProductImage({
 }
 
 export default function ProductDetail() {
-  const [match, params] = useRoute('/product/:id');
+  const [legacyMatch, legacyParams] = useRoute('/product/:id');
+  const [stableMatch, stableParams] = useRoute('/parfum/:brand/:slug');
   const { isWishlisted, toggleWishlist } = useWishlist();
   const [quantity, setQuantity] = useState(1);
+  const [selectedVariantId, setSelectedVariantId] = useState<number | null>(null);
   const [scrollY, setScrollY] = useState(0);
   const [isAddingToCart, setIsAddingToCart] = useState(false);
   const [showAddedFeedback, setShowAddedFeedback] = useState(false);
@@ -62,17 +65,29 @@ export default function ProductDetail() {
   const [areOlfactoryNotesRevealed, setAreOlfactoryNotesRevealed] = useState(false);
 
   const { addToCart } = useLocalCart();
+  const { isAuthenticated } = useAuth();
+  const addVariantToCart = trpc.cart.addVariant.useMutation();
+  const trpcUtils = trpc.useUtils();
 
   // Get product from tRPC
-  const { data: product, isLoading } = trpc.products.getById.useQuery(
-    { id: parseInt((params as any)?.id || '0') },
-    { enabled: !!match }
+  const { data: legacyProduct, isLoading: isLoadingLegacy } = trpc.products.getById.useQuery(
+    { id: parseInt((legacyParams as any)?.id || '0') },
+    { enabled: !!legacyMatch },
   );
+  const { data: stableProduct, isLoading: isLoadingStable } = trpc.products.getByBrandSlug.useQuery(
+    { brand: (stableParams as any)?.brand || '', slug: (stableParams as any)?.slug || '' },
+    { enabled: !!stableMatch },
+  );
+  const product = stableProduct ?? legacyProduct;
+  const productVariants = stableProduct?.variants ?? [];
+  const productBrandName = stableProduct?.brand.name ?? "Collection Matière Première";
+  const selectedVariant = productVariants.find((variant) => variant.id === selectedVariantId) ?? productVariants.find((variant) => variant.availableQuantity > 0) ?? null;
+  const isLoading = stableMatch ? isLoadingStable : isLoadingLegacy;
 
   // Get similar products
   const { data: allProducts } = trpc.products.list.useQuery();
   const similarProducts = allProducts?.filter(
-    (p: any) => p.id !== product?.id
+    (p: any) => p.id !== product?.id && p.brandId === product?.brandId
   ).slice(0, 3);
 
   useEffect(() => {
@@ -113,8 +128,46 @@ export default function ProductDetail() {
     return () => observer.disconnect();
   }, [product?.id]);
 
+  useEffect(() => {
+    if (productVariants.length === 0) {
+      setSelectedVariantId(null);
+      return;
+    }
+    setSelectedVariantId((current) => productVariants.some((variant) => variant.id === current)
+      ? current
+      : (productVariants.find((variant) => variant.availableQuantity > 0)?.id ?? productVariants[0].id));
+  }, [productVariants]);
+
   const handleAddToCart = () => {
     if (!product || isAddingToCart) return;
+
+    if (stableMatch) {
+      if (!isAuthenticated) {
+        toast.info("Connectez-vous pour ajouter un décant à votre panier.");
+        return;
+      }
+      if (!selectedVariant || selectedVariant.availableQuantity < quantity) {
+        toast.error("Le format choisi n’est pas disponible dans cette quantité.");
+        return;
+      }
+      addVariantToCart.mutate(
+        { productId: product.id, variantId: selectedVariant.id, quantity },
+        {
+          onSuccess: async () => {
+            await trpcUtils.cart.getItems.invalidate();
+            setIsAddingToCart(true);
+            setShowAddedFeedback(true);
+            if (addFeedbackTimer.current) window.clearTimeout(addFeedbackTimer.current);
+            addFeedbackTimer.current = window.setTimeout(() => {
+              setIsAddingToCart(false);
+              setShowAddedFeedback(false);
+            }, CART_CONFIRMATION_DURATION_MS);
+          },
+          onError: (error) => toast.error(error.message || "Impossible d’ajouter ce format au panier."),
+        },
+      );
+      return;
+    }
 
     addToCart(product, quantity, { announce: false });
     setIsAddingToCart(true);
@@ -201,16 +254,38 @@ export default function ProductDetail() {
             {/* Header */}
             <div className="mb-8 animate-fade-in">
               <p className="text-sm text-gray-500 uppercase tracking-widest mb-4">
-                Collection Matière Première
+                {productBrandName}
               </p>
               <h1 className="mb-4 text-3xl font-light text-gray-900 sm:text-4xl md:text-5xl">
                 {product.name}
               </h1>
               <p className="mb-6 text-base leading-7 text-gray-600 sm:text-xl">{product.description}</p>
-              <div className="text-3xl font-light text-gray-900">
-                {formatPrice(product.price)}
-              </div>
-              <p className="mt-2 text-sm text-gray-500">Décant {product.volumeMl ?? 50} ml</p>
+              {stableMatch && productVariants.length === 0 ? (
+                <p className="text-base leading-7 text-gray-600">Référence en préparation : les formats, tarifs et disponibilités seront affichés après l’enregistrement du stock réel.</p>
+              ) : (
+                <>
+                  <div className="text-3xl font-light text-gray-900">
+                    {productVariants.length ? `À partir de ${formatPrice(Math.min(...productVariants.map((variant) => variant.priceCents)))}` : formatPrice(product.price)}
+                  </div>
+                  <p className="mt-2 text-sm text-gray-500">{productVariants.length ? "Formats disponibles sous réserve du stock réel" : `Décant ${product.volumeMl ?? 50} ml`}</p>
+                </>
+              )}
+              {stableMatch && productVariants.length > 0 && (
+                <label className="mt-5 block max-w-xs text-sm text-gray-700">
+                  <span className="mb-2 block text-xs uppercase tracking-widest text-gray-500">Format</span>
+                  <select
+                    value={selectedVariantId ?? ""}
+                    onChange={(event) => setSelectedVariantId(Number(event.target.value))}
+                    className="min-h-11 w-full rounded-lg border border-gray-300 bg-white px-3 text-gray-900"
+                  >
+                    {productVariants.map((variant) => (
+                      <option key={variant.id} value={variant.id} disabled={variant.availableQuantity <= 0}>
+                        {variant.sizeMl} ml — {formatPrice(variant.priceCents)}{variant.availableQuantity > 0 ? "" : " — indisponible"}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+              )}
             </div>
 
             {/* Olfactory Notes */}
@@ -219,7 +294,7 @@ export default function ProductDetail() {
                 { label: "Notes de tête", notes: product.topNotes, number: "01" },
                 { label: "Notes de cœur", notes: product.heartNotes, number: "02" },
                 { label: "Notes de fond", notes: product.baseNotes, number: "03" },
-              ].map((note, index) => (
+              ].filter((note) => (note.notes ?? "").trim().length > 0).map((note, index) => (
                 <div
                   key={note.label}
                   className={`group/note flex gap-4 border-l pl-4 transition-all duration-700 ease-out motion-reduce:translate-y-0 motion-reduce:transition-none ${
@@ -269,7 +344,7 @@ export default function ProductDetail() {
               <div className="flex flex-col gap-3 sm:flex-row sm:gap-4">
                 <Button
                   onClick={handleAddToCart}
-                  disabled={isAddingToCart}
+                  disabled={isAddingToCart || addVariantToCart.isPending || (stableMatch && (!isAuthenticated || !selectedVariant || selectedVariant.availableQuantity < quantity))}
                   aria-live="polite"
                   className={`relative min-h-12 w-full flex-1 overflow-hidden rounded-lg bg-gray-900 py-3 text-white transition-all hover:bg-gray-800 hover:shadow-lg sm:w-auto ${
                     isAddingToCart ? "scale-[0.98] bg-gray-800" : ""
@@ -277,7 +352,7 @@ export default function ProductDetail() {
                 >
                   {showAddedFeedback && <span className="cart-added-ripple" aria-hidden="true" />}
                   <ShoppingCart className={`relative z-10 w-5 h-5 ${isAddingToCart ? "cart-icon-bounce" : ""}`} />
-                  <span className="relative z-10">{getCartConfirmationLabel(isAddingToCart)}</span>
+                  <span className="relative z-10">{stableMatch && !isAuthenticated ? "Connectez-vous pour acheter" : stableMatch && (!selectedVariant || selectedVariant.availableQuantity < quantity) ? "Indisponible" : getCartConfirmationLabel(isAddingToCart)}</span>
                   {showAddedFeedback && <span className="cart-added-check" aria-hidden="true">✓</span>}
                 </Button>
                 <button
@@ -306,9 +381,9 @@ export default function ProductDetail() {
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
               {similarProducts.map((p, idx) => (
-                <a
+                <Link
                   key={p.id}
-                  href={`/product/${p.id}`}
+                  href={p.brand?.slug ? `/parfum/${p.brand.slug}/${p.slug}` : `/product/${p.id}`}
                   className="group cursor-pointer animate-fade-in"
                   style={{ animationDelay: `${idx * 100}ms` }}
                 >
@@ -324,7 +399,7 @@ export default function ProductDetail() {
                     {p.name}
                   </h3>
                   <p className="text-gray-600">{formatPrice(p.price)}</p>
-                </a>
+                </Link>
               ))}
             </div>
           </div>

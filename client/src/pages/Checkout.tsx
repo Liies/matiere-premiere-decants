@@ -83,7 +83,7 @@ export default function Checkout() {
   }
 
   const totalAmount = (cartItems || []).reduce(
-    (sum, item) => sum + (item.product?.price || 0) * item.quantity,
+    (sum, item) => sum + (item.variant?.priceCents ?? item.product?.price ?? 0) * item.quantity,
     0
   );
 
@@ -96,7 +96,7 @@ export default function Checkout() {
     const items = cartItems.map((item) => ({
       productId: item.productId,
       quantity: item.quantity,
-      unitPrice: item.product?.price || 0,
+      ...(item.variantId ? { variantId: item.variantId } : {}),
     }));
 
     createOrder.mutate(
@@ -235,7 +235,7 @@ export default function Checkout() {
                         {item.product?.name} x {item.quantity}
                       </span>
                       <span className="text-gray-900">
-                        €{(((item.product?.price || 0) * item.quantity) / 100).toFixed(2)}
+                        €{(((item.variant?.priceCents ?? item.product?.price ?? 0) * item.quantity) / 100).toFixed(2)}
                       </span>
                     </div>
                   ))}

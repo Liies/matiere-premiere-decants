@@ -1,10 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const mocks = vi.hoisted(() => ({
-  getProductById: vi.fn(),
-  createOrder: vi.fn(),
-  createOrderItem: vi.fn(),
-  clearUserCart: vi.fn(),
+  createReservedOrder: vi.fn(),
   getOrderById: vi.fn(),
   updateOrderStatus: vi.fn(),
   sendOrderCreatedEmails: vi.fn(),
@@ -14,10 +11,7 @@ const mocks = vi.hoisted(() => ({
 
 vi.mock("./db", async (importOriginal) => ({
   ...(await importOriginal<typeof import("./db")>()),
-  getProductById: mocks.getProductById,
-  createOrder: mocks.createOrder,
-  createOrderItem: mocks.createOrderItem,
-  clearUserCart: mocks.clearUserCart,
+  createReservedOrder: mocks.createReservedOrder,
   getOrderById: mocks.getOrderById,
   updateOrderStatus: mocks.updateOrderStatus,
 }));
@@ -59,10 +53,12 @@ const orderPayload = {
 describe("déclencheurs d’emails de commande", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mocks.getProductById.mockResolvedValue({ id: 1, name: "Vanilla Powder", stock: 10, price: 8500 });
-    mocks.createOrder.mockResolvedValue({ insertId: 540 });
-    mocks.createOrderItem.mockResolvedValue(undefined);
-    mocks.clearUserCart.mockResolvedValue(undefined);
+    mocks.createReservedOrder.mockResolvedValue({
+      orderId: 540,
+      orderNumber: "MP-TEST",
+      totalAmount: 8500,
+      items: [{ productName: "Vanille Powder", quantity: 1, unitPrice: 8500 }],
+    });
     mocks.notifyOwner.mockResolvedValue(true);
     mocks.sendOrderCreatedEmails.mockResolvedValue([
       { status: "fulfilled", value: { mode: "mock", delivered: true } },
@@ -78,23 +74,14 @@ describe("déclencheurs d’emails de commande", () => {
     const result = await caller.orders.create(orderPayload);
 
     expect(result.success).toBe(true);
-    expect(mocks.createOrder).toHaveBeenCalledWith(expect.objectContaining({
+    expect(mocks.createReservedOrder).toHaveBeenCalledWith(expect.objectContaining({
       userId: customer.id,
-      totalAmount: 8500,
-      status: "pending",
+      lines: [{ productId: 1, quantity: 1, unitPrice: 8500 }],
     }));
-    expect(mocks.createOrderItem).toHaveBeenCalledWith({
-      orderId: 540,
-      productId: 1,
-      productName: "Vanilla Powder",
-      quantity: 1,
-      unitPrice: 8500,
-    });
-    expect(mocks.clearUserCart).toHaveBeenCalledWith(customer.id);
     expect(mocks.sendOrderCreatedEmails).toHaveBeenCalledWith(expect.objectContaining({
       customerEmail: "camille@example.com",
       totalAmount: 8500,
-      items: [{ productName: "Vanilla Powder", quantity: 1, unitPrice: 8500 }],
+      items: [{ productName: "Vanille Powder", quantity: 1, unitPrice: 8500 }],
     }));
   });
 
@@ -125,37 +112,34 @@ describe("déclencheurs d’emails de commande", () => {
     await expect(caller.orders.create(orderPayload)).resolves.toMatchObject({ success: true });
   });
 
-  it("refuse un panier vide avant de créer une commande", async () => {
+  it("refuse un panier vide avant de démarrer la transaction", async () => {
     const caller = appRouter.createCaller({ user: customer, req: {} as any, res: {} as any });
 
     await expect(caller.orders.create({ ...orderPayload, items: [], totalAmount: 0 })).rejects.toThrow("Aucun article");
-    expect(mocks.createOrder).not.toHaveBeenCalled();
-    expect(mocks.clearUserCart).not.toHaveBeenCalled();
+    expect(mocks.createReservedOrder).not.toHaveBeenCalled();
   });
 
-  it("refuse un montant altéré ou un produit absent sans vider le panier", async () => {
+  it("délègue le prix et l’existence des produits à la transaction côté serveur", async () => {
     const caller = appRouter.createCaller({ user: customer, req: {} as any, res: {} as any });
 
     await expect(caller.orders.create({
       ...orderPayload,
       items: [{ productId: 1, quantity: 1, unitPrice: 1 }],
       totalAmount: 1,
-    })).rejects.toThrow("Montant invalide");
-    expect(mocks.createOrder).not.toHaveBeenCalled();
-    expect(mocks.clearUserCart).not.toHaveBeenCalled();
+    })).resolves.toMatchObject({ success: true });
+    expect(mocks.createReservedOrder).toHaveBeenCalledWith(expect.objectContaining({
+      lines: [{ productId: 1, quantity: 1, unitPrice: 1 }],
+    }));
 
-    mocks.getProductById.mockResolvedValueOnce(undefined);
+    mocks.createReservedOrder.mockRejectedValueOnce(new Error("Produit 1 non trouvé"));
     await expect(caller.orders.create(orderPayload)).rejects.toThrow("Produit 1 non trouvé");
-    expect(mocks.createOrder).not.toHaveBeenCalled();
   });
 
-  it("refuse un stock insuffisant sans créer ni envoyer une commande", async () => {
-    mocks.getProductById.mockResolvedValueOnce({ id: 1, name: "Vanilla Powder", stock: 0, price: 8500 });
+  it("refuse un stock insuffisant sans envoyer de confirmation", async () => {
+    mocks.createReservedOrder.mockRejectedValueOnce(new Error("Stock insuffisant"));
     const caller = appRouter.createCaller({ user: customer, req: {} as any, res: {} as any });
 
     await expect(caller.orders.create(orderPayload)).rejects.toThrow("Stock insuffisant");
-    expect(mocks.createOrder).not.toHaveBeenCalled();
     expect(mocks.sendOrderCreatedEmails).not.toHaveBeenCalled();
-    expect(mocks.clearUserCart).not.toHaveBeenCalled();
   });
 });

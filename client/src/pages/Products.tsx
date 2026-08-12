@@ -36,6 +36,9 @@ export default function Products() {
   const hoverFlipTimer = useRef<number | null>(null);
 
   type CatalogProduct = NonNullable<typeof products>[number];
+  const productPath = (product: CatalogProduct) => product.brand?.slug
+    ? `/parfum/${product.brand.slug}/${product.slug}`
+    : `/product/${product.id}`;
   const noteMatchedProducts = useMemo<CatalogProduct[]>(
     () => (products ? filterProductsByNotes<CatalogProduct>(products, selectedFilters) : []),
     [products, selectedFilters],
@@ -115,7 +118,7 @@ export default function Products() {
     setSearchQuery(product.name);
     setIsSearchFocused(false);
     setActiveSuggestionIndex(-1);
-    window.location.assign(`/product/${product.id}`);
+    window.location.assign(productPath(product));
   };
 
   const handleSearchKeyDown = (event: ReactKeyboardEvent<HTMLInputElement>) => {
@@ -371,7 +374,7 @@ export default function Products() {
                         className="catalog-flip-card"
                       >
                         <div className="catalog-flip-card-inner">
-                          <a href={`/product/${product.id}`} className="catalog-flip-face catalog-flip-front luxury-image-frame product-bottle-frame flex h-56 w-full items-center justify-center overflow-hidden rounded-lg bg-gray-100 sm:h-64" aria-label={`Voir la fiche de ${product.name}`}>
+                          <a href={productPath(product)} className="catalog-flip-face catalog-flip-front luxury-image-frame product-bottle-frame flex h-56 w-full items-center justify-center overflow-hidden rounded-lg bg-gray-100 sm:h-64" aria-label={`Voir la fiche de ${product.name}`}>
                             {(() => {
                               const image = getProductImage(product.id);
                               return image ? (
@@ -386,7 +389,7 @@ export default function Products() {
                               );
                             })()}
                           </a>
-                          <a href={`/product/${product.id}`} className="catalog-flip-face catalog-flip-back" aria-label={`Voir la fiche de ${product.name} et ses notes olfactives`}>
+                          <a href={productPath(product)} className="catalog-flip-face catalog-flip-back" aria-label={`Voir la fiche de ${product.name} et ses notes olfactives`}>
                             <p className="text-xs font-medium uppercase tracking-[0.18em] text-gray-500">Pyramide olfactive</p>
                             <dl className="mt-5 space-y-4 text-left">
                               <div>
@@ -406,7 +409,7 @@ export default function Products() {
                           </a>
                         </div>
                       </div>
-                      <a href={`/product/${product.id}`} className="mt-5 block" aria-label={`Voir la fiche de ${product.name}`}>
+                      <a href={productPath(product)} className="mt-5 block" aria-label={`Voir la fiche de ${product.name}`}>
                         <h3 className="text-lg font-light text-gray-900 hover:text-gray-600 transition-colors">{product.name}</h3>
                         <p className="text-xs text-gray-500 font-medium mt-1">Décant {product.volumeMl ?? 50} ml</p>
                       </a>

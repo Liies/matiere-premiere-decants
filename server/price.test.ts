@@ -10,7 +10,7 @@ describe("formatPrice", () => {
   });
 
   it("référence un prix unique de 120,00 € pour chaque parfum du catalogue", () => {
-    expect(MATIERE_PREMIERE_PRODUCTS).toHaveLength(10);
+    expect(MATIERE_PREMIERE_PRODUCTS).toHaveLength(11);
     expect(MATIERE_PREMIERE_PRODUCTS.every((product) => product.price === UNIFORM_CATALOG_PRICE_CENTS)).toBe(true);
   });
 });

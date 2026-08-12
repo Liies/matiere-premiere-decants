@@ -8,9 +8,9 @@ import { useAuth } from "@/_core/hooks/useAuth";
 import { toast } from "sonner";
 import { useState } from "react";
 
-type OrderStatusType = "pending" | "paid" | "processing" | "shipped" | "delivered" | "cancelled";
+type OrderStatusType = "awaiting_payment" | "pending" | "paid" | "processing" | "shipped" | "delivered" | "cancelled";
 
-const statuses: OrderStatusType[] = ["pending", "paid", "processing", "shipped", "delivered", "cancelled"];
+const statuses: OrderStatusType[] = ["awaiting_payment", "pending", "paid", "processing", "shipped", "delivered", "cancelled"];
 
 export default function Admin() {
   const { user, isAuthenticated } = useAuth();

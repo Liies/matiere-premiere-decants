@@ -4,9 +4,9 @@ import { MATIERE_PREMIERE_PRODUCTS } from "../shared/products-data";
 
 describe("recherche catalogue par nom", () => {
   it("trouve un parfum avec une correspondance partielle en temps réel", () => {
-    const results = searchProductsByName(MATIERE_PREMIERE_PRODUCTS, "saff");
+    const results = searchProductsByName(MATIERE_PREMIERE_PRODUCTS, "safr");
 
-    expect(results.map((product) => product.name)).toEqual(["Crystal Saffron"]);
+    expect(results.map((product) => product.name)).toEqual(["Crystal Safran"]);
   });
 
   it("ignore la casse et les accents", () => {
@@ -28,15 +28,15 @@ describe("recherche catalogue par nom", () => {
 
     expect(suggestions).toHaveLength(3);
     expect(suggestions.map((product) => product.name)).toEqual([
-      "Vanilla Powder",
-      "Crystal Saffron",
+      "Encens Suave",
+      "Falcon Leather",
       "Radical Rose",
     ]);
   });
 
   it("retourne les suggestions liées aux parfums filtrés par la saisie", () => {
-    const suggestions = getCatalogSuggestions(MATIERE_PREMIERE_PRODUCTS, "metal");
+    const suggestions = getCatalogSuggestions(MATIERE_PREMIERE_PRODUCTS, "neroli");
 
-    expect(suggestions.map((product) => product.name)).toEqual(["Metal Lavender"]);
+    expect(suggestions.map((product) => product.name)).toEqual(["Néroli Oranger"]);
   });
 });

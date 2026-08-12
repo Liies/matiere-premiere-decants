@@ -62,7 +62,7 @@ export default function Cart() {
 
   const totalAmount = isAuthenticated
     ? (cartItems || []).reduce(
-        (sum, item) => sum + (item.product?.price || 0) * item.quantity,
+        (sum, item) => sum + (item.variant?.priceCents ?? item.product?.price ?? 0) * item.quantity,
         0
       )
     : getTotalPrice();
@@ -100,10 +100,10 @@ export default function Cart() {
                         <h3 className="text-lg font-light text-gray-900">
                           {isAuthenticated ? (item as any).product?.name : (item as any).name}
                         </h3>
-                        <p className="text-sm text-gray-500">Décant {(isAuthenticated ? (item as any).product?.volumeMl : (item as any).volumeMl) ?? 50} ml</p>
+                        <p className="text-sm text-gray-500">Décant {(isAuthenticated ? (item as any).variant?.sizeMl ?? (item as any).product?.volumeMl : (item as any).volumeMl) ?? 50} ml</p>
                       </div>
                       <p className="text-lg font-light text-gray-900">
-                        €{((isAuthenticated ? (item as any).product?.price || 0 : (item as any).price) / 100).toFixed(2)}
+                        €{((isAuthenticated ? (item as any).variant?.priceCents ?? (item as any).product?.price ?? 0 : (item as any).price) / 100).toFixed(2)}
                       </p>
                     </div>
 

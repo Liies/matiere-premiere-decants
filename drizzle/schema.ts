@@ -1,17 +1,7 @@
-import { int, mysqlEnum, mysqlTable, text, timestamp, varchar } from "drizzle-orm/mysql-core";
+import { boolean, decimal, index, int, mysqlEnum, mysqlTable, primaryKey, text, timestamp, uniqueIndex, varchar } from "drizzle-orm/mysql-core";
 
-/**
- * Core user table backing auth flow.
- * Extend this file with additional tables as your product grows.
- * Columns use camelCase to match both database fields and generated types.
- */
 export const users = mysqlTable("users", {
-  /**
-   * Surrogate primary key. Auto-incremented numeric value managed by the database.
-   * Use this for relations between tables.
-   */
   id: int("id").autoincrement().primaryKey(),
-  /** Manus OAuth identifier (openId) returned from the OAuth callback. Unique per user. */
   openId: varchar("openId", { length: 64 }).notNull().unique(),
   name: text("name"),
   email: varchar("email", { length: 320 }),
@@ -25,35 +15,124 @@ export const users = mysqlTable("users", {
 export type User = typeof users.$inferSelect;
 export type InsertUser = typeof users.$inferInsert;
 
-/**
- * Products table - Catalogue des parfums Matière Première
- */
+/** Maisons de parfum : une entité distincte pour un catalogue multi-marques. */
+export const brands = mysqlTable("brands", {
+  id: int("id").autoincrement().primaryKey(),
+  name: varchar("name", { length: 120 }).notNull(),
+  slug: varchar("slug", { length: 120 }).notNull().unique(),
+  country: varchar("country", { length: 2 }),
+  tier: mysqlEnum("tier", ["niche", "designer", "exclusive"]).default("niche").notNull(),
+  story: text("story"),
+  logoUrl: varchar("logoUrl", { length: 512 }),
+  heroUrl: varchar("heroUrl", { length: 512 }),
+  sortOrder: int("sortOrder").default(0).notNull(),
+  isActive: boolean("isActive").default(true).notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type Brand = typeof brands.$inferSelect;
+export type InsertBrand = typeof brands.$inferInsert;
+
+/** Notes olfactives dédoublonnées et classées pour les filtres fiables. */
+export const notes = mysqlTable("notes", {
+  id: int("id").autoincrement().primaryKey(),
+  name: varchar("name", { length: 120 }).notNull(),
+  slug: varchar("slug", { length: 120 }).notNull(),
+  family: mysqlEnum("family", ["boise", "floral", "epice", "gourmand", "cuire", "ambre", "agrume", "musc", "aromatique", "aquatique"]),
+  parentId: int("parentId"),
+}, (table) => [
+  uniqueIndex("notes_name_unique").on(table.name),
+  uniqueIndex("notes_slug_unique").on(table.slug),
+  index("notes_parent_id_idx").on(table.parentId),
+]);
+
+export type Note = typeof notes.$inferSelect;
+
+/** Produits. Les colonnes textuelles de notes sont conservées pour la transition de l’interface actuelle. */
 export const products = mysqlTable("products", {
   id: int("id").autoincrement().primaryKey(),
+  // Nullable pendant la reprise des produits historiques ; obligatoire pour tout nouveau produit.
+  brandId: int("brandId").references(() => brands.id, { onDelete: "set null", onUpdate: "cascade" }),
   name: varchar("name", { length: 255 }).notNull(),
   slug: varchar("slug", { length: 255 }).notNull().unique(),
+  concentration: mysqlEnum("concentration", ["edt", "edp", "extrait", "parfum", "esprit", "cologne"]).default("parfum").notNull(),
+  gender: mysqlEnum("gender", ["homme", "femme", "mixte"]).default("mixte").notNull(),
+  perfumer: varchar("perfumer", { length: 160 }),
+  releaseYear: int("releaseYear"),
+  status: mysqlEnum("status", ["available", "out_of_stock", "discontinued", "coming_soon"]).default("available").notNull(),
+  legalNotice: text("legalNotice"),
+  heroScore: int("heroScore").default(0).notNull(),
   description: text("description"),
   topNotes: text("topNotes"),
   heartNotes: text("heartNotes"),
   baseNotes: text("baseNotes"),
-  price: int("price").notNull(), // Price in cents
+  // Compatibilité temporaire avec le panier historique ; la vente utilise progressivement variants.priceCents.
+  price: int("price").notNull(),
   volumeMl: int("volumeMl").notNull().default(50),
   stock: int("stock").notNull().default(0),
   imageUrl: varchar("imageUrl", { length: 512 }),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
-});
+}, (table) => [
+  index("products_brand_id_idx").on(table.brandId),
+  index("products_brand_slug_idx").on(table.brandId, table.slug),
+  index("products_status_idx").on(table.status),
+]);
 
 export type Product = typeof products.$inferSelect;
 export type InsertProduct = typeof products.$inferInsert;
 
-/**
- * Cart items table - Articles dans le panier de l'utilisateur
- */
+/** Pyramide olfactive structurée : une note peut apparaître à plusieurs niveaux. */
+export const productNotes = mysqlTable("productNotes", {
+  productId: int("productId").notNull().references(() => products.id, { onDelete: "cascade", onUpdate: "cascade" }),
+  noteId: int("noteId").notNull().references(() => notes.id, { onDelete: "restrict", onUpdate: "cascade" }),
+  layer: mysqlEnum("layer", ["top", "heart", "base"]).notNull(),
+  position: int("position").default(0).notNull(),
+}, (table) => [
+  primaryKey({ columns: [table.productId, table.noteId, table.layer], name: "product_notes_pk" }),
+  index("product_notes_note_id_idx").on(table.noteId),
+]);
+
+export type ProductNote = typeof productNotes.$inferSelect;
+
+/** Flacons réellement détenus. Le stock fiable est exprimé en millilitres restants. */
+export const sourceBottles = mysqlTable("sourceBottles", {
+  id: int("id").autoincrement().primaryKey(),
+  productId: int("productId").notNull().references(() => products.id, { onDelete: "restrict", onUpdate: "cascade" }),
+  batchRef: varchar("batchRef", { length: 64 }),
+  capacityMl: int("capacityMl").notNull(),
+  remainingMl: decimal("remainingMl", { precision: 7, scale: 2 }).notNull(),
+  purchasePriceCents: int("purchasePriceCents").notNull(),
+  purchasedAt: timestamp("purchasedAt").defaultNow().notNull(),
+}, (table) => [index("source_bottles_product_id_idx").on(table.productId)]);
+
+export type SourceBottle = typeof sourceBottles.$inferSelect;
+
+/** Formats vendus, avec un SKU et un prix indépendants du produit parent. */
+export const variants = mysqlTable("variants", {
+  id: int("id").autoincrement().primaryKey(),
+  productId: int("productId").notNull().references(() => products.id, { onDelete: "restrict", onUpdate: "cascade" }),
+  sizeMl: int("sizeMl").notNull(),
+  sku: varchar("sku", { length: 64 }).notNull(),
+  priceCents: int("priceCents").notNull(),
+  isActive: boolean("isActive").default(true).notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+}, (table) => [
+  uniqueIndex("variants_sku_unique").on(table.sku),
+  uniqueIndex("variants_product_size_unique").on(table.productId, table.sizeMl),
+  index("variants_product_id_idx").on(table.productId),
+]);
+
+export type Variant = typeof variants.$inferSelect;
+
+/** Articles dans le panier ; variantId est la référence métier des nouveaux articles. */
 export const cartItems = mysqlTable("cartItems", {
   id: int("id").autoincrement().primaryKey(),
   userId: int("userId").notNull(),
-  productId: int("productId").notNull(),
+  productId: int("productId").notNull().references(() => products.id, { onDelete: "restrict", onUpdate: "cascade" }),
+  variantId: int("variantId").references(() => variants.id, { onDelete: "set null", onUpdate: "cascade" }),
   quantity: int("quantity").notNull().default(1),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
@@ -62,10 +141,7 @@ export const cartItems = mysqlTable("cartItems", {
 export type CartItem = typeof cartItems.$inferSelect;
 export type InsertCartItem = typeof cartItems.$inferInsert;
 
-/**
- * Cart synchronization receipts prevent a guest cart from being merged twice
- * if a browser retries after a network interruption.
- */
+/** Reçus de synchronisation de panier invité afin de garantir l’idempotence. */
 export const cartSyncReceipts = mysqlTable("cartSyncReceipts", {
   id: int("id").autoincrement().primaryKey(),
   userId: int("userId").notNull(),
@@ -73,15 +149,12 @@ export const cartSyncReceipts = mysqlTable("cartSyncReceipts", {
   createdAt: timestamp("createdAt").defaultNow().notNull(),
 });
 
-/**
- * Orders table - Commandes
- */
 export const orders = mysqlTable("orders", {
   id: int("id").autoincrement().primaryKey(),
   userId: int("userId").notNull(),
   orderNumber: varchar("orderNumber", { length: 64 }).notNull().unique(),
-  status: mysqlEnum("status", ["pending", "paid", "processing", "shipped", "delivered", "cancelled"]).default("pending").notNull(),
-  totalAmount: int("totalAmount").notNull(), // Total in cents
+  status: mysqlEnum("status", ["awaiting_payment", "pending", "paid", "processing", "shipped", "delivered", "cancelled"]).default("awaiting_payment").notNull(),
+  totalAmount: int("totalAmount").notNull(),
   stripePaymentIntentId: varchar("stripePaymentIntentId", { length: 255 }),
   customerEmail: varchar("customerEmail", { length: 320 }).notNull(),
   customerName: varchar("customerName", { length: 255 }).notNull(),
@@ -96,16 +169,14 @@ export const orders = mysqlTable("orders", {
 export type Order = typeof orders.$inferSelect;
 export type InsertOrder = typeof orders.$inferInsert;
 
-/**
- * Order items table - Articles dans chaque commande
- */
 export const orderItems = mysqlTable("orderItems", {
   id: int("id").autoincrement().primaryKey(),
   orderId: int("orderId").notNull(),
-  productId: int("productId").notNull(),
+  productId: int("productId").notNull().references(() => products.id, { onDelete: "restrict", onUpdate: "cascade" }),
+  variantId: int("variantId").references(() => variants.id, { onDelete: "set null", onUpdate: "cascade" }),
   productName: varchar("productName", { length: 255 }).notNull(),
   quantity: int("quantity").notNull(),
-  unitPrice: int("unitPrice").notNull(), // Price in cents at time of order
+  unitPrice: int("unitPrice").notNull(),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
 });
 
