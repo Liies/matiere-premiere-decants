@@ -24,6 +24,7 @@ import {
 import { nanoid } from "nanoid";
 import { notifyOwner } from "./_core/notification";
 import { contactMessageSchema, CONTACT_SUBJECT_LABELS } from "@shared/contact";
+import { sendOrderCreatedEmails, sendOrderStatusEmail } from "./transactionalEmail";
 
 const ORDER_STATUS = z.enum(["pending", "paid", "processing", "shipped", "delivered", "cancelled"]);
 const PRODUCT_CATALOG_UPDATE = z.object({
@@ -241,6 +242,7 @@ export const appRouter = router({
 
         // Valider et recalculer les prix serveur
         let serverTotalAmount = 0;
+        const validatedItems: Array<{ productId: number; productName: string; quantity: number; unitPrice: number }> = [];
         for (const item of input.items) {
           const product = await getProductById(item.productId);
           if (!product) {
@@ -253,6 +255,12 @@ export const appRouter = router({
 
           // Recalculer le prix serveur (sécurité)
           serverTotalAmount += product.price * item.quantity;
+          validatedItems.push({
+            productId: product.id,
+            productName: product.name,
+            quantity: item.quantity,
+            unitPrice: product.price,
+          });
         }
 
         // Vérifier que le montant correspond
@@ -277,12 +285,11 @@ export const appRouter = router({
         });
 
         // Créer les articles de la commande
-        for (const item of input.items) {
-          const product = await getProductById(item.productId);
+        for (const item of validatedItems) {
           await createOrderItem({
             orderId: (result as any).insertId,
             productId: item.productId,
-            productName: product?.name || "Produit inconnu",
+            productName: item.productName,
             quantity: item.quantity,
             unitPrice: item.unitPrice,
           });
@@ -300,6 +307,21 @@ export const appRouter = router({
         } catch (error) {
           console.error("Erreur lors de l'envoi de la notification:", error);
           // Ne pas échouer la commande si la notification échoue
+        }
+
+        try {
+          const emailResults = await sendOrderCreatedEmails({
+            orderNumber,
+            customerName: input.customerName,
+            customerEmail: input.customerEmail,
+            totalAmount: input.totalAmount,
+            items: validatedItems.map(({ productName, quantity, unitPrice }) => ({ productName, quantity, unitPrice })),
+          });
+          emailResults
+            .filter((result) => result.status === "rejected")
+            .forEach((result) => console.error("Erreur lors de l’envoi d’email de commande:", result.reason));
+        } catch (error) {
+          console.error("Erreur lors de la préparation des emails de commande:", error);
         }
 
         return {
@@ -386,6 +408,19 @@ export const appRouter = router({
           });
         } catch (error) {
           console.error("Erreur lors de l'envoi de la notification:", error);
+        }
+
+        if (order.status !== input.status) {
+          try {
+            await sendOrderStatusEmail({
+              orderNumber: order.orderNumber,
+              customerName: order.customerName,
+              customerEmail: order.customerEmail,
+              status: input.status,
+            });
+          } catch (error) {
+            console.error("Erreur lors de l’envoi d’email de statut:", error);
+          }
         }
 
         return { success: true };

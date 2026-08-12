@@ -5920,3 +5920,19 @@
 - [x] Ajouter les tests unitaires et d’intégration du parcours de synchronisation
 - [x] Vérifier le parcours en interface, TypeScript et build de production
 - [x] Sauvegarder un checkpoint de la synchronisation panier
+
+## Emails transactionnels — demande courante
+- [ ] Configurer le fournisseur d’email transactionnel et le domaine d’expédition
+- [x] Créer le modèle de notification de nouvelle commande au propriétaire
+- [x] Créer le modèle de confirmation de commande au client
+- [x] Créer le modèle de changement de statut au client
+- [x] Déclencher les emails automatiquement après commande et changement de statut
+- [x] Tester les modèles, erreurs et l’absence d’échec de commande si l’email échoue
+- [x] Vérifier TypeScript et build de production
+- [ ] Sauvegarder un checkpoint de l’email transactionnel
+
+## Emails transactionnels en simulation — demande courante
+- [x] Créer un adaptateur d’email à bascule simulation / Resend
+- [x] Implémenter et tester les modèles commande, confirmation et changement de statut
+- [x] Déclencher les envois simulés sans bloquer le parcours de commande
+- [x] Documenter le passage au mode Resend après correction des identifiants
