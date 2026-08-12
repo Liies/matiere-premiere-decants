@@ -5979,3 +5979,11 @@
 - [x] Rédiger un README français couvrant installation, usage, configuration et qualité
 - [x] Vérifier le README et le versionner dans le dépôt Git connecté
 - [x] Sauvegarder un checkpoint de la documentation du dépôt
+
+## Maîtres parfumeurs — demande courante
+- [x] Identifier et recouper les maîtres parfumeurs présentés sur l’accueil
+- [x] Vérifier leurs créations reconnues chez Matière Première et dans d’autres maisons
+- [x] Remplacer les portraits par une présentation éditoriale sans images
+- [x] Ajouter une couverture Vitest adaptée au nouveau contenu
+- [x] Vérifier le rendu, les types et les tests
+- [ ] Sauvegarder la version publiée

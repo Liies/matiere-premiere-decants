@@ -3,7 +3,8 @@ import { useAuth } from "@/_core/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import { getNoseImage, getProductImage } from "@shared/image-assets";
+import { getProductImage } from "@shared/image-assets";
+import { MASTER_PERFUMER_PROFILE } from "@shared/perfumer-profile";
 import { Link } from "wouter";
 import { ArrowRight } from "lucide-react";
 
@@ -263,7 +264,7 @@ export default function HomePremium() {
         </div>
       </section>
 
-      {/* Master Noses Section */}
+      {/* Perfumer Section */}
       <section
         ref={setRef("noses")}
         id="noses"
@@ -272,74 +273,59 @@ export default function HomePremium() {
         }`}
       >
         <div className="container max-w-5xl mx-auto">
-          <div className="text-center mb-16">
-            <p className="text-sm uppercase tracking-widest text-gray-600 mb-4">Les Créateurs</p>
+          <div className="mb-16 text-center">
+            <p className="mb-4 text-sm uppercase tracking-widest text-gray-600">Le Créateur</p>
             <h2 className="text-3xl font-light text-gray-900 sm:text-5xl">
-              Les Nez Derrière la Magie
+              Une signature, de la matière à l’émotion.
             </h2>
           </div>
 
-          <div className="grid grid-cols-1 gap-10 md:grid-cols-2 md:gap-12">
-            {/* Nose 1 */}
+          <div className="grid grid-cols-1 gap-8 md:grid-cols-[0.9fr_1.1fr] md:gap-12">
             <div
-              className={`group space-y-6 transition-all duration-1000 ${
+              className={`border-t border-gray-300 pt-8 transition-all duration-1000 motion-reduce:transform-none motion-reduce:transition-none ${
                 visibleSections["noses"] ? "translate-y-0 opacity-100" : "translate-y-12 opacity-0"
               }`}
             >
-              {(() => {
-                const image = getNoseImage(1);
-                return image ? (
-                  <img
-                    src={image.compressed}
-                    alt="Master Perfumer"
-                    className="h-80 w-full rounded-lg object-cover shadow-lg transition-transform duration-1000 group-hover:scale-[1.02] sm:h-96"
-                  />
-                ) : (
-                  <div className="w-full h-96 bg-gray-200 rounded-lg shadow-lg" />
-                );
-              })()}
-              <div>
-                <h3 className="text-2xl font-light text-gray-900 mb-2">
-                  Maître Parfumeur I
-                </h3>
-                <p className="text-gray-600 font-light mb-4">
-                  Avec plus de 25 ans d'expérience, ce maître parfumeur a créé certaines des fragrances les plus emblématiques de Matière Première.
-                </p>
-                <p className="text-gray-500 text-sm">
-                  Spécialité : Notes florales et épicées
-                </p>
+              <p className="mb-5 text-xs font-medium uppercase tracking-[0.2em] text-gray-400">01 — Matière Première</p>
+              <h3 className="mb-3 text-3xl font-light text-gray-900">{MASTER_PERFUMER_PROFILE.name}</h3>
+              <p className="mb-6 text-sm uppercase tracking-[0.14em] text-gray-500">{MASTER_PERFUMER_PROFILE.role}</p>
+              <p className="max-w-md text-base font-light leading-7 text-gray-600">{MASTER_PERFUMER_PROFILE.biography}</p>
+              <div className="mt-8 border-l border-gray-300 pl-5">
+                <p className="mb-3 text-xs font-medium uppercase tracking-[0.16em] text-gray-500">Créations au sein de la maison</p>
+                <p className="text-lg font-light leading-8 text-gray-900">{MASTER_PERFUMER_PROFILE.matierePremiereCreations.join(" · ")}</p>
               </div>
             </div>
 
-            {/* Nose 2 */}
             <div
-              className={`group space-y-6 transition-all duration-1000 ${
+              className={`border-t border-gray-300 pt-8 transition-all duration-1000 delay-100 motion-reduce:transform-none motion-reduce:transition-none ${
                 visibleSections["noses"] ? "translate-y-0 opacity-100" : "translate-y-12 opacity-0"
               }`}
             >
-              {(() => {
-                const image = getNoseImage(2);
-                return image ? (
-                  <img
-                    src={image.compressed}
-                    alt="Master Perfumer"
-                    className="h-80 w-full rounded-lg object-cover shadow-lg transition-transform duration-1000 group-hover:scale-[1.02] sm:h-96"
-                  />
-                ) : (
-                  <div className="w-full h-96 bg-gray-200 rounded-lg shadow-lg" />
-                );
-              })()}
-              <div>
-                <h3 className="text-2xl font-light text-gray-900 mb-2">
-                  Maître Parfumeur II
-                </h3>
-                <p className="text-gray-600 font-light mb-4">
-                  Innovatrice dans l'art de la parfumerie moderne, elle apporte une perspective unique et contemporaine à nos créations.
-                </p>
-                <p className="text-gray-500 text-sm">
-                  Spécialité : Notes boisées et minérales
-                </p>
+              <p className="mb-5 text-xs font-medium uppercase tracking-[0.2em] text-gray-400">02 — Repères de création</p>
+              <p className="max-w-lg text-base font-light leading-7 text-gray-600">
+                En parallèle de la maison, son parcours a contribué à des créations pour plusieurs grandes signatures de la parfumerie contemporaine.
+              </p>
+              <div className="mt-8 grid grid-cols-1 border-t border-gray-200 sm:grid-cols-2">
+                {MASTER_PERFUMER_PROFILE.externalCreations.map((creation, index) => (
+                  <div
+                    key={`${creation.house}-${creation.name}`}
+                    className={`py-5 ${index % 2 === 0 ? "sm:border-r sm:pr-6" : "sm:pl-6"} ${index < 2 ? "border-b border-gray-200" : ""}`}
+                  >
+                    <p className="text-xs font-medium uppercase tracking-[0.16em] text-gray-500">{creation.house}</p>
+                    <p className="mt-2 text-xl font-light text-gray-900">{creation.name}</p>
+                  </div>
+                ))}
               </div>
+              <p className="mt-8 text-xs leading-5 text-gray-500">
+                Sources :{" "}
+                <a href={MASTER_PERFUMER_PROFILE.sources.official} target="_blank" rel="noreferrer" className="underline decoration-gray-300 underline-offset-4 transition-colors hover:text-gray-900">
+                  Matière Première
+                </a>{" "}
+                et{" "}
+                <a href={MASTER_PERFUMER_PROFILE.sources.interview} target="_blank" rel="noreferrer" className="underline decoration-gray-300 underline-offset-4 transition-colors hover:text-gray-900">
+                  entretien avec Aurélien Guichard
+                </a>.
+              </p>
             </div>
           </div>
         </div>
