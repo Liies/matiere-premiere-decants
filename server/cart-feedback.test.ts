@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   CART_CONFIRMATION_DURATION_MS,
   getCartConfirmationLabel,
+  getCartFeedbackKey,
 } from "../shared/cart-feedback";
 
 describe("confirmation d’ajout au panier", () => {
@@ -12,5 +13,11 @@ describe("confirmation d’ajout au panier", () => {
 
   it("laisse la confirmation visible assez longtemps pour être perçue", () => {
     expect(CART_CONFIRMATION_DURATION_MS).toBeGreaterThanOrEqual(1000);
+  });
+
+  it("distingue le feedback de deux cartes même si un identifiant est réutilisé", () => {
+    expect(getCartFeedbackKey({ id: 1, name: "Vanilla Powder" })).not.toBe(
+      getCartFeedbackKey({ id: 1, name: "Crystal Saffron" }),
+    );
   });
 });

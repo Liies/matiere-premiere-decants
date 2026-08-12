@@ -1,5 +1,5 @@
 import { Link, useLocation } from "wouter";
-import { Leaf, ShoppingCart, User, Menu, X, ChevronDown } from "lucide-react";
+import { Leaf, ShoppingCart, User, Menu, X, ChevronDown, Heart } from "lucide-react";
 import { useState } from "react";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { getLoginUrl } from "@/const";
@@ -129,6 +129,13 @@ export default function Header() {
           >
             <ShoppingCart className="h-5 w-5" aria-hidden="true" />
           </Link>
+          <Link
+            href="/wishlist"
+            aria-label="Ouvrir la liste de souhaits"
+            className="hidden h-11 w-11 items-center justify-center rounded-full text-gray-600 transition hover:bg-gray-100 hover:text-red-500 sm:flex"
+          >
+            <Heart className="h-5 w-5" aria-hidden="true" />
+          </Link>
 
           {isAuthenticated ? (
             <div className="flex items-center gap-4">
@@ -231,6 +238,9 @@ export default function Header() {
             </Link>
             <Link href="/contact" onClick={closeMobileMenu} className="flex min-h-11 items-center rounded-lg px-3 text-sm text-gray-600 transition hover:bg-gray-50 hover:text-gray-900">
               Contact
+            </Link>
+            <Link href="/wishlist" onClick={closeMobileMenu} className="flex min-h-11 items-center rounded-lg px-3 text-sm text-gray-600 transition hover:bg-gray-50 hover:text-red-500">
+              Liste de souhaits
             </Link>
             {isAuthenticated && (
               <Link href="/account" onClick={closeMobileMenu} className="flex min-h-11 items-center rounded-lg px-3 text-sm text-gray-600 transition hover:bg-gray-50 hover:text-gray-900">

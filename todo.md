@@ -5891,3 +5891,13 @@
 - [x] Préserver prefers-reduced-motion et l’expérience mobile
 - [x] Vérifier le rendu, les tests et le build
 - [x] Sauvegarder un checkpoint de la version enrichie
+
+## Correction panier et liste de souhaits — demande courante
+- [x] Isoler le feedback « Ajouté » à la seule carte produit concernée
+- [x] Vérifier le comportement après plusieurs ajouts successifs
+- [x] Créer une liste de souhaits persistante côté navigateur
+- [x] Ajouter un contrôle cœur sur les cartes avec micro-animation d’ajout et retrait
+- [x] Synchroniser le statut de souhait entre le catalogue et la fiche produit
+- [x] Auditer la couverture des parcours d’intégration panier et liste de souhaits, puis compléter les cas manquants
+- [x] Ajouter les tests, vérifier desktop/mobile et le build
+- [ ] Sauvegarder un checkpoint de la correction et des souhaits

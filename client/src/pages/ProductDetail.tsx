@@ -11,6 +11,7 @@ import { getProductImage } from '@shared/image-assets';
 import { formatPrice } from '@shared/price';
 import { CART_CONFIRMATION_DURATION_MS, getCartConfirmationLabel } from '@shared/cart-feedback';
 import { getOlfactoryRevealDelay } from '@shared/olfactory-reveal';
+import { useWishlist } from '@/hooks/useWishlist';
 
 function ProductImage({
   productId,
@@ -49,12 +50,14 @@ function ProductImage({
 
 export default function ProductDetail() {
   const [match, params] = useRoute('/product/:id');
-  const [isWishlisted, setIsWishlisted] = useState(false);
+  const { isWishlisted, toggleWishlist } = useWishlist();
   const [quantity, setQuantity] = useState(1);
   const [scrollY, setScrollY] = useState(0);
   const [isAddingToCart, setIsAddingToCart] = useState(false);
   const [showAddedFeedback, setShowAddedFeedback] = useState(false);
   const addFeedbackTimer = useRef<number | null>(null);
+  const wishlistAnimationTimer = useRef<number | null>(null);
+  const [isWishlistAnimating, setIsWishlistAnimating] = useState(false);
   const olfactoryNotesRef = useRef<HTMLDivElement | null>(null);
   const [areOlfactoryNotesRevealed, setAreOlfactoryNotesRevealed] = useState(false);
 
@@ -81,6 +84,7 @@ export default function ProductDetail() {
   useEffect(() => {
     return () => {
       if (addFeedbackTimer.current) window.clearTimeout(addFeedbackTimer.current);
+      if (wishlistAnimationTimer.current) window.clearTimeout(wishlistAnimationTimer.current);
     };
   }, []);
 
@@ -121,6 +125,14 @@ export default function ProductDetail() {
       setIsAddingToCart(false);
       setShowAddedFeedback(false);
     }, CART_CONFIRMATION_DURATION_MS);
+  };
+
+  const handleToggleWishlist = () => {
+    if (!product) return;
+    toggleWishlist(product.id);
+    setIsWishlistAnimating(true);
+    if (wishlistAnimationTimer.current) window.clearTimeout(wishlistAnimationTimer.current);
+    wishlistAnimationTimer.current = window.setTimeout(() => setIsWishlistAnimating(false), 520);
   };
 
   if (isLoading) {
@@ -269,13 +281,14 @@ export default function ProductDetail() {
                 </Button>
                 <button
                   type="button"
-                  onClick={() => setIsWishlisted(!isWishlisted)}
-                  aria-label={isWishlisted ? "Retirer des favoris" : "Ajouter aux favoris"}
+                  onClick={handleToggleWishlist}
+                  aria-label={isWishlisted(product.id) ? "Retirer des favoris" : "Ajouter aux favoris"}
                   className="flex min-h-12 w-full items-center justify-center rounded-lg border border-gray-300 px-6 py-3 transition-colors hover:bg-gray-50 sm:w-auto"
                 >
                   <Heart
                     className={`w-5 h-5 ${
-                      isWishlisted ? 'fill-red-500 text-red-500' : 'text-gray-600'
+                      isWishlisted(product.id) ? 'fill-red-500 text-red-500' : 'text-gray-600'
+                    } ${isWishlistAnimating ? 'wishlist-heart-pop' : ''}
                     }`}
                   />
                 </button>

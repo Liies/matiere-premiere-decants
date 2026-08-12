@@ -567,6 +567,13 @@
   50% { opacity: 0.42; transform: scale(1.08); }
 }
 
+@keyframes wishlistHeartPop {
+  0% { transform: scale(0.82); }
+  45% { transform: scale(1.28) rotate(-7deg); }
+  72% { transform: scale(0.94) rotate(3deg); }
+  100% { transform: scale(1) rotate(0); }
+}
+
 @layer utilities {
   .hero-bottle-reveal {
     animation: heroBottleReveal 1.15s cubic-bezier(0.22, 1, 0.36, 1) 0.55s both;
@@ -589,12 +596,17 @@
     opacity: 0;
     animation: heroCopyReveal 800ms cubic-bezier(0.22, 1, 0.36, 1) both;
   }
+
+  .wishlist-heart-pop {
+    animation: wishlistHeartPop 520ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .hero-bottle-reveal,
   .hero-bottle-halo,
-  .hero-copy-reveal {
+  .hero-copy-reveal,
+  .wishlist-heart-pop {
     animation: none !important;
     filter: none !important;
     opacity: 1 !important;

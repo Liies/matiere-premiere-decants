@@ -5,28 +5,32 @@ import { Card } from "@/components/ui/card";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import { ShoppingCart, Leaf, Search, SlidersHorizontal, X } from "lucide-react";
+import { ShoppingCart, Leaf, Search, SlidersHorizontal, X, Heart } from "lucide-react";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { toast } from "sonner";
 import { getProductImage } from "@shared/image-assets";
 import { useLocalCart } from "@/hooks/useLocalCart";
 import { filterProductsByNotes, OLFACTORY_FILTERS } from "@shared/olfactory";
 import { getCatalogSuggestions, searchProductsByName } from "@shared/catalog-search";
-import { CART_CONFIRMATION_DURATION_MS } from "@shared/cart-feedback";
+import { CART_CONFIRMATION_DURATION_MS, getCartFeedbackKey } from "@shared/cart-feedback";
 import { getOlfactoryFilterIdFromHash } from "@shared/catalog-category-route";
+import { useWishlist } from "@/hooks/useWishlist";
 
 export default function Products() {
   const { data: products, isLoading } = trpc.products.list.useQuery();
   const { isAuthenticated, user } = useAuth();
   const { addToCart: addToLocalCart } = useLocalCart();
+  const { isWishlisted, toggleWishlist } = useWishlist();
   const addToCart = trpc.cart.addItem.useMutation();
   const [selectedQuantity, setSelectedQuantity] = useState<Record<number, number>>({});
   const [selectedFilters, setSelectedFilters] = useState<string[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const [activeSuggestionIndex, setActiveSuggestionIndex] = useState(-1);
-  const [recentlyAddedProductId, setRecentlyAddedProductId] = useState<number | null>(null);
+  const [recentlyAddedProductKey, setRecentlyAddedProductKey] = useState<string | null>(null);
+  const [wishlistAnimationKey, setWishlistAnimationKey] = useState<string | null>(null);
   const addFeedbackTimer = useRef<number | null>(null);
+  const wishlistAnimationTimer = useRef<number | null>(null);
 
   type CatalogProduct = NonNullable<typeof products>[number];
   const noteMatchedProducts = useMemo<CatalogProduct[]>(
@@ -45,6 +49,7 @@ export default function Products() {
   useEffect(() => {
     return () => {
       if (addFeedbackTimer.current) window.clearTimeout(addFeedbackTimer.current);
+      if (wishlistAnimationTimer.current) window.clearTimeout(wishlistAnimationTimer.current);
     };
   }, []);
 
@@ -64,12 +69,22 @@ export default function Products() {
     return () => window.removeEventListener("hashchange", applyCategoryFromHash);
   }, []);
 
-  const confirmAddedProduct = (productId: number) => {
-    setRecentlyAddedProductId(productId);
+  const confirmAddedProduct = (product: CatalogProduct) => {
+    setRecentlyAddedProductKey(getCartFeedbackKey(product));
     if (addFeedbackTimer.current) window.clearTimeout(addFeedbackTimer.current);
     addFeedbackTimer.current = window.setTimeout(() => {
-      setRecentlyAddedProductId(null);
+      setRecentlyAddedProductKey(null);
     }, CART_CONFIRMATION_DURATION_MS);
+  };
+
+  const isProductRecentlyAdded = (product: CatalogProduct) =>
+    recentlyAddedProductKey === getCartFeedbackKey(product);
+
+  const handleToggleWishlist = (product: CatalogProduct) => {
+    toggleWishlist(product.id);
+    setWishlistAnimationKey(getCartFeedbackKey(product));
+    if (wishlistAnimationTimer.current) window.clearTimeout(wishlistAnimationTimer.current);
+    wishlistAnimationTimer.current = window.setTimeout(() => setWishlistAnimationKey(null), 520);
   };
 
   const selectSuggestion = (product: CatalogProduct) => {
@@ -105,7 +120,7 @@ export default function Products() {
     const quantity = selectedQuantity[product.id] || 1;
     const handleSuccessfulAddition = () => {
       setSelectedQuantity((prev) => ({ ...prev, [product.id]: 1 }));
-      confirmAddedProduct(product.id);
+      confirmAddedProduct(product);
     };
 
     if (isAuthenticated && user) {
@@ -308,12 +323,22 @@ export default function Products() {
             <div className="grid grid-cols-1 gap-5 sm:gap-8 md:grid-cols-2 lg:grid-cols-3">
               {filteredProducts.map((product, index) => (
                 <Card
-                  key={product.id}
+                  key={getCartFeedbackKey(product)}
                   className="group/product-card overflow-hidden border-gray-200 transition-all duration-500 animate-fade-in hover:-translate-y-1 hover:shadow-xl motion-reduce:transform-none motion-reduce:transition-none"
                   style={{ animationDelay: `${Math.min(index, 5) * 70}ms` }}
                 >
                   <div className="space-y-4 p-4 sm:p-5">
-                    <a href={`/product/${product.id}`} className="block" aria-label={`Voir la fiche de ${product.name}`}>
+                    <div className="relative">
+                      <button
+                        type="button"
+                        onClick={() => handleToggleWishlist(product)}
+                        aria-label={isWishlisted(product.id) ? `Retirer ${product.name} de la liste de souhaits` : `Ajouter ${product.name} à la liste de souhaits`}
+                        aria-pressed={isWishlisted(product.id)}
+                        className={`wishlist-heart-button absolute right-3 top-3 z-20 flex h-11 w-11 items-center justify-center rounded-full bg-white/90 shadow-sm transition hover:bg-white ${isWishlisted(product.id) ? "text-red-500" : "text-gray-500 hover:text-red-500"}`}
+                      >
+                        <Heart className={`h-5 w-5 ${isWishlisted(product.id) ? "fill-current" : ""} ${wishlistAnimationKey === getCartFeedbackKey(product) ? "wishlist-heart-pop" : ""}`} aria-hidden="true" />
+                      </button>
+                      <a href={`/product/${product.id}`} className="block" aria-label={`Voir la fiche de ${product.name}`}>
                       <div className="luxury-image-frame product-bottle-frame flex h-56 w-full items-center justify-center overflow-hidden rounded-lg bg-gray-100 sm:h-64">
                         {(() => {
                           const image = getProductImage(product.id);
@@ -333,7 +358,8 @@ export default function Products() {
                         <h3 className="text-lg font-light text-gray-900 hover:text-gray-600 transition-colors">{product.name}</h3>
                         <p className="text-xs text-gray-500 font-medium mt-1">Décant 50ml</p>
                       </div>
-                    </a>
+                      </a>
+                    </div>
 
                     <p className="text-gray-600 text-sm line-clamp-3">{product.description}</p>
 
@@ -385,22 +411,22 @@ export default function Products() {
                           disabled={addToCart.isPending || product.stock === 0}
                           aria-live="polite"
                           className={`relative min-h-11 flex-1 overflow-hidden bg-gray-900 text-white font-light whitespace-nowrap transition-all duration-500 touch-manipulation hover:-translate-y-0.5 hover:bg-gray-800 hover:shadow-lg sm:max-w-0 sm:min-w-0 sm:flex-none sm:scale-95 sm:translate-y-2 sm:px-0 sm:opacity-0 sm:group-hover/product-card:max-w-44 sm:group-hover/product-card:scale-100 sm:group-hover/product-card:translate-y-0 sm:group-hover/product-card:px-4 sm:group-hover/product-card:opacity-100 sm:group-focus-within/product-card:max-w-44 sm:group-focus-within/product-card:scale-100 sm:group-focus-within/product-card:translate-y-0 sm:group-focus-within/product-card:px-4 sm:group-focus-within/product-card:opacity-100 motion-reduce:transform-none motion-reduce:transition-none ${
-                            recentlyAddedProductId === product.id ? "scale-[0.97] bg-gray-800" : ""
+                            isProductRecentlyAdded(product) ? "scale-[0.97] bg-gray-800" : ""
                           }`}
                         >
-                          {recentlyAddedProductId === product.id && (
+                          {isProductRecentlyAdded(product) && (
                             <span className="cart-added-ripple" aria-hidden="true" />
                           )}
                           <ShoppingCart
                             className={`relative z-10 mr-2 h-4 w-4 ${
-                              recentlyAddedProductId === product.id ? "cart-icon-bounce" : ""
+                              isProductRecentlyAdded(product) ? "cart-icon-bounce" : ""
                             }`}
                             aria-hidden="true"
                           />
                           <span className="relative z-10">
-                            {recentlyAddedProductId === product.id ? "Ajouté" : "Ajouter"}
+                            {isProductRecentlyAdded(product) ? "Ajouté" : "Ajouter"}
                           </span>
-                          {recentlyAddedProductId === product.id && (
+                          {isProductRecentlyAdded(product) && (
                             <span className="cart-added-check" aria-hidden="true">✓</span>
                           )}
                         </Button>
