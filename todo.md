@@ -5958,4 +5958,4 @@
 - [x] Vérifier les erreurs réseau et les ressources bloquantes dans les parcours publics
 - [x] Corriger les goulots de performance à impact significatif
 - [x] Valider tests, TypeScript et build de production après optimisation
-- [ ] Sauvegarder un checkpoint de l’audit de performance
+- [x] Sauvegarder un checkpoint de l’audit de performance
