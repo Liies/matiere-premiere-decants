@@ -74,12 +74,17 @@ function writeToLogFile(source: LogSource, entries: unknown[]) {
  * - Files: browserConsole.log, networkRequests.log, sessionReplay.log
  * - Auto-trimmed when exceeding 1MB (keeps newest entries)
  */
-function vitePluginManusDebugCollector(enabled: boolean): Plugin {
+function vitePluginManusDebugCollector(): Plugin {
+  let isProductionBuild = false;
   return {
     name: "manus-debug-collector",
 
+    configResolved(config) {
+      isProductionBuild = config.command === "build";
+    },
+
     transformIndexHtml(html) {
-      if (!enabled) {
+      if (isProductionBuild) {
         return html;
       }
       return {
@@ -150,14 +155,10 @@ function vitePluginManusDebugCollector(enabled: boolean): Plugin {
   };
 }
 
-export default defineConfig(({ command }) => ({
-  plugins: [
-    react(),
-    tailwindcss(),
-    jsxLocPlugin(),
-    vitePluginManusRuntime(),
-    vitePluginManusDebugCollector(command === "serve"),
-  ],
+const plugins = [react(), tailwindcss(), jsxLocPlugin(), vitePluginManusRuntime(), vitePluginManusDebugCollector()];
+
+export default defineConfig({
+  plugins,
   resolve: {
     alias: {
       "@": path.resolve(import.meta.dirname, "client", "src"),
@@ -205,4 +206,4 @@ export default defineConfig(({ command }) => ({
       deny: ["**/.*"],
     },
   },
-}));
+});

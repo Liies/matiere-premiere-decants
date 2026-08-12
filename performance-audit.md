@@ -16,6 +16,8 @@
 
 La page d’accueil publiée termine son écran de chargement initial et rend correctement le hero, la navigation et les visuels. Aucun correctif de rendu ni ressource bloquante n’a été constaté pendant le contrôle visuel.
 
+Après redémarrage du serveur de développement, l’aperçu local rend également l’accueil complet. Les erreurs de pré-transformation observées pendant le rechargement de configuration n’affectent donc pas l’application finale.
+
 ## Optimisation appliquée
 
 Le collecteur de diagnostic réservé au serveur de développement n’est plus injecté dans le document de production. Cette correction retire une requête cliente non nécessaire aux visiteurs. Après optimisation, le document produit pèse **369 497 octets** (**106,02 Ko gzip**) et ne contient plus de référence à `__manus__/debug-collector.js`.
