@@ -6012,4 +6012,4 @@
 - [x] Vérifier le catalogue, le panier et le checkout
 - [x] Ajouter ou ajuster la couverture Vitest de tarification
 - [x] Vérifier les types, les tests et le build
-- [ ] Sauvegarder la version publiée
+- [x] Sauvegarder la version publiée
