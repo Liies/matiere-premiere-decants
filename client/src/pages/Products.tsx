@@ -29,6 +29,7 @@ export default function Products() {
   const [activeSuggestionIndex, setActiveSuggestionIndex] = useState(-1);
   const [recentlyAddedProductKey, setRecentlyAddedProductKey] = useState<string | null>(null);
   const [wishlistAnimationKey, setWishlistAnimationKey] = useState<string | null>(null);
+  const [flippedProductId, setFlippedProductId] = useState<number | null>(null);
   const addFeedbackTimer = useRef<number | null>(null);
   const wishlistAnimationTimer = useRef<number | null>(null);
 
@@ -324,7 +325,7 @@ export default function Products() {
               {filteredProducts.map((product, index) => (
                 <Card
                   key={getCartFeedbackKey(product)}
-                  className="group/product-card overflow-hidden border-gray-200 transition-all duration-500 animate-fade-in hover:-translate-y-1 hover:shadow-xl motion-reduce:transform-none motion-reduce:transition-none"
+                  className="catalog-product-card group/product-card overflow-hidden border-gray-200 transition-all duration-500 animate-fade-in hover:-translate-y-1 hover:shadow-xl motion-reduce:transform-none motion-reduce:transition-none"
                   style={{ animationDelay: `${Math.min(index, 5) * 70}ms` }}
                 >
                   <div className="space-y-4 p-4 sm:p-5">
@@ -338,45 +339,64 @@ export default function Products() {
                       >
                         <Heart className={`h-5 w-5 ${isWishlisted(product.id) ? "fill-current" : ""} ${wishlistAnimationKey === getCartFeedbackKey(product) ? "wishlist-heart-pop" : ""}`} aria-hidden="true" />
                       </button>
-                      <a href={`/product/${product.id}`} className="block" aria-label={`Voir la fiche de ${product.name}`}>
-                      <div className="luxury-image-frame product-bottle-frame flex h-56 w-full items-center justify-center overflow-hidden rounded-lg bg-gray-100 sm:h-64">
-                        {(() => {
-                          const image = getProductImage(product.id);
-                          return image ? (
-                            <img
-                              src={image.compressed}
-                              alt={product.name}
-                              loading="lazy"
-                              className="h-full w-full object-cover transition-transform duration-1000 ease-out group-hover/product-card:scale-[1.035] group-focus-within/product-card:scale-[1.035] motion-reduce:transform-none motion-reduce:transition-none"
-                            />
-                          ) : (
-                            <Leaf className="w-12 h-12 text-gray-300" aria-hidden="true" />
-                          );
-                        })()}
+                      <div
+                        data-testid={`catalog-flip-card-${product.id}`}
+                        data-flipped={flippedProductId === product.id}
+                        className="catalog-flip-card"
+                      >
+                        <div className="catalog-flip-card-inner">
+                          <a href={`/product/${product.id}`} className="catalog-flip-face catalog-flip-front luxury-image-frame product-bottle-frame flex h-56 w-full items-center justify-center overflow-hidden rounded-lg bg-gray-100 sm:h-64" aria-label={`Voir la fiche de ${product.name}`}>
+                            {(() => {
+                              const image = getProductImage(product.id);
+                              return image ? (
+                                <img
+                                  src={image.compressed}
+                                  alt={product.name}
+                                  loading="lazy"
+                                  className="h-full w-full object-cover transition-transform duration-1000 ease-out group-hover/product-card:scale-[1.035] group-focus-within/product-card:scale-[1.035] motion-reduce:transform-none motion-reduce:transition-none"
+                                />
+                              ) : (
+                                <Leaf className="w-12 h-12 text-gray-300" aria-hidden="true" />
+                              );
+                            })()}
+                          </a>
+                          <a href={`/product/${product.id}`} className="catalog-flip-face catalog-flip-back" aria-label={`Voir la fiche de ${product.name} et ses notes olfactives`}>
+                            <p className="text-xs font-medium uppercase tracking-[0.18em] text-gray-500">Pyramide olfactive</p>
+                            <dl className="mt-5 space-y-4 text-left">
+                              <div>
+                                <dt className="text-xs uppercase tracking-[0.14em] text-gray-500">Tête</dt>
+                                <dd className="mt-1 text-sm leading-6 text-gray-900">{product.topNotes}</dd>
+                              </div>
+                              <div>
+                                <dt className="text-xs uppercase tracking-[0.14em] text-gray-500">Cœur</dt>
+                                <dd className="mt-1 text-sm leading-6 text-gray-900">{product.heartNotes}</dd>
+                              </div>
+                              <div>
+                                <dt className="text-xs uppercase tracking-[0.14em] text-gray-500">Fond</dt>
+                                <dd className="mt-1 text-sm leading-6 text-gray-900">{product.baseNotes}</dd>
+                              </div>
+                            </dl>
+                            <p className="mt-5 text-xs text-gray-500">Voir la fiche détaillée →</p>
+                          </a>
+                        </div>
                       </div>
-                      <div className="mt-5">
+                      <a href={`/product/${product.id}`} className="mt-5 block" aria-label={`Voir la fiche de ${product.name}`}>
                         <h3 className="text-lg font-light text-gray-900 hover:text-gray-600 transition-colors">{product.name}</h3>
                         <p className="text-xs text-gray-500 font-medium mt-1">Décant {product.volumeMl ?? 50} ml</p>
-                      </div>
                       </a>
                     </div>
 
-                    <p className="text-gray-600 text-sm line-clamp-3">{product.description}</p>
+                    <button
+                      type="button"
+                      onClick={() => setFlippedProductId((current) => (current === product.id ? null : product.id))}
+                      aria-expanded={flippedProductId === product.id}
+                      aria-controls={`catalog-flip-card-${product.id}`}
+                      className="mt-1 min-h-11 text-left text-xs font-medium uppercase tracking-[0.14em] text-gray-600 underline decoration-gray-300 underline-offset-4 sm:hidden"
+                    >
+                      {flippedProductId === product.id ? "Masquer les notes" : "Afficher les notes"}
+                    </button>
 
-                    <div className="space-y-2 text-sm">
-                      <div>
-                        <p className="text-gray-500">Notes de tête</p>
-                        <p className="text-gray-900">{product.topNotes}</p>
-                      </div>
-                      <div>
-                        <p className="text-gray-500">Notes de cœur</p>
-                        <p className="text-gray-900">{product.heartNotes}</p>
-                      </div>
-                      <div>
-                        <p className="text-gray-500">Notes de fond</p>
-                        <p className="text-gray-900">{product.baseNotes}</p>
-                      </div>
-                    </div>
+                    <p className="text-gray-600 text-sm line-clamp-3">{product.description}</p>
 
                     <div className="flex flex-col gap-3 border-t border-gray-200 pt-4 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
                       <div>

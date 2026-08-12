@@ -5987,3 +5987,12 @@
 - [x] Ajouter une couverture Vitest adaptée au nouveau contenu
 - [x] Vérifier le rendu, les types et les tests
 - [x] Sauvegarder la version publiée
+
+## Cartes catalogue retournables — demande courante
+- [x] Examiner la structure de carte et l’affichage actuel des notes
+- [x] Ajouter une animation de retournement au survol et au focus clavier
+- [x] Afficher les notes olfactives sur le verso de la carte
+- [x] Retirer les notes affichées sous l’image produit
+- [x] Ajouter une couverture Vitest pour le contrat de présentation
+- [x] Vérifier le rendu, les mouvements réduits, les tests et le build
+- [ ] Sauvegarder la version publiée

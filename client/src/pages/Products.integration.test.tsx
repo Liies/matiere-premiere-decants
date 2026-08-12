@@ -118,4 +118,18 @@ describe("intégration catalogue — panier et souhaits", () => {
     expect(saffronHeart.getAttribute("aria-pressed")).toBe("false");
     expect(JSON.parse(window.localStorage.getItem(WISHLIST_STORAGE_KEY) ?? "[]")).toEqual([1]);
   });
+
+  it("place les notes sur le verso retournable et permet de l’ouvrir au toucher", () => {
+    render(<Products />);
+
+    const vanillaFlipCard = screen.getByTestId("catalog-flip-card-1");
+    expect(vanillaFlipCard.getAttribute("data-flipped")).toBe("false");
+    expect(screen.getAllByText("Pyramide olfactive")).toHaveLength(2);
+    expect(screen.queryByText("Notes de tête")).toBeNull();
+
+    fireEvent.click(screen.getAllByRole("button", { name: "Afficher les notes" })[0]!);
+
+    expect(vanillaFlipCard.getAttribute("data-flipped")).toBe("true");
+    expect(screen.getByRole("button", { name: "Masquer les notes" }).getAttribute("aria-expanded")).toBe("true");
+  });
 });
