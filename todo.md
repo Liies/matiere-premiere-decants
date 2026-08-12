@@ -5952,3 +5952,10 @@
 - [x] Tester les échecs isolés d’email sans impact sur les commandes ou statuts
 - [x] Exécuter Vitest, TypeScript et le build de production
 - [x] Sauvegarder un checkpoint de la couverture email
+
+## Audit de performance — demande courante
+- [x] Mesurer les ressources, les temps de chargement et la composition des bundles
+- [x] Vérifier les erreurs réseau et les ressources bloquantes dans les parcours publics
+- [x] Corriger les goulots de performance à impact significatif
+- [x] Valider tests, TypeScript et build de production après optimisation
+- [ ] Sauvegarder un checkpoint de l’audit de performance
