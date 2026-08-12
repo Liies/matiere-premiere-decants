@@ -6013,3 +6013,9 @@
 - [x] Ajouter ou ajuster la couverture Vitest de tarification
 - [x] Vérifier les types, les tests et le build
 - [x] Sauvegarder la version publiée
+
+## Halo produit plus discret — demande courante
+- [x] Examiner les styles actuels du halo de survol
+- [x] Réduire l’intensité, l’ampleur et l’opacité du halo
+- [x] Vérifier le rendu, le mouvement réduit, les tests et le build
+- [ ] Sauvegarder la version publiée

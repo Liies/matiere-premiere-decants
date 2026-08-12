@@ -527,19 +527,19 @@
     content: "";
     position: absolute;
     z-index: 1;
-    inset: 18% 14%;
+    inset: 25% 23%;
     border-radius: 9999px;
     pointer-events: none;
-    background: radial-gradient(circle, rgba(255, 249, 235, 0.7) 0%, rgba(255, 249, 235, 0) 68%);
+    background: radial-gradient(circle, rgba(255, 249, 235, 0.38) 0%, rgba(255, 249, 235, 0) 68%);
     opacity: 0;
-    transform: scale(0.84);
-    transition: opacity 700ms ease, transform 900ms cubic-bezier(0.22, 1, 0.36, 1);
+    transform: scale(0.92);
+    transition: opacity 650ms ease, transform 800ms cubic-bezier(0.22, 1, 0.36, 1);
   }
 
   .product-bottle-frame:hover::before,
   .product-bottle-frame:focus-within::before {
-    opacity: 1;
-    transform: scale(1.22);
+    opacity: 0.55;
+    transform: scale(1.06);
   }
 }
 
