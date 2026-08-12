@@ -5995,4 +5995,4 @@
 - [x] Retirer les notes affichées sous l’image produit
 - [x] Ajouter une couverture Vitest pour le contrat de présentation
 - [x] Vérifier le rendu, les mouvements réduits, les tests et le build
-- [ ] Sauvegarder la version publiée
+- [x] Sauvegarder la version publiée
