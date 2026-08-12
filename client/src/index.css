@@ -469,3 +469,65 @@
     animation: none !important;
   }
 }
+
+
+/* Luxury atmosphere: restrained, slow and non-blocking. */
+@keyframes luxuryOrbFloat {
+  0%, 100% { transform: translate3d(0, 0, 0) scale(1); opacity: 0.18; }
+  50% { transform: translate3d(0, -14px, 0) scale(1.08); opacity: 0.28; }
+}
+
+@layer utilities {
+  .luxury-orb {
+    position: absolute;
+    width: 10rem;
+    height: 10rem;
+    border-radius: 9999px;
+    pointer-events: none;
+    filter: blur(28px);
+    background: rgba(209, 196, 178, 0.45);
+    animation: luxuryOrbFloat 9s ease-in-out infinite;
+  }
+
+  .luxury-orb-one {
+    top: 16%;
+    left: 8%;
+  }
+
+  .luxury-orb-two {
+    right: 8%;
+    bottom: 18%;
+    width: 8rem;
+    height: 8rem;
+    animation-delay: -4s;
+    background: rgba(174, 185, 191, 0.35);
+  }
+
+  .luxury-image-frame {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .luxury-image-frame::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: linear-gradient(110deg, transparent 35%, rgba(255, 255, 255, 0.28) 50%, transparent 65%);
+    transform: translateX(-120%);
+    transition: transform 900ms ease;
+  }
+
+  .luxury-image-frame:hover::after,
+  .luxury-image-frame:focus-within::after {
+    transform: translateX(120%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .luxury-orb,
+  .luxury-image-frame::after {
+    animation: none !important;
+    transition: none !important;
+  }
+}

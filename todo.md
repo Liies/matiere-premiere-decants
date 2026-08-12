@@ -5844,4 +5844,13 @@
 - [x] Ajuster la fiche produit, le panier et le tunnel de commande au mobile
 - [x] Vérifier les animations et prefers-reduced-motion sur mobile
 - [x] Ajouter ou mettre à jour les tests nécessaires
-- [ ] Valider le rendu responsive et sauvegarder un checkpoint
+- [x] Valider le rendu responsive et sauvegarder un checkpoint
+
+
+## Hiérarchie des animations de luxe — demande courante
+- [x] Renforcer le storytelling immersif et l’apparition au scroll sur la page d’accueil
+- [x] Ajouter un effet de lueur subtil et un zoom fluide sur les flacons du catalogue
+- [x] Fluidifier la révélation des notes olfactives et la rotation au scroll sur la fiche produit
+- [x] Maintenir la rapidité et l’efficacité de l’achat et du checkout
+- [x] Valider l’accessibilité, les tests et le rendu de la version premium
+- [ ] Sauvegarder un checkpoint de la version finale animée

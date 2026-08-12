@@ -291,12 +291,12 @@ export default function Products() {
               {filteredProducts.map((product, index) => (
                 <Card
                   key={product.id}
-                  className="overflow-hidden border-gray-200 hover:shadow-xl transition-all duration-500 animate-fade-in"
+                  className="group/product-card overflow-hidden border-gray-200 transition-all duration-500 animate-fade-in hover:-translate-y-1 hover:shadow-xl"
                   style={{ animationDelay: `${Math.min(index, 5) * 70}ms` }}
                 >
                   <div className="space-y-4 p-4 sm:p-5">
                     <a href={`/product/${product.id}`} className="block" aria-label={`Voir la fiche de ${product.name}`}>
-                      <div className="h-56 w-full overflow-hidden rounded-lg bg-gray-100 flex items-center justify-center sm:h-64">
+                      <div className="luxury-image-frame flex h-56 w-full items-center justify-center overflow-hidden rounded-lg bg-gray-100 sm:h-64">
                         {(() => {
                           const image = getProductImage(product.id);
                           return image ? (
@@ -304,7 +304,7 @@ export default function Products() {
                               src={image.compressed}
                               alt={product.name}
                               loading="lazy"
-                              className="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
+                              className="h-full w-full object-cover transition-transform duration-700 group-hover/product-card:scale-[1.04]"
                             />
                           ) : (
                             <Leaf className="w-12 h-12 text-gray-300" aria-hidden="true" />
@@ -366,7 +366,7 @@ export default function Products() {
                           onClick={() => handleAddToCart(product)}
                           disabled={addToCart.isPending || product.stock === 0}
                           aria-live="polite"
-                          className={`relative min-h-11 flex-1 overflow-hidden bg-gray-900 text-white font-light whitespace-nowrap transition-all touch-manipulation hover:bg-gray-800 hover:shadow-lg sm:flex-none ${
+                          className={`relative min-h-11 flex-1 overflow-hidden bg-gray-900 text-white font-light whitespace-nowrap transition-all touch-manipulation hover:-translate-y-0.5 hover:bg-gray-800 hover:shadow-lg sm:flex-none ${
                             recentlyAddedProductId === product.id ? "scale-[0.97] bg-gray-800" : ""
                           }`}
                         >

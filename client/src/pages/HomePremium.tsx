@@ -53,41 +53,47 @@ export default function HomePremium() {
       <Header />
 
       {/* Hero Section */}
-      <section className="pt-32 pb-24 px-4 relative overflow-hidden">
+      <section className="relative min-h-[calc(100svh-4.5rem)] overflow-hidden px-4 py-20 sm:py-28 md:py-32">
         <div
           className="absolute inset-0 -z-10"
           style={{
-            transform: `translateY(${scrollY * 0.5}px)`,
+            transform: `translate3d(0, ${Math.min(scrollY * 0.18, 80)}px, 0) scale(1.06)`,
           }}
         >
           <img
             src="https://d2xsxph8kpxj0f.cloudfront.net/310519663634453748/oKjLk7qKw3XzkAh8kgeZU3/mp-story-hero-88whgjPV3o5cgctoSVF89Q.webp"
             alt="Matière Première"
-            className="w-full h-full object-cover opacity-40"
+            className="h-full w-full object-cover opacity-35 will-change-transform"
           />
         </div>
+        <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-white/20 via-white/10 to-white/85" aria-hidden="true" />
+        <span className="luxury-orb luxury-orb-one" aria-hidden="true" />
+        <span className="luxury-orb luxury-orb-two" aria-hidden="true" />
 
-        <div className="container max-w-4xl mx-auto text-center space-y-8">
+        <div className="container relative mx-auto max-w-4xl space-y-8 text-center">
           <div className="space-y-6 animate-fade-in">
-            <p className="text-sm uppercase tracking-widest text-gray-600">Bienvenue chez</p>
-            <h1 className="text-6xl md:text-7xl font-light tracking-tight text-gray-900 leading-tight">
+            <p className="animate-reveal-text text-sm uppercase tracking-[0.24em] text-gray-600">Bienvenue chez</p>
+            <h1 className="animate-float-up text-4xl font-light leading-tight tracking-tight text-gray-900 sm:text-6xl md:text-7xl">
               Matière Première
             </h1>
-            <p className="text-2xl font-light text-gray-700">
+            <p className="animate-float-up text-xl font-light text-gray-700 sm:text-2xl">
               L'essence pure de la parfumerie
             </p>
           </div>
 
           <div className="pt-8">
-            <p className="text-gray-600 font-light mb-8">
+            <p className="mx-auto mb-8 max-w-2xl text-sm font-light leading-7 text-gray-600 sm:text-base">
               Découvrez une collection exclusive de décants 50ml, où chaque fragrance célèbre la pureté d'une seule matière première.
             </p>
             <Link href="/products">
-              <Button className="gap-2 bg-gray-900 hover:bg-gray-800 text-white px-8 py-6 text-base">
+              <Button className="min-h-12 gap-2 bg-gray-900 px-8 py-6 text-base text-white shadow-lg shadow-gray-900/10 transition-transform hover:-translate-y-0.5 hover:bg-gray-800">
                 Explorer la Collection
                 <ArrowRight className="w-4 h-4" />
               </Button>
             </Link>
+          </div>
+          <div className="mt-10 flex justify-center text-gray-500" aria-hidden="true">
+            <span className="h-12 w-px animate-pulse-subtle bg-gray-400" />
           </div>
         </div>
       </section>
@@ -96,19 +102,19 @@ export default function HomePremium() {
       <section
         ref={setRef("story")}
         id="story"
-        className={`py-32 px-4 bg-gray-50 transition-all duration-1000 ${
+        className={`bg-gray-50 px-4 py-20 transition-all duration-1000 sm:py-32 ${
           visibleSections["story"] ? "opacity-100" : "opacity-0"
         }`}
       >
         <div className="container max-w-5xl mx-auto">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-16 items-center">
+          <div className="grid grid-cols-1 items-center gap-10 md:grid-cols-2 md:gap-16">
             <div
               className={`space-y-6 transition-all duration-1000 ${
                 visibleSections["story"] ? "translate-x-0 opacity-100" : "-translate-x-12 opacity-0"
               }`}
             >
               <p className="text-sm uppercase tracking-widest text-gray-600">Notre Histoire</p>
-              <h2 className="text-5xl font-light text-gray-900">
+              <h2 className="text-3xl font-light text-gray-900 sm:text-5xl">
                 Fondée en 2016
               </h2>
               <p className="text-lg text-gray-600 font-light leading-relaxed">
@@ -120,14 +126,14 @@ export default function HomePremium() {
             </div>
 
             <div
-              className={`transition-all duration-1000 ${
+              className={`luxury-image-frame group transition-all duration-1000 ${
                 visibleSections["story"] ? "translate-x-0 opacity-100" : "translate-x-12 opacity-0"
               }`}
             >
               <img
                 src="https://d2xsxph8kpxj0f.cloudfront.net/310519663634453748/oKjLk7qKw3XzkAh8kgeZU3/mp-history-EUBK4GLMuWtze4obx7Syvj.webp"
                 alt="L'histoire de Matière Première"
-                className="w-full h-auto rounded-lg shadow-lg"
+                className="h-auto w-full rounded-lg shadow-lg transition-transform duration-1000 group-hover:scale-[1.02]"
               />
             </div>
           </div>
@@ -138,21 +144,21 @@ export default function HomePremium() {
       <section
         ref={setRef("ingredients")}
         id="ingredients"
-        className={`py-32 px-4 bg-white transition-all duration-1000 ${
+        className={`bg-white px-4 py-20 transition-all duration-1000 sm:py-32 ${
           visibleSections["ingredients"] ? "opacity-100" : "opacity-0"
         }`}
       >
         <div className="container max-w-5xl mx-auto">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-16 items-center">
+          <div className="grid grid-cols-1 items-center gap-10 md:grid-cols-2 md:gap-16">
             <div
-              className={`transition-all duration-1000 ${
+              className={`luxury-image-frame group transition-all duration-1000 ${
                 visibleSections["ingredients"] ? "translate-x-0 opacity-100" : "-translate-x-12 opacity-0"
               }`}
             >
               <img
                 src="https://d2xsxph8kpxj0f.cloudfront.net/310519663634453748/oKjLk7qKw3XzkAh8kgeZU3/mp-ingredients-W6x6mGy9Xy9zMzRqyytYqp.webp"
                 alt="Matières premières luxe"
-                className="w-full h-auto rounded-lg shadow-lg"
+                className="h-auto w-full rounded-lg shadow-lg transition-transform duration-1000 group-hover:scale-[1.02]"
               />
             </div>
 
@@ -162,7 +168,7 @@ export default function HomePremium() {
               }`}
             >
               <p className="text-sm uppercase tracking-widest text-gray-600">L'Essence de Luxe</p>
-              <h2 className="text-5xl font-light text-gray-900">
+              <h2 className="text-3xl font-light text-gray-900 sm:text-5xl">
                 Matières Premières Exceptionnelles
               </h2>
               <p className="text-lg text-gray-600 font-light leading-relaxed">
@@ -180,22 +186,22 @@ export default function HomePremium() {
       <section
         ref={setRef("noses")}
         id="noses"
-        className={`py-32 px-4 bg-gray-50 transition-all duration-1000 ${
+        className={`bg-gray-50 px-4 py-20 transition-all duration-1000 sm:py-32 ${
           visibleSections["noses"] ? "opacity-100" : "opacity-0"
         }`}
       >
         <div className="container max-w-5xl mx-auto">
           <div className="text-center mb-16">
             <p className="text-sm uppercase tracking-widest text-gray-600 mb-4">Les Créateurs</p>
-            <h2 className="text-5xl font-light text-gray-900">
+            <h2 className="text-3xl font-light text-gray-900 sm:text-5xl">
               Les Nez Derrière la Magie
             </h2>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
+          <div className="grid grid-cols-1 gap-10 md:grid-cols-2 md:gap-12">
             {/* Nose 1 */}
             <div
-              className={`space-y-6 transition-all duration-1000 ${
+              className={`group space-y-6 transition-all duration-1000 ${
                 visibleSections["noses"] ? "translate-y-0 opacity-100" : "translate-y-12 opacity-0"
               }`}
             >
@@ -205,7 +211,7 @@ export default function HomePremium() {
                   <img
                     src={image.compressed}
                     alt="Master Perfumer"
-                    className="w-full h-96 object-cover rounded-lg shadow-lg"
+                    className="h-80 w-full rounded-lg object-cover shadow-lg transition-transform duration-1000 group-hover:scale-[1.02] sm:h-96"
                   />
                 ) : (
                   <div className="w-full h-96 bg-gray-200 rounded-lg shadow-lg" />
@@ -226,7 +232,7 @@ export default function HomePremium() {
 
             {/* Nose 2 */}
             <div
-              className={`space-y-6 transition-all duration-1000 ${
+              className={`group space-y-6 transition-all duration-1000 ${
                 visibleSections["noses"] ? "translate-y-0 opacity-100" : "translate-y-12 opacity-0"
               }`}
             >
@@ -236,7 +242,7 @@ export default function HomePremium() {
                   <img
                     src={image.compressed}
                     alt="Master Perfumer"
-                    className="w-full h-96 object-cover rounded-lg shadow-lg"
+                    className="h-80 w-full rounded-lg object-cover shadow-lg transition-transform duration-1000 group-hover:scale-[1.02] sm:h-96"
                   />
                 ) : (
                   <div className="w-full h-96 bg-gray-200 rounded-lg shadow-lg" />
@@ -262,16 +268,17 @@ export default function HomePremium() {
       <section
         ref={setRef("collection")}
         id="collection"
-        className={`py-32 px-4 bg-white transition-all duration-1000 ${
+        className={`bg-white px-4 py-20 transition-all duration-1000 sm:py-32 ${
           visibleSections["collection"] ? "opacity-100" : "opacity-0"
         }`}
       >
         <div className="container max-w-5xl mx-auto text-center">
           <p className="text-sm uppercase tracking-widest text-gray-600 mb-4">La Collection</p>
-          <h2 className="text-5xl font-light text-gray-900 mb-8">
+                      <h2 className="mb-6 text-3xl font-light text-gray-900 sm:mb-8 sm:text-5xl">
+
             10 Fragrances Exceptionnelles
           </h2>
-          <p className="text-xl text-gray-600 font-light mb-12 max-w-2xl mx-auto">
+          <p className="mx-auto mb-10 max-w-2xl text-base font-light leading-7 text-gray-600 sm:mb-12 sm:text-xl">
             Chaque parfum Matière Première est une célébration de pureté. Découvrez notre sélection complète de décants 50ml, chacun racontant l'histoire d'une matière première unique.
           </p>
 
@@ -285,10 +292,10 @@ export default function HomePremium() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-32 px-4 bg-gray-900 text-white">
+      <section className="bg-gray-900 px-4 py-20 text-white sm:py-32">
         <div className="container max-w-3xl mx-auto text-center space-y-8">
-          <h2 className="text-5xl font-light">Prêt à découvrir ?</h2>
-          <p className="text-xl font-light text-gray-300">
+          <h2 className="text-3xl font-light sm:text-5xl">Prêt à découvrir ?</h2>
+          <p className="text-base font-light leading-7 text-gray-300 sm:text-xl">
             Explorez notre collection exclusive et trouvez votre fragrance signature.
           </p>
           <Link href="/products">

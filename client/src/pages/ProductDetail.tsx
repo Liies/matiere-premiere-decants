@@ -142,7 +142,7 @@ export default function ProductDetail() {
           {/* Product Image */}
           <div className="flex items-center justify-center">
             <div
-              className="relative mx-auto aspect-square w-full max-w-xl overflow-hidden rounded-lg bg-gray-50 transition-transform duration-500"
+              className="luxury-image-frame group relative mx-auto aspect-square w-full max-w-xl overflow-hidden rounded-lg bg-gray-50 transition-transform duration-700"
               style={{
                 transform: `scale(${1 + scrollY * 0.0001})`,
               }}
@@ -151,7 +151,7 @@ export default function ProductDetail() {
                 productId={product.id}
                 fallbackUrl={product.imageUrl}
                 alt={product.name}
-                className="w-full h-full object-cover"
+                className="h-full w-full object-cover transition-transform duration-1000 group-hover:scale-[1.03]"
               />
             </div>
           </div>
@@ -173,21 +173,21 @@ export default function ProductDetail() {
             </div>
 
             {/* Olfactory Notes */}
-            <div className="mb-8 space-y-6 animate-fade-in-delay">
-              <div>
-                <h3 className="text-sm uppercase tracking-widest text-gray-500 mb-3">
+            <div className="mb-8 space-y-5 animate-fade-in-delay sm:space-y-6">
+              <div className="border-l border-gray-200 pl-4 transition-colors duration-500 hover:border-gray-900">
+                <h3 className="mb-3 text-sm uppercase tracking-widest text-gray-500">
                   Notes de tête
                 </h3>
                 <p className="text-gray-700">{product.topNotes}</p>
               </div>
-              <div>
-                <h3 className="text-sm uppercase tracking-widest text-gray-500 mb-3">
+              <div className="border-l border-gray-200 pl-4 transition-colors duration-500 hover:border-gray-900">
+                <h3 className="mb-3 text-sm uppercase tracking-widest text-gray-500">
                   Notes de cœur
                 </h3>
                 <p className="text-gray-700">{product.heartNotes}</p>
               </div>
-              <div>
-                <h3 className="text-sm uppercase tracking-widest text-gray-500 mb-3">
+              <div className="border-l border-gray-200 pl-4 transition-colors duration-500 hover:border-gray-900">
+                <h3 className="mb-3 text-sm uppercase tracking-widest text-gray-500">
                   Notes de fond
                 </h3>
                 <p className="text-gray-700">{product.baseNotes}</p>
