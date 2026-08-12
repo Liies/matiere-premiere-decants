@@ -5978,4 +5978,4 @@
 - [x] Auditer les scripts, l’architecture et la documentation existante
 - [x] Rédiger un README français couvrant installation, usage, configuration et qualité
 - [x] Vérifier le README et le versionner dans le dépôt Git connecté
-- [ ] Sauvegarder un checkpoint de la documentation du dépôt
+- [x] Sauvegarder un checkpoint de la documentation du dépôt
