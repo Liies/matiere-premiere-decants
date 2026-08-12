@@ -531,3 +531,57 @@
     transition: none !important;
   }
 }
+
+@keyframes initialLoaderReveal {
+  from { opacity: 0; transform: translateY(8px); letter-spacing: 0.32em; }
+  to { opacity: 1; transform: translateY(0); letter-spacing: 0.22em; }
+}
+
+@keyframes initialLoaderMark {
+  from { opacity: 0; transform: scale(0.94); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+@layer utilities {
+  .initial-loader {
+    position: fixed;
+    z-index: 100;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #fff;
+    color: #111827;
+    opacity: 1;
+    transition: opacity 320ms ease, visibility 320ms ease;
+  }
+
+  .initial-loader-leaving {
+    opacity: 0;
+    visibility: hidden;
+  }
+
+  .initial-loader-mark {
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+    animation: initialLoaderMark 720ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+
+  .initial-loader-wordmark {
+    font-size: 0.8rem;
+    font-weight: 300;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    animation: initialLoaderReveal 900ms cubic-bezier(0.22, 1, 0.36, 1) 100ms both;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .initial-loader,
+  .initial-loader-mark,
+  .initial-loader-wordmark {
+    animation: none !important;
+    transition: none !important;
+  }
+}

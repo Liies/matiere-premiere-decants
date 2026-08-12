@@ -5853,4 +5853,11 @@
 - [x] Fluidifier la révélation des notes olfactives et la rotation au scroll sur la fiche produit
 - [x] Maintenir la rapidité et l’efficacité de l’achat et du checkout
 - [x] Valider l’accessibilité, les tests et le rendu de la version premium
-- [ ] Sauvegarder un checkpoint de la version finale animée
+- [x] Sauvegarder un checkpoint de la version finale animée
+
+## Écran de chargement initial — demande courante
+- [x] Créer un préchargement minimaliste avec le monogramme de marque
+- [x] Animer l’apparition en fondu et la révélation de la page d’accueil
+- [x] Respecter prefers-reduced-motion et éviter tout blocage de navigation
+- [x] Vérifier le démarrage dans le preview, les tests et le build
+- [x] Sauvegarder un checkpoint de la version préchargement

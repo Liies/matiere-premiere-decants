@@ -1,12 +1,15 @@
-import { lazy, Suspense } from "react";
+import { lazy, Suspense, useCallback, useEffect, useState } from "react";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import NotFound from "@/pages/NotFound";
 import { Route, Switch } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
+import InitialLoader from "./components/InitialLoader";
+import { INITIAL_LOADER_SESSION_KEY, shouldShowInitialLoader } from "@shared/initial-loader";
 const Home = lazy(() => import("./pages/Home"));
-const HomePremium = lazy(() => import("./pages/HomePremium"));
+const loadHomePremium = () => import("./pages/HomePremium");
+const HomePremium = lazy(loadHomePremium);
 
 const Products = lazy(() => import("./pages/Products"));
 const Cart = lazy(() => import("./pages/Cart"));
@@ -60,6 +63,23 @@ function Router() {
 // - If you want to make theme switchable, pass `switchable` ThemeProvider and use `useTheme` hook
 
 function App() {
+  const [showInitialLoader, setShowInitialLoader] = useState(() => {
+    if (typeof window === "undefined") return false;
+    return shouldShowInitialLoader(
+      window.location.pathname,
+      window.sessionStorage.getItem(INITIAL_LOADER_SESSION_KEY) === "true",
+    );
+  });
+
+  useEffect(() => {
+    if (showInitialLoader) void loadHomePremium();
+  }, [showInitialLoader]);
+
+  const dismissInitialLoader = useCallback(() => {
+    window.sessionStorage.setItem(INITIAL_LOADER_SESSION_KEY, "true");
+    setShowInitialLoader(false);
+  }, []);
+
   return (
     <ErrorBoundary>
       <ThemeProvider
@@ -68,7 +88,7 @@ function App() {
       >
         <TooltipProvider>
           <Toaster />
-          <Router />
+          {showInitialLoader ? <InitialLoader onComplete={dismissInitialLoader} /> : <Router />}
         </TooltipProvider>
       </ThemeProvider>
     </ErrorBoundary>
