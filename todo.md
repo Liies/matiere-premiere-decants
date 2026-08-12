@@ -5973,3 +5973,9 @@
 - [x] Documenter les fichiers corrigés, tests et vérifications visuelles
 - [x] Référencer la version corrigée sauvegardée
 - [x] Sauvegarder un checkpoint du dossier d’incident
+
+## README du dépôt — demande courante
+- [x] Auditer les scripts, l’architecture et la documentation existante
+- [x] Rédiger un README français couvrant installation, usage, configuration et qualité
+- [x] Vérifier le README et le versionner dans le dépôt Git connecté
+- [ ] Sauvegarder un checkpoint de la documentation du dépôt
