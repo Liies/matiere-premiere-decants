@@ -13,6 +13,7 @@ import { useLocalCart } from "@/hooks/useLocalCart";
 import { filterProductsByNotes, OLFACTORY_FILTERS } from "@shared/olfactory";
 import { getCatalogSuggestions, searchProductsByName } from "@shared/catalog-search";
 import { CART_CONFIRMATION_DURATION_MS } from "@shared/cart-feedback";
+import { getOlfactoryFilterIdFromHash } from "@shared/catalog-category-route";
 
 export default function Products() {
   const { data: products, isLoading } = trpc.products.list.useQuery();
@@ -45,6 +46,22 @@ export default function Products() {
     return () => {
       if (addFeedbackTimer.current) window.clearTimeout(addFeedbackTimer.current);
     };
+  }, []);
+
+  useEffect(() => {
+    const applyCategoryFromHash = () => {
+      const filterId = getOlfactoryFilterIdFromHash(window.location.hash);
+      if (!filterId) return;
+
+      setSelectedFilters([filterId]);
+      window.requestAnimationFrame(() => {
+        document.getElementById("catalog-filters")?.scrollIntoView({ behavior: "smooth", block: "start" });
+      });
+    };
+
+    applyCategoryFromHash();
+    window.addEventListener("hashchange", applyCategoryFromHash);
+    return () => window.removeEventListener("hashchange", applyCategoryFromHash);
   }, []);
 
   const confirmAddedProduct = (productId: number) => {
@@ -207,8 +224,9 @@ export default function Products() {
           </section>
 
           <section
+            id="catalog-filters"
             aria-labelledby="olfactory-filter-title"
-            className="mb-12 rounded-2xl border border-gray-200 bg-gray-50/70 p-5 md:p-6 animate-slide-up"
+            className="mb-12 scroll-mt-24 rounded-2xl border border-gray-200 bg-gray-50/70 p-5 md:p-6 animate-slide-up"
           >
             <div className="flex flex-col gap-5 md:flex-row md:items-center md:justify-between">
               <div>

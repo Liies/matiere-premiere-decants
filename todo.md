@@ -5875,3 +5875,11 @@
 - [x] Respecter prefers-reduced-motion et conserver les notes immédiatement lisibles
 - [x] Vérifier le rendu, les tests et le build
 - [x] Sauvegarder un checkpoint de la révélation olfactive
+
+## Navigation catégories et storytelling savoir-faire — demande courante
+- [x] Ajouter un accès « Par familles » dans le menu de navigation
+- [x] Dévoiler progressivement les catégories de parfums au survol, focus et clic mobile
+- [x] Préserver les contrôles clavier, le focus visible et prefers-reduced-motion
+- [x] Créer une section savoir-faire avec apparition progressive au scroll
+- [x] Vérifier le rendu desktop/mobile, les tests et le build
+- [x] Sauvegarder un checkpoint de la navigation et du storytelling

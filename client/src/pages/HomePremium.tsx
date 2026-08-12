@@ -44,6 +44,20 @@ export default function HomePremium() {
     return () => observer.disconnect();
   }, []);
 
+  useEffect(() => {
+    const targetId = window.location.hash.replace(/^#/, "").trim();
+    if (!targetId) return;
+
+    setVisibleSections((current) => ({ ...current, [targetId]: true }));
+
+    const scrollToAnchor = () => {
+      document.getElementById(targetId)?.scrollIntoView({ block: "start" });
+    };
+
+    const timer = window.setTimeout(scrollToAnchor, 50);
+    return () => window.clearTimeout(timer);
+  }, []);
+
   const setRef = (id: string) => (el: HTMLDivElement | null) => {
     sectionRefs.current[id] = el;
   };
@@ -178,6 +192,59 @@ export default function HomePremium() {
                 C'est cette obsession pour la qualité qui fait la différence. Chaque décant 50ml est une promesse de pureté absolue.
               </p>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Craft Section */}
+      <section
+        ref={setRef("craft")}
+        id="craft"
+        className={`bg-stone-50 px-4 py-20 transition-all duration-1000 sm:py-32 ${
+          visibleSections["craft"] ? "opacity-100" : "opacity-0"
+        }`}
+      >
+        <div className="container mx-auto max-w-6xl">
+          <div className="grid items-end gap-8 md:grid-cols-[0.85fr_1.15fr] md:gap-16">
+            <div
+              className={`transition-all duration-700 ease-out motion-reduce:transform-none motion-reduce:transition-none ${
+                visibleSections["craft"] ? "translate-y-0 opacity-100" : "translate-y-6 opacity-0"
+              }`}
+            >
+              <p className="mb-4 text-sm uppercase tracking-widest text-gray-600">Le savoir-faire</p>
+              <h2 className="text-3xl font-light leading-tight text-gray-900 sm:text-5xl">
+                De la matière
+                <br />
+                à l’émotion.
+              </h2>
+            </div>
+            <p
+              className={`max-w-xl text-base font-light leading-7 text-gray-600 transition-all duration-700 delay-100 ease-out motion-reduce:transform-none motion-reduce:transition-none sm:text-lg ${
+                visibleSections["craft"] ? "translate-y-0 opacity-100" : "translate-y-6 opacity-0"
+              }`}
+            >
+              Chaque décant est préparé avec le même respect du geste parfumier : une matière première choisie avec exigence, une composition précise, puis une expérience à découvrir à son rythme.
+            </p>
+          </div>
+
+          <div className="mt-12 grid border-t border-gray-200 sm:mt-16 md:grid-cols-3">
+            {[
+              { number: "01", title: "Sélectionner", copy: "Chercher l’éclat singulier d’une matière et préserver son caractère." },
+              { number: "02", title: "Composer", copy: "Construire autour d’elle une signature équilibrée, lisible et mémorable." },
+              { number: "03", title: "Transmettre", copy: "Proposer un format de découverte pensé pour laisser parler la fragrance." },
+            ].map((step, index) => (
+              <article
+                key={step.number}
+                className={`border-b border-gray-200 py-8 transition-all duration-700 ease-out motion-reduce:transform-none motion-reduce:transition-none md:border-b-0 md:border-r md:px-8 md:first:pl-0 md:last:border-r-0 md:last:pr-0 ${
+                  visibleSections["craft"] ? "translate-y-0 opacity-100" : "translate-y-8 opacity-0"
+                }`}
+                style={{ transitionDelay: visibleSections["craft"] ? `${180 + index * 130}ms` : "0ms" }}
+              >
+                <p className="mb-8 text-xs font-medium tracking-[0.2em] text-gray-400">{step.number}</p>
+                <h3 className="mb-3 text-xl font-light text-gray-900">{step.title}</h3>
+                <p className="max-w-xs text-sm leading-6 text-gray-600">{step.copy}</p>
+              </article>
+            ))}
           </div>
         </div>
       </section>

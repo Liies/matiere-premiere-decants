@@ -6,7 +6,7 @@ import { Route, Switch } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import InitialLoader from "./components/InitialLoader";
-import { INITIAL_LOADER_SESSION_KEY, shouldShowInitialLoader } from "@shared/initial-loader";
+import { getInitialAnchorTargetId, INITIAL_LOADER_SESSION_KEY, shouldShowInitialLoader } from "@shared/initial-loader";
 const Home = lazy(() => import("./pages/Home"));
 const loadHomePremium = () => import("./pages/HomePremium");
 const HomePremium = lazy(loadHomePremium);
@@ -68,6 +68,7 @@ function App() {
     return shouldShowInitialLoader(
       window.location.pathname,
       window.sessionStorage.getItem(INITIAL_LOADER_SESSION_KEY) === "true",
+      window.location.hash,
     );
   });
 
@@ -78,6 +79,23 @@ function App() {
   const dismissInitialLoader = useCallback(() => {
     window.sessionStorage.setItem(INITIAL_LOADER_SESSION_KEY, "true");
     setShowInitialLoader(false);
+
+    const anchorTargetId = getInitialAnchorTargetId(window.location.hash);
+    if (anchorTargetId) {
+      const restoreAnchor = (attempt = 0) => {
+        const target = document.getElementById(anchorTargetId);
+        if (target) {
+          target.scrollIntoView({ block: "start" });
+          return;
+        }
+
+        if (attempt < 20) {
+          window.requestAnimationFrame(() => restoreAnchor(attempt + 1));
+        }
+      };
+
+      window.requestAnimationFrame(() => restoreAnchor());
+    }
   }, []);
 
   return (
