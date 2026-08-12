@@ -5900,4 +5900,4 @@
 - [x] Synchroniser le statut de souhait entre le catalogue et la fiche produit
 - [x] Auditer la couverture des parcours d’intégration panier et liste de souhaits, puis compléter les cas manquants
 - [x] Ajouter les tests, vérifier desktop/mobile et le build
-- [ ] Sauvegarder un checkpoint de la correction et des souhaits
+- [x] Sauvegarder un checkpoint de la correction et des souhaits
