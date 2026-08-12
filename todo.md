@@ -5861,3 +5861,10 @@
 - [x] Respecter prefers-reduced-motion et éviter tout blocage de navigation
 - [x] Vérifier le démarrage dans le preview, les tests et le build
 - [x] Sauvegarder un checkpoint de la version préchargement
+
+## Cartes produit — survol premium
+- [x] Ajouter un zoom léger et lent du flacon au survol
+- [x] Révéler le bouton d’ajout au panier au survol ou au focus clavier
+- [x] Préserver le bouton visible et utilisable sur mobile
+- [x] Respecter prefers-reduced-motion, vérifier les tests et le build
+- [x] Sauvegarder un checkpoint de la micro-interaction

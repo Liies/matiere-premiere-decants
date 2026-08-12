@@ -291,7 +291,7 @@ export default function Products() {
               {filteredProducts.map((product, index) => (
                 <Card
                   key={product.id}
-                  className="group/product-card overflow-hidden border-gray-200 transition-all duration-500 animate-fade-in hover:-translate-y-1 hover:shadow-xl"
+                  className="group/product-card overflow-hidden border-gray-200 transition-all duration-500 animate-fade-in hover:-translate-y-1 hover:shadow-xl motion-reduce:transform-none motion-reduce:transition-none"
                   style={{ animationDelay: `${Math.min(index, 5) * 70}ms` }}
                 >
                   <div className="space-y-4 p-4 sm:p-5">
@@ -304,7 +304,7 @@ export default function Products() {
                               src={image.compressed}
                               alt={product.name}
                               loading="lazy"
-                              className="h-full w-full object-cover transition-transform duration-700 group-hover/product-card:scale-[1.04]"
+                              className="h-full w-full object-cover transition-transform duration-1000 ease-out group-hover/product-card:scale-[1.035] group-focus-within/product-card:scale-[1.035] motion-reduce:transform-none motion-reduce:transition-none"
                             />
                           ) : (
                             <Leaf className="w-12 h-12 text-gray-300" aria-hidden="true" />
@@ -366,7 +366,7 @@ export default function Products() {
                           onClick={() => handleAddToCart(product)}
                           disabled={addToCart.isPending || product.stock === 0}
                           aria-live="polite"
-                          className={`relative min-h-11 flex-1 overflow-hidden bg-gray-900 text-white font-light whitespace-nowrap transition-all touch-manipulation hover:-translate-y-0.5 hover:bg-gray-800 hover:shadow-lg sm:flex-none ${
+                          className={`relative min-h-11 flex-1 overflow-hidden bg-gray-900 text-white font-light whitespace-nowrap transition-all duration-500 touch-manipulation hover:-translate-y-0.5 hover:bg-gray-800 hover:shadow-lg sm:max-w-0 sm:min-w-0 sm:flex-none sm:scale-95 sm:translate-y-2 sm:px-0 sm:opacity-0 sm:group-hover/product-card:max-w-44 sm:group-hover/product-card:scale-100 sm:group-hover/product-card:translate-y-0 sm:group-hover/product-card:px-4 sm:group-hover/product-card:opacity-100 sm:group-focus-within/product-card:max-w-44 sm:group-focus-within/product-card:scale-100 sm:group-focus-within/product-card:translate-y-0 sm:group-focus-within/product-card:px-4 sm:group-focus-within/product-card:opacity-100 motion-reduce:transform-none motion-reduce:transition-none ${
                             recentlyAddedProductId === product.id ? "scale-[0.97] bg-gray-800" : ""
                           }`}
                         >
