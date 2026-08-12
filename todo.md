@@ -5883,3 +5883,11 @@
 - [x] Créer une section savoir-faire avec apparition progressive au scroll
 - [x] Vérifier le rendu desktop/mobile, les tests et le build
 - [x] Sauvegarder un checkpoint de la navigation et du storytelling
+
+## Reflet des flacons et hero immersif — demande courante
+- [x] Ajouter un reflet lumineux subtil au survol des flacons du catalogue
+- [x] Créer une apparition progressive d’un flacon dans le hero
+- [x] Raffiner l’entrée en fondu et le séquençage du texte du hero
+- [x] Préserver prefers-reduced-motion et l’expérience mobile
+- [x] Vérifier le rendu, les tests et le build
+- [x] Sauvegarder un checkpoint de la version enrichie

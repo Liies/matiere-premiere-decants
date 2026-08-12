@@ -522,13 +522,83 @@
   .luxury-image-frame:focus-within::after {
     transform: translateX(120%);
   }
+
+  .product-bottle-frame::before {
+    content: "";
+    position: absolute;
+    z-index: 1;
+    inset: 18% 14%;
+    border-radius: 9999px;
+    pointer-events: none;
+    background: radial-gradient(circle, rgba(255, 249, 235, 0.7) 0%, rgba(255, 249, 235, 0) 68%);
+    opacity: 0;
+    transform: scale(0.84);
+    transition: opacity 700ms ease, transform 900ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .product-bottle-frame:hover::before,
+  .product-bottle-frame:focus-within::before {
+    opacity: 1;
+    transform: scale(1.22);
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .luxury-orb,
-  .luxury-image-frame::after {
+  .luxury-image-frame::after,
+  .product-bottle-frame::before {
     animation: none !important;
     transition: none !important;
+  }
+}
+
+@keyframes heroBottleReveal {
+  from { opacity: 0; transform: translate3d(0, 24px, 0) scale(0.92); filter: blur(4px); }
+  to { opacity: 0.88; transform: translate3d(0, 0, 0) scale(1); filter: blur(0); }
+}
+
+@keyframes heroCopyReveal {
+  from { opacity: 0; transform: translate3d(0, 14px, 0); }
+  to { opacity: 1; transform: translate3d(0, 0, 0); }
+}
+
+@keyframes heroBottleHalo {
+  0%, 100% { opacity: 0.2; transform: scale(0.9); }
+  50% { opacity: 0.42; transform: scale(1.08); }
+}
+
+@layer utilities {
+  .hero-bottle-reveal {
+    animation: heroBottleReveal 1.15s cubic-bezier(0.22, 1, 0.36, 1) 0.55s both;
+  }
+
+  .hero-bottle-halo {
+    position: absolute;
+    z-index: 0;
+    top: 19%;
+    left: 50%;
+    width: 78%;
+    aspect-ratio: 1;
+    border-radius: 9999px;
+    background: radial-gradient(circle, rgba(226, 213, 193, 0.65) 0%, rgba(226, 213, 193, 0) 70%);
+    transform: translateX(-50%);
+    animation: heroBottleHalo 5s ease-in-out 1.4s infinite;
+  }
+
+  .hero-copy-reveal {
+    opacity: 0;
+    animation: heroCopyReveal 800ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-bottle-reveal,
+  .hero-bottle-halo,
+  .hero-copy-reveal {
+    animation: none !important;
+    filter: none !important;
+    opacity: 1 !important;
+    transform: none !important;
   }
 }
 

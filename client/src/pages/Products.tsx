@@ -314,7 +314,7 @@ export default function Products() {
                 >
                   <div className="space-y-4 p-4 sm:p-5">
                     <a href={`/product/${product.id}`} className="block" aria-label={`Voir la fiche de ${product.name}`}>
-                      <div className="luxury-image-frame flex h-56 w-full items-center justify-center overflow-hidden rounded-lg bg-gray-100 sm:h-64">
+                      <div className="luxury-image-frame product-bottle-frame flex h-56 w-full items-center justify-center overflow-hidden rounded-lg bg-gray-100 sm:h-64">
                         {(() => {
                           const image = getProductImage(product.id);
                           return image ? (

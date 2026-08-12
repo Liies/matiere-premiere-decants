@@ -14,8 +14,13 @@ await page.getByRole("button", { name: "Par familles" }).hover();
 await page.waitForTimeout(650);
 await page.screenshot({ path: "/home/ubuntu/nav-categories-open.png" });
 
+await page.locator(".product-bottle-frame").first().hover();
+await page.waitForTimeout(650);
+await page.screenshot({ path: "/home/ubuntu/product-bottle-reflect-hover.png" });
+
 await page.goto(`${baseUrl}/`, { waitUntil: "networkidle" });
-await page.waitForTimeout(1600);
+await page.waitForTimeout(3200);
+await page.screenshot({ path: "/home/ubuntu/hero-bottle-reveal.png" });
 await page.locator("#craft").scrollIntoViewIfNeeded();
 await page.waitForTimeout(900);
 await page.screenshot({ path: "/home/ubuntu/craft-section-visible.png" });
@@ -26,5 +31,9 @@ await mobilePage.getByRole("button", { name: "Ouvrir le menu" }).click();
 await mobilePage.getByRole("button", { name: "Par familles" }).click();
 await mobilePage.waitForTimeout(450);
 await mobilePage.screenshot({ path: "/home/ubuntu/nav-categories-mobile-open.png" });
+
+await mobilePage.goto(`${baseUrl}/`, { waitUntil: "networkidle" });
+await mobilePage.waitForTimeout(3200);
+await mobilePage.screenshot({ path: "/home/ubuntu/hero-bottle-mobile.png" });
 
 await browser.close();

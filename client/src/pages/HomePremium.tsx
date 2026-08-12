@@ -3,12 +3,13 @@ import { useAuth } from "@/_core/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import { getNoseImage } from "@shared/image-assets";
+import { getNoseImage, getProductImage } from "@shared/image-assets";
 import { Link } from "wouter";
 import { ArrowRight } from "lucide-react";
 
 export default function HomePremium() {
   const { user, isAuthenticated } = useAuth();
+  const heroBottle = getProductImage(1);
   const [scrollY, setScrollY] = useState(0);
   const [visibleSections, setVisibleSections] = useState<Record<string, boolean>>({});
   const sectionRefs = useRef<Record<string, HTMLDivElement | null>>({});
@@ -84,18 +85,31 @@ export default function HomePremium() {
         <span className="luxury-orb luxury-orb-one" aria-hidden="true" />
         <span className="luxury-orb luxury-orb-two" aria-hidden="true" />
 
-        <div className="container relative mx-auto max-w-4xl space-y-8 text-center">
-          <div className="space-y-6 animate-fade-in">
-            <p className="animate-reveal-text text-sm uppercase tracking-[0.24em] text-gray-600">Bienvenue chez</p>
-            <h1 className="animate-float-up text-4xl font-light leading-tight tracking-tight text-gray-900 sm:text-6xl md:text-7xl">
+        {heroBottle && (
+          <div className="pointer-events-none absolute inset-x-0 bottom-4 z-0 flex justify-center sm:bottom-0" aria-hidden="true">
+            <div className="hero-bottle-reveal relative h-56 w-44 sm:h-72 sm:w-56 md:h-80 md:w-64">
+              <span className="hero-bottle-halo" />
+              <img
+                src={heroBottle.compressed}
+                alt=""
+                className="relative z-10 h-full w-full object-contain drop-shadow-[0_24px_30px_rgba(17,24,39,0.14)]"
+              />
+            </div>
+          </div>
+        )}
+
+        <div className="container relative z-10 mx-auto max-w-4xl space-y-8 text-center">
+          <div className="space-y-6">
+            <p className="hero-copy-reveal text-sm uppercase tracking-[0.24em] text-gray-600" style={{ animationDelay: "80ms" }}>Bienvenue chez</p>
+            <h1 className="hero-copy-reveal text-4xl font-light leading-tight tracking-tight text-gray-900 sm:text-6xl md:text-7xl" style={{ animationDelay: "180ms" }}>
               Matière Première
             </h1>
-            <p className="animate-float-up text-xl font-light text-gray-700 sm:text-2xl">
+            <p className="hero-copy-reveal text-xl font-light text-gray-700 sm:text-2xl" style={{ animationDelay: "300ms" }}>
               L'essence pure de la parfumerie
             </p>
           </div>
 
-          <div className="pt-8">
+          <div className="hero-copy-reveal pt-8" style={{ animationDelay: "420ms" }}>
             <p className="mx-auto mb-8 max-w-2xl text-sm font-light leading-7 text-gray-600 sm:text-base">
               Découvrez une collection exclusive de décants 50ml, où chaque fragrance célèbre la pureté d'une seule matière première.
             </p>
