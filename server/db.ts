@@ -1,7 +1,8 @@
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import { InsertUser, users, products, cartItems, orders, orderItems, InsertOrder, InsertOrderItem } from "../drizzle/schema";
+import { InsertUser, users, products, cartItems, cartSyncReceipts, orders, orderItems, InsertOrder, InsertOrderItem } from "../drizzle/schema";
 import { ENV } from './_core/env';
+import { buildCartSyncPlan } from "@shared/cart-sync";
 
 let _db: ReturnType<typeof drizzle> | null = null;
 
@@ -137,6 +138,21 @@ export async function getCartItems(userId: number) {
 export async function addCartItem(userId: number, productId: number, quantity: number) {
   const db = await getDb();
   if (!db) return;
+
+  const existingItems = await db
+    .select()
+    .from(cartItems)
+    .where(and(eq(cartItems.userId, userId), eq(cartItems.productId, productId)));
+
+  if (existingItems.length > 0) {
+    const mergedQuantity = existingItems.reduce((total, item) => total + item.quantity, quantity);
+    await db.update(cartItems).set({ quantity: mergedQuantity }).where(eq(cartItems.id, existingItems[0].id));
+    for (const duplicate of existingItems.slice(1)) {
+      await db.delete(cartItems).where(eq(cartItems.id, duplicate.id));
+    }
+    return;
+  }
+
   await db.insert(cartItems).values({ userId, productId, quantity });
 }
 
@@ -156,6 +172,77 @@ export async function clearUserCart(userId: number) {
   const db = await getDb();
   if (!db) return;
   await db.delete(cartItems).where(eq(cartItems.userId, userId));
+}
+
+export async function syncGuestCartToUserCart(
+  userId: number,
+  syncKey: string,
+  guestItems: Array<{ productId: number; quantity: number }>,
+) {
+  const db = await getDb();
+  if (!db) {
+    throw new Error("La synchronisation du panier est temporairement indisponible");
+  }
+
+  const existingReceipt = await db
+    .select()
+    .from(cartSyncReceipts)
+    .where(eq(cartSyncReceipts.syncKey, syncKey))
+    .limit(1);
+
+  if (existingReceipt.length > 0) {
+    if (existingReceipt[0].userId !== userId) {
+      throw new Error("Clé de synchronisation invalide");
+    }
+    return { alreadySynced: true } as const;
+  }
+
+  try {
+    await db.transaction(async (tx) => {
+      const accountItems = await tx.select().from(cartItems).where(eq(cartItems.userId, userId));
+      const catalog = await tx.select({ id: products.id, stock: products.stock }).from(products);
+      const plan = buildCartSyncPlan({
+        accountItems: accountItems.map(({ productId, quantity }) => ({ productId, quantity })),
+        guestItems,
+        products: catalog,
+      });
+      const existingByProduct = new Map<number, typeof accountItems>();
+
+      accountItems.forEach((item) => {
+        const rows = existingByProduct.get(item.productId) ?? [];
+        rows.push(item);
+        existingByProduct.set(item.productId, rows);
+      });
+
+      for (const item of plan) {
+        const rows = existingByProduct.get(item.productId) ?? [];
+        if (rows.length === 0) {
+          await tx.insert(cartItems).values({ userId, productId: item.productId, quantity: item.quantity });
+          continue;
+        }
+
+        await tx.update(cartItems).set({ quantity: item.quantity }).where(eq(cartItems.id, rows[0].id));
+        for (const duplicateRow of rows.slice(1)) {
+          await tx.delete(cartItems).where(eq(cartItems.id, duplicateRow.id));
+        }
+      }
+
+      await tx.insert(cartSyncReceipts).values({ userId, syncKey });
+    });
+  } catch (error) {
+    const receiptAfterRetry = await db
+      .select()
+      .from(cartSyncReceipts)
+      .where(and(eq(cartSyncReceipts.syncKey, syncKey), eq(cartSyncReceipts.userId, userId)))
+      .limit(1);
+
+    if (receiptAfterRetry.length > 0) {
+      return { alreadySynced: true } as const;
+    }
+    throw error;
+  }
+
+  return { alreadySynced: false } as const;
 }
 
 /**

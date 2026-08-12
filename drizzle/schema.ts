@@ -63,6 +63,17 @@ export type CartItem = typeof cartItems.$inferSelect;
 export type InsertCartItem = typeof cartItems.$inferInsert;
 
 /**
+ * Cart synchronization receipts prevent a guest cart from being merged twice
+ * if a browser retries after a network interruption.
+ */
+export const cartSyncReceipts = mysqlTable("cartSyncReceipts", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  syncKey: varchar("syncKey", { length: 128 }).notNull().unique(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+/**
  * Orders table - Commandes
  */
 export const orders = mysqlTable("orders", {

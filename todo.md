@@ -5911,3 +5911,12 @@
 - [x] Valider les formulaires, autorisations et tests de non-régression
 - [x] Vérifier desktop/mobile, TypeScript et build de production
 - [x] Sauvegarder un checkpoint de la navigation et de l’administration catalogue
+
+## Synchronisation panier invité à la connexion — demande courante
+- [x] Auditer les sources de vérité du panier local et du panier compte
+- [x] Créer une procédure de fusion idempotente côté serveur
+- [x] Déclencher la synchronisation après authentification et ne vider le localStorage qu’après succès
+- [x] Gérer les doublons, quantités, produits indisponibles et erreurs de reprise
+- [x] Ajouter les tests unitaires et d’intégration du parcours de synchronisation
+- [x] Vérifier le parcours en interface, TypeScript et build de production
+- [ ] Sauvegarder un checkpoint de la synchronisation panier

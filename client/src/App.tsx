@@ -7,6 +7,7 @@ import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import InitialLoader from "./components/InitialLoader";
 import { getInitialAnchorTargetId, INITIAL_LOADER_SESSION_KEY, shouldShowInitialLoader } from "@shared/initial-loader";
+import { useCartSyncOnSignIn } from "@/hooks/useCartSyncOnSignIn";
 const Home = lazy(() => import("./pages/Home"));
 const loadHomePremium = () => import("./pages/HomePremium");
 const HomePremium = lazy(loadHomePremium);
@@ -31,6 +32,11 @@ function PageLoading() {
       Chargement de la collection…
     </main>
   );
+}
+
+function CartSyncOnSignIn() {
+  useCartSyncOnSignIn();
+  return null;
 }
 
 function Router() {
@@ -110,6 +116,7 @@ function App() {
       >
         <TooltipProvider>
           <Toaster />
+          <CartSyncOnSignIn />
           {showInitialLoader ? <InitialLoader onComplete={dismissInitialLoader} /> : <Router />}
         </TooltipProvider>
       </ThemeProvider>

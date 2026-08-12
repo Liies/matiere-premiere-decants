@@ -19,6 +19,7 @@ import {
   getOrderItems,
   getOrderById,
   updateProductCatalog,
+  syncGuestCartToUserCart,
 } from "./db";
 import { nanoid } from "nanoid";
 import { notifyOwner } from "./_core/notification";
@@ -134,6 +135,18 @@ export const appRouter = router({
       return enrichedItems;
     }),
 
+    syncGuestCart: protectedProcedure
+      .input(z.object({
+        syncKey: z.string().min(12).max(128),
+        items: z.array(z.object({
+          productId: z.number().int().positive(),
+          quantity: z.number().int().min(1).max(100),
+        })).min(1).max(100),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        return syncGuestCartToUserCart(ctx.user.id, input.syncKey, input.items);
+      }),
+
     addItem: protectedProcedure
       .input(z.object({ productId: z.number(), quantity: z.number().min(1) }))
       .mutation(async ({ input, ctx }) => {
@@ -143,8 +156,13 @@ export const appRouter = router({
           throw new Error("Produit non trouvé");
         }
 
-        // Valider le stock
-        if (product.stock < input.quantity) {
+        const currentItems = await getCartItems(ctx.user.id);
+        const currentQuantity = (currentItems || [])
+          .filter((item) => item.productId === input.productId)
+          .reduce((total, item) => total + item.quantity, 0);
+
+        // Valider le stock avec la quantité déjà présente dans le panier compte.
+        if (product.stock < currentQuantity + input.quantity) {
           throw new Error("Stock insuffisant");
         }
 

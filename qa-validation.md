@@ -27,3 +27,8 @@
 
 - Le menu principal du catalogue affiche désormais **Accueil**, **Catalogue**, **À propos**, **FAQ** et **Contact** ; l’entrée « Par familles » a été retirée.
 - Les filtres olfactifs restent accessibles directement dans la page Catalogue.
+
+## Synchronisation du panier à la connexion
+
+- Le panier authentifié continue de charger sans erreur après ajout du déclencheur global de synchronisation.
+- Les entrées existantes en double d’un même produit sont prises en compte dans le plan de fusion et sont normalisées en une quantité unique dès qu’une synchronisation invitée réussit.

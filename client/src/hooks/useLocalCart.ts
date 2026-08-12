@@ -8,7 +8,8 @@ export interface LocalCartItem {
   price: number;
 }
 
-const CART_STORAGE_KEY = "matiere-premiere-cart";
+export const CART_STORAGE_KEY = "matiere-premiere-cart";
+export const CART_SYNC_KEY_STORAGE_KEY = "matiere-premiere-cart-sync-key";
 
 export function useLocalCart() {
   const [cartItems, setCartItems] = useState<LocalCartItem[]>([]);
