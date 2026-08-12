@@ -5901,3 +5901,13 @@
 - [x] Auditer la couverture des parcours d’intégration panier et liste de souhaits, puis compléter les cas manquants
 - [x] Ajouter les tests, vérifier desktop/mobile et le build
 - [x] Sauvegarder un checkpoint de la correction et des souhaits
+
+## Navigation uniforme et administration catalogue — demande courante
+- [x] Retirer « Par familles » du menu desktop et du menu mobile
+- [x] Unifier les éléments, états actifs et liens de navigation sur toutes les pages
+- [x] Vérifier que les filtres olfactifs du catalogue restent disponibles sans le menu dédié
+- [x] Créer les procédures administrateur de lecture et mise à jour des produits
+- [x] Créer l’interface d’administration pour modifier nom, description, prix et contenance
+- [x] Valider les formulaires, autorisations et tests de non-régression
+- [x] Vérifier desktop/mobile, TypeScript et build de production
+- [ ] Sauvegarder un checkpoint de la navigation et de l’administration catalogue

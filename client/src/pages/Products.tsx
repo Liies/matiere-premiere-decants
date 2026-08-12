@@ -223,7 +223,7 @@ export default function Products() {
                       >
                         <span>
                           <span className="block text-sm text-gray-900">{suggestion.name}</span>
-                          <span className="block text-xs text-gray-500">Décant 50ml · Voir la fiche</span>
+                          <span className="block text-xs text-gray-500">Décant {suggestion.volumeMl ?? 50} ml · Voir la fiche</span>
                         </span>
                         <span className="text-xs uppercase tracking-[0.16em] text-gray-400">Ouvrir</span>
                       </button>
@@ -356,7 +356,7 @@ export default function Products() {
                       </div>
                       <div className="mt-5">
                         <h3 className="text-lg font-light text-gray-900 hover:text-gray-600 transition-colors">{product.name}</h3>
-                        <p className="text-xs text-gray-500 font-medium mt-1">Décant 50ml</p>
+                        <p className="text-xs text-gray-500 font-medium mt-1">Décant {product.volumeMl ?? 50} ml</p>
                       </div>
                       </a>
                     </div>

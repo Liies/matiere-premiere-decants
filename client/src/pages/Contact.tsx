@@ -3,8 +3,9 @@ import { useAuth } from "@/_core/hooks/useAuth";
 import { trpc } from "@/lib/trpc";
 import { Button } from "@/components/ui/button";
 import Footer from "@/components/Footer";
+import Header from "@/components/Header";
 import { Link } from "wouter";
-import { Leaf, Mail, Phone, MapPin } from "lucide-react";
+import { Mail, Phone, MapPin } from "lucide-react";
 import { toast } from "sonner";
 
 export default function Contact() {
@@ -48,30 +49,7 @@ export default function Contact() {
 
   return (
     <div className="min-h-screen bg-white">
-      {/* Header */}
-      <header className="border-b border-gray-200">
-        <div className="container flex items-center justify-between py-6">
-          <Link href="/">
-            <div className="flex items-center gap-2 cursor-pointer">
-              <Leaf className="w-6 h-6 text-gray-900" />
-              <h1 className="text-2xl font-light tracking-wider text-gray-900">
-                Matière Première
-              </h1>
-            </div>
-          </Link>
-          <nav className="flex items-center gap-8">
-            <Link href="/products" className="text-sm text-gray-600 hover:text-gray-900 transition">
-              Catalogue
-            </Link>
-            <Link href="/contact" className="text-sm text-gray-900 font-medium">
-              Contact
-            </Link>
-            <Link href="/cart" className="text-sm text-gray-600 hover:text-gray-900 transition">
-              Panier
-            </Link>
-          </nav>
-        </div>
-      </header>
+      <Header />
 
       {/* Hero Section */}
       <section className="py-20 px-4 bg-gray-50">

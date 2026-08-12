@@ -112,6 +112,19 @@ export async function getProductById(id: number) {
   return result.length > 0 ? result[0] : undefined;
 }
 
+export type ProductCatalogUpdate = {
+  name: string;
+  description: string;
+  price: number;
+  volumeMl: number;
+};
+
+export async function updateProductCatalog(id: number, values: ProductCatalogUpdate) {
+  const db = await getDb();
+  if (!db) return;
+  await db.update(products).set(values).where(eq(products.id, id));
+}
+
 /**
  * Cart queries
  */

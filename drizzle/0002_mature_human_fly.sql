@@ -1,0 +1,1 @@
+ALTER TABLE `products` ADD `volumeMl` int DEFAULT 50 NOT NULL;

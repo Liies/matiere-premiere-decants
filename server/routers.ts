@@ -18,12 +18,20 @@ import {
   createOrderItem,
   getOrderItems,
   getOrderById,
+  updateProductCatalog,
 } from "./db";
 import { nanoid } from "nanoid";
 import { notifyOwner } from "./_core/notification";
 import { contactMessageSchema, CONTACT_SUBJECT_LABELS } from "@shared/contact";
 
 const ORDER_STATUS = z.enum(["pending", "paid", "processing", "shipped", "delivered", "cancelled"]);
+const PRODUCT_CATALOG_UPDATE = z.object({
+  id: z.number().int().positive(),
+  name: z.string().trim().min(2, "Le nom doit comporter au moins 2 caractères").max(255),
+  description: z.string().trim().min(10, "La description doit comporter au moins 10 caractères").max(4000),
+  price: z.number().int().min(100, "Le prix doit être d’au moins 1,00 €").max(1_000_000),
+  volumeMl: z.number().int().min(1, "La contenance doit être supérieure à 0 ml").max(1_000),
+});
 
 export const appRouter = router({
   system: systemRouter,
@@ -73,6 +81,37 @@ export const appRouter = router({
       .query(async ({ input }) => {
         const product = await getProductById(input.id);
         return product;
+      }),
+  }),
+
+  adminCatalog: router({
+    list: protectedProcedure.query(async ({ ctx }) => {
+      if (ctx.user.role !== "admin") {
+        throw new Error("Accès refusé");
+      }
+      return getAllProducts();
+    }),
+
+    update: protectedProcedure
+      .input(PRODUCT_CATALOG_UPDATE)
+      .mutation(async ({ input, ctx }) => {
+        if (ctx.user.role !== "admin") {
+          throw new Error("Accès refusé");
+        }
+
+        const product = await getProductById(input.id);
+        if (!product) {
+          throw new Error("Produit non trouvé");
+        }
+
+        await updateProductCatalog(input.id, {
+          name: input.name,
+          description: input.description,
+          price: input.price,
+          volumeMl: input.volumeMl,
+        });
+
+        return { success: true } as const;
       }),
   }),
 

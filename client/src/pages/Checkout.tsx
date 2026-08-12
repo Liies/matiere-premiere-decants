@@ -1,8 +1,9 @@
 import { trpc } from "@/lib/trpc";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import Header from "@/components/Header";
 import { Link, useLocation } from "wouter";
-import { Leaf, CheckCircle } from "lucide-react";
+import { CheckCircle } from "lucide-react";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { toast } from "sonner";
 import { useState } from "react";
@@ -43,16 +44,7 @@ export default function Checkout() {
   if (!isAuthenticated) {
     return (
       <div className="min-h-screen flex flex-col bg-white">
-        <header className="border-b border-gray-200">
-          <div className="container flex items-center justify-between py-6">
-            <Link href="/" className="flex items-center gap-2 hover:opacity-70 transition">
-              <Leaf className="w-6 h-6 text-gray-900" />
-              <h1 className="text-base font-light tracking-[0.12em] text-gray-900 sm:text-2xl sm:tracking-wider">
-                Matière Première
-              </h1>
-            </Link>
-          </div>
-        </header>
+        <Header />
         <main className="flex-1 flex items-center justify-center py-12 px-4">
           <div className="text-center">
             <p className="text-gray-600 mb-4">Veuillez vous connecter pour continuer</p>
@@ -68,16 +60,7 @@ export default function Checkout() {
   if (orderCreated) {
     return (
       <div className="min-h-screen flex flex-col bg-white">
-        <header className="border-b border-gray-200">
-          <div className="container flex items-center justify-between py-6">
-            <Link href="/" className="flex items-center gap-2 hover:opacity-70 transition">
-              <Leaf className="w-6 h-6 text-gray-900" />
-              <h1 className="text-base font-light tracking-[0.12em] text-gray-900 sm:text-2xl sm:tracking-wider">
-                Matière Première
-              </h1>
-            </Link>
-          </div>
-        </header>
+        <Header />
         <main className="flex-1 flex items-center justify-center py-12 px-4">
           <div className="text-center max-w-md">
             <CheckCircle className="w-16 h-16 text-green-600 mx-auto mb-4" />
@@ -139,17 +122,7 @@ export default function Checkout() {
 
   return (
     <div className="min-h-screen flex flex-col bg-white">
-      {/* Header */}
-      <header className="border-b border-gray-200">
-        <div className="container flex items-center justify-between py-6">
-          <Link href="/" className="flex items-center gap-2 hover:opacity-70 transition">
-            <Leaf className="w-6 h-6 text-gray-900" />
-            <h1 className="text-base font-light tracking-[0.12em] text-gray-900 sm:text-2xl sm:tracking-wider">
-              Matière Première
-            </h1>
-          </Link>
-        </div>
-      </header>
+      <Header />
 
       {/* Content */}
               <main className="flex-1 py-8 sm:py-12">

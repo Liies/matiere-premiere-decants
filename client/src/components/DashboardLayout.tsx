@@ -21,15 +21,15 @@ import {
 } from "@/components/ui/sidebar";
 import { getLoginUrl } from "@/const";
 import { useIsMobile } from "@/hooks/useMobile";
-import { LayoutDashboard, LogOut, PanelLeft, Users } from "lucide-react";
+import { Leaf, LogOut, Package, PanelLeft, ShoppingBag } from "lucide-react";
 import { CSSProperties, useEffect, useRef, useState } from "react";
 import { useLocation } from "wouter";
 import { DashboardLayoutSkeleton } from './DashboardLayoutSkeleton';
 import { Button } from "./ui/button";
 
 const menuItems = [
-  { icon: LayoutDashboard, label: "Page 1", path: "/" },
-  { icon: Users, label: "Page 2", path: "/some-path" },
+  { icon: ShoppingBag, label: "Commandes", path: "/admin" },
+  { icon: Package, label: "Catalogue", path: "/admin/catalogue" },
 ];
 
 const SIDEBAR_WIDTH_KEY = "sidebar-width";
@@ -169,11 +169,10 @@ function DashboardLayoutContent({
                 <PanelLeft className="h-4 w-4 text-muted-foreground" />
               </button>
               {!isCollapsed ? (
-                <div className="flex items-center gap-2 min-w-0">
-                  <span className="font-semibold tracking-tight truncate">
-                    Navigation
-                  </span>
-                </div>
+                <a href="/" className="flex min-w-0 items-center gap-2 text-sm font-semibold tracking-tight text-foreground hover:opacity-70">
+                  <Leaf className="h-4 w-4 shrink-0" aria-hidden="true" />
+                  <span className="truncate">Matière Première</span>
+                </a>
               ) : null}
             </div>
           </SidebarHeader>

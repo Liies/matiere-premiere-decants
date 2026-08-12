@@ -19,6 +19,7 @@ describe("Products Router", () => {
     expect(firstProduct).toHaveProperty("id");
     expect(firstProduct).toHaveProperty("name");
     expect(firstProduct).toHaveProperty("price");
+    expect(firstProduct).toHaveProperty("volumeMl");
     expect(firstProduct).toHaveProperty("stock");
     expect(firstProduct).toHaveProperty("description");
     expect(firstProduct).toHaveProperty("topNotes");

@@ -1,8 +1,9 @@
 import { trpc } from "@/lib/trpc";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import Header from "@/components/Header";
 import { Link, useLocation } from "wouter";
-import { Leaf, LogOut } from "lucide-react";
+import { LogOut } from "lucide-react";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { toast } from "sonner";
 
@@ -15,16 +16,7 @@ export default function Account() {
   if (!isAuthenticated) {
     return (
       <div className="min-h-screen flex flex-col bg-white">
-        <header className="border-b border-gray-200">
-          <div className="container flex items-center justify-between py-6">
-            <Link href="/" className="flex items-center gap-2 hover:opacity-70 transition">
-              <Leaf className="w-6 h-6 text-gray-900" />
-              <h1 className="text-2xl font-light tracking-wider text-gray-900">
-                Matière Première
-              </h1>
-            </Link>
-          </div>
-        </header>
+        <Header />
         <main className="flex-1 flex items-center justify-center py-12 px-4">
           <div className="text-center">
             <p className="text-gray-600 mb-4">Veuillez vous connecter pour accéder à votre compte</p>
@@ -59,30 +51,7 @@ export default function Account() {
 
   return (
     <div className="min-h-screen flex flex-col bg-white">
-      {/* Header */}
-      <header className="border-b border-gray-200">
-        <div className="container flex items-center justify-between py-6">
-          <Link href="/" className="flex items-center gap-2 hover:opacity-70 transition">
-            <Leaf className="w-6 h-6 text-gray-900" />
-            <h1 className="text-2xl font-light tracking-wider text-gray-900">
-              Matière Première
-            </h1>
-          </Link>
-          <nav className="flex items-center gap-8">
-            <Link href="/products" className="text-sm text-gray-600 hover:text-gray-900 transition">
-              Catalogue
-            </Link>
-            <Link href="/cart" className="text-sm text-gray-600 hover:text-gray-900 transition">
-              Panier
-            </Link>
-            {user?.role === "admin" && (
-              <Link href="/admin" className="text-sm text-gray-600 hover:text-gray-900 transition">
-                Admin
-              </Link>
-            )}
-          </nav>
-        </div>
-      </header>
+      <Header />
 
       {/* Content */}
       <main className="flex-1 py-12 px-4">

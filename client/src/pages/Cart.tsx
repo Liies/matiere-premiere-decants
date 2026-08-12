@@ -1,8 +1,9 @@
 import { trpc } from "@/lib/trpc";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import Header from "@/components/Header";
 import { Link } from "wouter";
-import { Leaf, Trash2, Plus, Minus } from "lucide-react";
+import { Trash2, Plus, Minus } from "lucide-react";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { useLocalCart } from "@/hooks/useLocalCart";
 import { toast } from "sonner";
@@ -68,25 +69,7 @@ export default function Cart() {
 
   return (
     <div className="min-h-screen flex flex-col bg-white">
-      {/* Header */}
-      <header className="border-b border-gray-200">
-        <div className="container flex items-center justify-between gap-3 py-3 sm:py-6">
-          <Link href="/" className="flex items-center gap-2 hover:opacity-70 transition">
-            <Leaf className="h-5 w-5 shrink-0 text-gray-900 sm:h-6 sm:w-6" />
-            <h1 className="text-base font-light tracking-[0.12em] text-gray-900 sm:text-2xl sm:tracking-wider">
-              Matière Première
-            </h1>
-          </Link>
-          <nav className="flex items-center gap-2 sm:gap-8">
-            <Link href="/products" className="flex min-h-11 items-center rounded-lg px-2 text-xs text-gray-600 transition hover:bg-gray-50 hover:text-gray-900 sm:text-sm">
-              Catalogue
-            </Link>
-            <Link href="/cart" className="flex min-h-11 items-center rounded-lg px-2 text-xs font-medium text-gray-900 sm:text-sm">
-              Panier
-            </Link>
-          </nav>
-        </div>
-      </header>
+      <Header />
 
       {/* Content */}
               <main className="flex-1 py-8 sm:py-12">
@@ -117,7 +100,7 @@ export default function Cart() {
                         <h3 className="text-lg font-light text-gray-900">
                           {isAuthenticated ? (item as any).product?.name : (item as any).name}
                         </h3>
-                        <p className="text-sm text-gray-500">Décant 50ml</p>
+                        <p className="text-sm text-gray-500">Décant {(isAuthenticated ? (item as any).product?.volumeMl : (item as any).volumeMl) ?? 50} ml</p>
                       </div>
                       <p className="text-lg font-light text-gray-900">
                         €{((isAuthenticated ? (item as any).product?.price || 0 : (item as any).price) / 100).toFixed(2)}

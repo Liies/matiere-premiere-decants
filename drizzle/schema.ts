@@ -37,6 +37,7 @@ export const products = mysqlTable("products", {
   heartNotes: text("heartNotes"),
   baseNotes: text("baseNotes"),
   price: int("price").notNull(), // Price in cents
+  volumeMl: int("volumeMl").notNull().default(50),
   stock: int("stock").notNull().default(0),
   imageUrl: varchar("imageUrl", { length: 512 }),
   createdAt: timestamp("createdAt").defaultNow().notNull(),

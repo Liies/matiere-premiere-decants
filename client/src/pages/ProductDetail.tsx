@@ -210,6 +210,7 @@ export default function ProductDetail() {
               <div className="text-3xl font-light text-gray-900">
                 {formatPrice(product.price)}
               </div>
+              <p className="mt-2 text-sm text-gray-500">Décant {product.volumeMl ?? 50} ml</p>
             </div>
 
             {/* Olfactory Notes */}

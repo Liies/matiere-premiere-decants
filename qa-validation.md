@@ -16,3 +16,14 @@
 
 - Le contrôle cœur est visible à côté de l’ajout au panier de **Vanilla Powder**.
 - Son activation fait basculer son libellé de « Ajouter aux favoris » à « Retirer des favoris » et affiche le cœur rempli, conformément au comportement de la liste de souhaits.
+
+## Administration catalogue
+
+- La route administrateur `/admin/catalogue` affiche la navigation de back-office, une liste de produits et les champs d’édition **nom**, **description**, **prix** et **contenance**.
+- Les produits existants ont reçu la contenance par défaut de **50 ml** lors de la migration non destructive.
+- Le changement de produit recharge les valeurs correspondantes dans le formulaire sans écriture involontaire.
+
+## Navigation publique uniforme
+
+- Le menu principal du catalogue affiche désormais **Accueil**, **Catalogue**, **À propos**, **FAQ** et **Contact** ; l’entrée « Par familles » a été retirée.
+- Les filtres olfactifs restent accessibles directement dans la page Catalogue.

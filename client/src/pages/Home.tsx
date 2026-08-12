@@ -1,7 +1,8 @@
 import { useAuth } from "@/_core/hooks/useAuth";
 import { Button } from "@/components/ui/button";
+import Header from "@/components/Header";
 import { Link } from "wouter";
-import { ArrowRight, Leaf, Sparkles, Droplet, Package } from "lucide-react";
+import { ArrowRight, Sparkles, Droplet, Package } from "lucide-react";
 import { imageAssets } from "@shared/image-assets";
 
 export default function Home() {
@@ -9,35 +10,7 @@ export default function Home() {
 
   return (
     <div className="min-h-screen flex flex-col bg-white">
-      {/* Header */}
-      <header className="border-b border-gray-200">
-        <div className="container flex items-center justify-between py-6">
-          <div className="flex items-center gap-2">
-            <Leaf className="w-6 h-6 text-gray-900" />
-            <h1 className="text-2xl font-light tracking-wider text-gray-900">
-              Matière Première
-            </h1>
-          </div>
-          <nav className="flex items-center gap-8">
-            <Link href="/products" className="text-sm text-gray-600 hover:text-gray-900 transition">
-              Catalogue
-            </Link>
-            <Link href="/cart" className="text-sm text-gray-600 hover:text-gray-900 transition">
-              Panier
-            </Link>
-            {isAuthenticated && (
-              <Link href="/account" className="text-sm text-gray-600 hover:text-gray-900 transition">
-                Compte
-              </Link>
-            )}
-            {isAuthenticated && user?.role === "admin" && (
-              <Link href="/admin" className="text-sm text-gray-600 hover:text-gray-900 transition">
-                Admin
-              </Link>
-            )}
-          </nav>
-        </div>
-      </header>
+      <Header />
 
       {/* Hero Section */}
       <section className="relative py-24 px-4 overflow-hidden bg-gradient-to-b from-white to-gray-50">

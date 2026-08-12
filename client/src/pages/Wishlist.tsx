@@ -66,7 +66,7 @@ export default function Wishlist() {
                           {image ? <img src={image.compressed} alt={product.name} className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-[1.03]" /> : <Leaf className="h-12 w-12 text-gray-300" aria-hidden="true" />}
                         </div>
                         <h2 className="mt-5 text-xl font-light text-gray-900">{product.name}</h2>
-                        <p className="mt-1 text-sm text-gray-500">Décant 50ml · €{(product.price / 100).toFixed(2)}</p>
+                        <p className="mt-1 text-sm text-gray-500">Décant {product.volumeMl ?? 50} ml · €{(product.price / 100).toFixed(2)}</p>
                       </Link>
                       <button type="button" onClick={() => toggleWishlist(product.id)} className="mt-5 flex min-h-11 items-center gap-2 text-sm text-gray-600 transition hover:text-gray-900">
                         <X className="h-4 w-4" aria-hidden="true" /> Retirer de la liste
