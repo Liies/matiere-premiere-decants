@@ -5936,3 +5936,11 @@
 - [x] Implémenter et tester les modèles commande, confirmation et changement de statut
 - [x] Déclencher les envois simulés sans bloquer le parcours de commande
 - [x] Documenter le passage au mode Resend après correction des identifiants
+
+## Tests d’intégration du flux de commande — demande courante
+- [x] Auditer la couverture existante du panier, du checkout et de la procédure orders.create
+- [x] Tester le flux complet valide : prix serveur, commande, lignes et vidage du panier
+- [x] Tester les échecs : panier vide, prix altéré, produit absent et stock insuffisant
+- [x] Tester les notifications simulées et l’absence de blocage du flux de commande
+- [x] Exécuter Vitest, TypeScript et le build de production
+- [ ] Sauvegarder un checkpoint de la couverture d’intégration commande

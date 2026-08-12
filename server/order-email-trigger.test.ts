@@ -45,6 +45,17 @@ const customer = {
 
 const administrator = { ...customer, id: 72, role: "admin" as const };
 
+const orderPayload = {
+  customerName: "Camille Martin",
+  customerEmail: "camille@example.com",
+  shippingAddress: "12 rue des Fleurs",
+  shippingCity: "Paris",
+  shippingPostalCode: "75001",
+  shippingCountry: "France",
+  items: [{ productId: 1, quantity: 1, unitPrice: 8500 }],
+  totalAmount: 8500,
+};
+
 describe("déclencheurs d’emails de commande", () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -64,18 +75,22 @@ describe("déclencheurs d’emails de commande", () => {
   it("déclenche les deux emails après une commande sans retarder sa confirmation", async () => {
     const caller = appRouter.createCaller({ user: customer, req: {} as any, res: {} as any });
 
-    const result = await caller.orders.create({
-      customerName: "Camille Martin",
-      customerEmail: "camille@example.com",
-      shippingAddress: "12 rue des Fleurs",
-      shippingCity: "Paris",
-      shippingPostalCode: "75001",
-      shippingCountry: "France",
-      items: [{ productId: 1, quantity: 1, unitPrice: 8500 }],
-      totalAmount: 8500,
-    });
+    const result = await caller.orders.create(orderPayload);
 
     expect(result.success).toBe(true);
+    expect(mocks.createOrder).toHaveBeenCalledWith(expect.objectContaining({
+      userId: customer.id,
+      totalAmount: 8500,
+      status: "pending",
+    }));
+    expect(mocks.createOrderItem).toHaveBeenCalledWith({
+      orderId: 540,
+      productId: 1,
+      productName: "Vanilla Powder",
+      quantity: 1,
+      unitPrice: 8500,
+    });
+    expect(mocks.clearUserCart).toHaveBeenCalledWith(customer.id);
     expect(mocks.sendOrderCreatedEmails).toHaveBeenCalledWith(expect.objectContaining({
       customerEmail: "camille@example.com",
       totalAmount: 8500,
@@ -107,15 +122,40 @@ describe("déclencheurs d’emails de commande", () => {
     mocks.sendOrderCreatedEmails.mockRejectedValue(new Error("Service temporairement indisponible"));
     const caller = appRouter.createCaller({ user: customer, req: {} as any, res: {} as any });
 
+    await expect(caller.orders.create(orderPayload)).resolves.toMatchObject({ success: true });
+  });
+
+  it("refuse un panier vide avant de créer une commande", async () => {
+    const caller = appRouter.createCaller({ user: customer, req: {} as any, res: {} as any });
+
+    await expect(caller.orders.create({ ...orderPayload, items: [], totalAmount: 0 })).rejects.toThrow("Aucun article");
+    expect(mocks.createOrder).not.toHaveBeenCalled();
+    expect(mocks.clearUserCart).not.toHaveBeenCalled();
+  });
+
+  it("refuse un montant altéré ou un produit absent sans vider le panier", async () => {
+    const caller = appRouter.createCaller({ user: customer, req: {} as any, res: {} as any });
+
     await expect(caller.orders.create({
-      customerName: "Camille Martin",
-      customerEmail: "camille@example.com",
-      shippingAddress: "12 rue des Fleurs",
-      shippingCity: "Paris",
-      shippingPostalCode: "75001",
-      shippingCountry: "France",
-      items: [{ productId: 1, quantity: 1, unitPrice: 8500 }],
-      totalAmount: 8500,
-    })).resolves.toMatchObject({ success: true });
+      ...orderPayload,
+      items: [{ productId: 1, quantity: 1, unitPrice: 1 }],
+      totalAmount: 1,
+    })).rejects.toThrow("Montant invalide");
+    expect(mocks.createOrder).not.toHaveBeenCalled();
+    expect(mocks.clearUserCart).not.toHaveBeenCalled();
+
+    mocks.getProductById.mockResolvedValueOnce(undefined);
+    await expect(caller.orders.create(orderPayload)).rejects.toThrow("Produit 1 non trouvé");
+    expect(mocks.createOrder).not.toHaveBeenCalled();
+  });
+
+  it("refuse un stock insuffisant sans créer ni envoyer une commande", async () => {
+    mocks.getProductById.mockResolvedValueOnce({ id: 1, name: "Vanilla Powder", stock: 0, price: 8500 });
+    const caller = appRouter.createCaller({ user: customer, req: {} as any, res: {} as any });
+
+    await expect(caller.orders.create(orderPayload)).rejects.toThrow("Stock insuffisant");
+    expect(mocks.createOrder).not.toHaveBeenCalled();
+    expect(mocks.sendOrderCreatedEmails).not.toHaveBeenCalled();
+    expect(mocks.clearUserCart).not.toHaveBeenCalled();
   });
 });
