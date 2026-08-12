@@ -113,12 +113,12 @@ export default function Products() {
     <div className="min-h-screen flex flex-col bg-white">
       <Header />
 
-      <main className="flex-1 py-12 px-4">
+      <main className="flex-1 py-8 sm:py-12">
         <div className="container">
           <div className="mb-10">
             <p className="text-xs uppercase tracking-[0.25em] text-gray-500 mb-3">La collection</p>
-            <h2 className="text-4xl font-light text-gray-900 mb-2">Catalogue Complet</h2>
-            <p className="text-gray-600">Découvrez nos 10 parfums de niche en décants 50ml</p>
+            <h2 className="text-3xl font-light text-gray-900 mb-2 sm:text-4xl">Catalogue Complet</h2>
+            <p className="max-w-xl text-sm leading-6 text-gray-600 sm:text-base">Découvrez nos 10 parfums de niche en décants 50ml</p>
           </div>
 
           <section aria-labelledby="catalog-search-title" className="mb-6 animate-slide-up">
@@ -171,7 +171,7 @@ export default function Products() {
                   id="catalog-search-suggestions"
                   role="listbox"
                   aria-label="Suggestions de parfums"
-                  className="absolute left-0 right-0 top-[calc(100%+0.5rem)] z-30 overflow-hidden rounded-2xl border border-gray-200 bg-white p-2 shadow-xl animate-fade-in"
+                  className="absolute left-0 right-0 top-[calc(100%+0.5rem)] z-30 max-h-[min(60vh,24rem)] overflow-y-auto overscroll-contain rounded-2xl border border-gray-200 bg-white p-2 shadow-xl animate-fade-in"
                 >
                   {searchSuggestions.length > 0 ? (
                     searchSuggestions.map((suggestion, index) => (
@@ -184,7 +184,8 @@ export default function Products() {
                         onMouseDown={(event) => event.preventDefault()}
                         onMouseEnter={() => setActiveSuggestionIndex(index)}
                         onClick={() => selectSuggestion(suggestion)}
-                        className={`flex w-full items-center justify-between rounded-xl px-4 py-3 text-left transition-colors ${
+                                                  className={`flex min-h-11 w-full items-center justify-between gap-3 rounded-xl px-3 py-3 text-left transition-colors sm:px-4 ${
+
                           activeSuggestionIndex === index ? "bg-gray-100" : "hover:bg-gray-50"
                         }`}
                       >
@@ -226,7 +227,7 @@ export default function Products() {
                   type="button"
                   variant="ghost"
                   onClick={() => setSelectedFilters([])}
-                  className="self-start md:self-auto text-gray-600 hover:text-gray-900"
+                  className="min-h-11 self-start text-gray-600 hover:text-gray-900 md:self-auto"
                 >
                   <X className="h-4 w-4 mr-2" aria-hidden="true" />
                   Réinitialiser
@@ -240,14 +241,14 @@ export default function Products() {
               onValueChange={setSelectedFilters}
               variant="outline"
               aria-label="Filtrer les parfums par notes olfactives"
-              className="mt-5 flex w-full flex-wrap gap-2"
+              className="mt-5 flex w-full flex-nowrap gap-2 overflow-x-auto overscroll-x-contain pb-2 sm:flex-wrap sm:overflow-visible sm:pb-0"
             >
               {OLFACTORY_FILTERS.map((filter) => (
                 <ToggleGroupItem
                   key={filter.id}
                   value={filter.id}
                   aria-label={`Filtrer par notes ${filter.label}`}
-                  className="rounded-full border-gray-300 bg-white px-4 py-2 text-sm font-normal data-[state=on]:border-gray-900 data-[state=on]:bg-gray-900 data-[state=on]:text-white"
+                  className="inline-flex min-h-11 min-w-max flex-none whitespace-nowrap rounded-full border-gray-300 bg-white px-3 py-2 text-sm font-normal touch-manipulation data-[state=on]:border-gray-900 data-[state=on]:bg-gray-900 data-[state=on]:text-white sm:px-4"
                 >
                   {filter.label}
                 </ToggleGroupItem>
@@ -286,16 +287,16 @@ export default function Products() {
               </Button>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div className="grid grid-cols-1 gap-5 sm:gap-8 md:grid-cols-2 lg:grid-cols-3">
               {filteredProducts.map((product, index) => (
                 <Card
                   key={product.id}
                   className="overflow-hidden border-gray-200 hover:shadow-xl transition-all duration-500 animate-fade-in"
                   style={{ animationDelay: `${Math.min(index, 5) * 70}ms` }}
                 >
-                  <div className="space-y-4 p-5">
+                  <div className="space-y-4 p-4 sm:p-5">
                     <a href={`/product/${product.id}`} className="block" aria-label={`Voir la fiche de ${product.name}`}>
-                      <div className="w-full h-64 bg-gray-100 rounded-lg overflow-hidden flex items-center justify-center">
+                      <div className="h-56 w-full overflow-hidden rounded-lg bg-gray-100 flex items-center justify-center sm:h-64">
                         {(() => {
                           const image = getProductImage(product.id);
                           return image ? (
@@ -333,7 +334,7 @@ export default function Products() {
                       </div>
                     </div>
 
-                    <div className="flex items-center justify-between gap-4 pt-4 border-t border-gray-200">
+                    <div className="flex flex-col gap-3 border-t border-gray-200 pt-4 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
                       <div>
                         <p className="text-2xl font-light text-gray-900">€{(product.price / 100).toFixed(2)}</p>
                         <p className="text-xs text-gray-500 font-medium">
@@ -341,7 +342,7 @@ export default function Products() {
                         </p>
                       </div>
 
-                      <div className="flex items-center gap-2">
+                      <div className="flex w-full items-center justify-between gap-2 sm:w-auto sm:justify-end">
                         <label htmlFor={`quantity-${product.id}`} className="sr-only">
                           Quantité de {product.name}
                         </label>
@@ -357,7 +358,7 @@ export default function Products() {
                               [product.id]: Math.max(1, parseInt(event.target.value, 10) || 1),
                             }))
                           }
-                          className="w-12 px-2 py-2 border border-gray-200 rounded text-center text-sm"
+                          className="h-11 w-14 rounded border border-gray-200 px-2 text-center text-sm"
                           disabled={product.stock === 0}
                         />
                         <Button
@@ -365,7 +366,7 @@ export default function Products() {
                           onClick={() => handleAddToCart(product)}
                           disabled={addToCart.isPending || product.stock === 0}
                           aria-live="polite"
-                          className={`relative overflow-hidden bg-gray-900 text-white font-light whitespace-nowrap transition-all hover:bg-gray-800 hover:shadow-lg ${
+                          className={`relative min-h-11 flex-1 overflow-hidden bg-gray-900 text-white font-light whitespace-nowrap transition-all touch-manipulation hover:bg-gray-800 hover:shadow-lg sm:flex-none ${
                             recentlyAddedProductId === product.id ? "scale-[0.97] bg-gray-800" : ""
                           }`}
                         >

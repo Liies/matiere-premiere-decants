@@ -70,18 +70,18 @@ export default function Cart() {
     <div className="min-h-screen flex flex-col bg-white">
       {/* Header */}
       <header className="border-b border-gray-200">
-        <div className="container flex items-center justify-between py-6">
+        <div className="container flex items-center justify-between gap-3 py-3 sm:py-6">
           <Link href="/" className="flex items-center gap-2 hover:opacity-70 transition">
-            <Leaf className="w-6 h-6 text-gray-900" />
-            <h1 className="text-2xl font-light tracking-wider text-gray-900">
+            <Leaf className="h-5 w-5 shrink-0 text-gray-900 sm:h-6 sm:w-6" />
+            <h1 className="text-base font-light tracking-[0.12em] text-gray-900 sm:text-2xl sm:tracking-wider">
               Matière Première
             </h1>
           </Link>
-          <nav className="flex items-center gap-8">
-            <Link href="/products" className="text-sm text-gray-600 hover:text-gray-900 transition">
+          <nav className="flex items-center gap-2 sm:gap-8">
+            <Link href="/products" className="flex min-h-11 items-center rounded-lg px-2 text-xs text-gray-600 transition hover:bg-gray-50 hover:text-gray-900 sm:text-sm">
               Catalogue
             </Link>
-            <Link href="/cart" className="text-sm text-gray-900 font-medium">
+            <Link href="/cart" className="flex min-h-11 items-center rounded-lg px-2 text-xs font-medium text-gray-900 sm:text-sm">
               Panier
             </Link>
           </nav>
@@ -89,9 +89,10 @@ export default function Cart() {
       </header>
 
       {/* Content */}
-      <main className="flex-1 py-12 px-4">
+              <main className="flex-1 py-8 sm:py-12">
+
         <div className="container max-w-4xl">
-          <h2 className="text-4xl font-light text-gray-900 mb-8">Votre Panier</h2>
+          <h2 className="mb-6 text-3xl font-light text-gray-900 sm:mb-8 sm:text-4xl">Votre Panier</h2>
 
           {isLoading && isAuthenticated ? (
             <p className="text-gray-600">Chargement du panier...</p>
@@ -109,8 +110,9 @@ export default function Cart() {
               {/* Cart Items */}
               <div className="lg:col-span-2 space-y-4">
                 {displayItems?.map((item) => (
-                  <Card key={isAuthenticated ? (item as any).id : (item as any).productId} className="p-6">
-                    <div className="flex justify-between items-start mb-4">
+                                      <Card key={isAuthenticated ? (item as any).id : (item as any).productId} className="p-4 sm:p-6">
+
+                    <div className="mb-4 flex items-start justify-between gap-3">
                       <div>
                         <h3 className="text-lg font-light text-gray-900">
                           {isAuthenticated ? (item as any).product?.name : (item as any).name}
@@ -171,7 +173,7 @@ export default function Cart() {
 
               {/* Summary */}
               <div className="lg:col-span-1">
-                <Card className="p-6 sticky top-4 space-y-6">
+                <Card className="space-y-6 p-4 lg:sticky lg:top-4 sm:p-6">
                   <div>
                     <h3 className="text-lg font-light text-gray-900 mb-4">Récapitulatif</h3>
                     <div className="space-y-2 text-sm">
@@ -195,7 +197,7 @@ export default function Cart() {
                     </div>
 
                     <Link href="/checkout">
-                      <Button className="w-full bg-gray-900 hover:bg-gray-800 text-white mb-2">
+                      <Button className="mb-2 min-h-12 w-full bg-gray-900 text-white hover:bg-gray-800">
                         Procéder au paiement
                       </Button>
                     </Link>
@@ -209,7 +211,7 @@ export default function Cart() {
                           toast.success("Panier vidé");
                         }
                       }}
-                      className="w-full py-2 text-sm text-gray-600 hover:text-gray-900 transition"
+                      className="min-h-11 w-full py-2 text-sm text-gray-600 transition hover:text-gray-900"
                     >
                       Vider le panier
                     </button>

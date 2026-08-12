@@ -10,15 +10,16 @@ export default function Header() {
   const [location] = useLocation();
 
   const isActive = (path: string) => location === path;
+  const closeMobileMenu = () => setMobileMenuOpen(false);
 
   return (
     <header className="sticky top-0 z-50 border-b border-gray-200 bg-white/95 backdrop-blur">
-      <div className="container flex items-center justify-between py-4">
+      <div className="container flex items-center justify-between gap-3 py-3 sm:py-4">
         {/* Logo */}
         <Link href="/">
           <div className="flex items-center gap-2 cursor-pointer hover:opacity-80 transition">
-            <Leaf className="w-6 h-6 text-gray-900" />
-            <h1 className="text-xl font-light tracking-wider text-gray-900 hidden sm:block">
+            <Leaf className="h-5 w-5 shrink-0 text-gray-900 sm:h-6 sm:w-6" />
+            <h1 className="text-[0.95rem] font-light tracking-[0.12em] text-gray-900 sm:text-xl sm:tracking-wider">
               Matière Première
             </h1>
           </div>
@@ -61,27 +62,35 @@ export default function Header() {
         </nav>
 
         {/* Right Actions */}
-        <div className="flex items-center gap-4">
-          <Link href="/cart" className="text-gray-600 hover:text-gray-900 transition">
-            <ShoppingCart className="w-5 h-5" />
+        <div className="flex shrink-0 items-center gap-1 sm:gap-4">
+          <Link
+            href="/cart"
+            aria-label="Ouvrir le panier"
+            className="flex h-11 w-11 items-center justify-center rounded-full text-gray-600 transition hover:bg-gray-100 hover:text-gray-900"
+          >
+            <ShoppingCart className="h-5 w-5" aria-hidden="true" />
           </Link>
 
           {isAuthenticated ? (
             <div className="flex items-center gap-4">
-              <Link href="/account" className="text-gray-600 hover:text-gray-900 transition">
-                <User className="w-5 h-5" />
+              <Link
+                href="/account"
+                aria-label="Ouvrir mon compte"
+                className="flex h-11 w-11 items-center justify-center rounded-full text-gray-600 transition hover:bg-gray-100 hover:text-gray-900"
+              >
+                <User className="h-5 w-5" aria-hidden="true" />
               </Link>
               {user?.role === "admin" && (
                 <Link
                   href="/admin"
-                  className="text-xs px-3 py-1 border border-gray-900 text-gray-900 hover:bg-gray-900 hover:text-white transition"
+                  className="hidden min-h-11 items-center border border-gray-900 px-3 py-2 text-xs text-gray-900 transition hover:bg-gray-900 hover:text-white sm:flex"
                 >
                   Admin
                 </Link>
               )}
               <button
                 onClick={() => logout()}
-                className="text-xs px-3 py-1 text-gray-600 hover:text-gray-900 transition"
+                className="hidden min-h-11 items-center px-2 py-2 text-xs text-gray-600 transition hover:text-gray-900 sm:flex"
               >
                 Déconnexion
               </button>
@@ -89,7 +98,7 @@ export default function Header() {
           ) : (
             <a
               href={getLoginUrl()}
-              className="text-xs px-3 py-1 border border-gray-900 text-gray-900 hover:bg-gray-900 hover:text-white transition"
+              className="hidden min-h-11 items-center border border-gray-900 px-3 py-2 text-xs text-gray-900 transition hover:bg-gray-900 hover:text-white sm:flex"
             >
               Connexion
             </a>
@@ -97,33 +106,47 @@ export default function Header() {
 
           {/* Mobile Menu Button */}
           <button
+            type="button"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="md:hidden text-gray-600 hover:text-gray-900 transition"
+            aria-label={mobileMenuOpen ? "Fermer le menu" : "Ouvrir le menu"}
+            aria-expanded={mobileMenuOpen}
+            aria-controls="mobile-navigation"
+            className="flex h-11 w-11 items-center justify-center rounded-full text-gray-600 transition hover:bg-gray-100 hover:text-gray-900 md:hidden"
           >
-            {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+            {mobileMenuOpen ? <X className="h-5 w-5" aria-hidden="true" /> : <Menu className="h-5 w-5" aria-hidden="true" />}
           </button>
         </div>
       </div>
 
       {/* Mobile Navigation */}
       {mobileMenuOpen && (
-        <div className="md:hidden border-t border-gray-200 bg-white">
-          <nav className="container py-4 space-y-3">
-            <Link href="/" className="block text-sm text-gray-600 hover:text-gray-900 transition">
+        <div id="mobile-navigation" className="border-t border-gray-200 bg-white md:hidden">
+          <nav className="container space-y-1 py-3" aria-label="Navigation mobile">
+            <Link href="/" onClick={closeMobileMenu} className="flex min-h-11 items-center rounded-lg px-3 text-sm text-gray-600 transition hover:bg-gray-50 hover:text-gray-900">
               Accueil
             </Link>
-            <Link href="/products" className="block text-sm text-gray-600 hover:text-gray-900 transition">
+            <Link href="/products" onClick={closeMobileMenu} className="flex min-h-11 items-center rounded-lg px-3 text-sm text-gray-600 transition hover:bg-gray-50 hover:text-gray-900">
               Catalogue
             </Link>
-            <Link href="/about" className="block text-sm text-gray-600 hover:text-gray-900 transition">
+            <Link href="/about" onClick={closeMobileMenu} className="flex min-h-11 items-center rounded-lg px-3 text-sm text-gray-600 transition hover:bg-gray-50 hover:text-gray-900">
               À Propos
             </Link>
-            <Link href="/faq" className="block text-sm text-gray-600 hover:text-gray-900 transition">
+            <Link href="/faq" onClick={closeMobileMenu} className="flex min-h-11 items-center rounded-lg px-3 text-sm text-gray-600 transition hover:bg-gray-50 hover:text-gray-900">
               FAQ
             </Link>
-            <Link href="/contact" className="block text-sm text-gray-600 hover:text-gray-900 transition">
+            <Link href="/contact" onClick={closeMobileMenu} className="flex min-h-11 items-center rounded-lg px-3 text-sm text-gray-600 transition hover:bg-gray-50 hover:text-gray-900">
               Contact
             </Link>
+            {isAuthenticated && (
+              <Link href="/account" onClick={closeMobileMenu} className="flex min-h-11 items-center rounded-lg px-3 text-sm text-gray-600 transition hover:bg-gray-50 hover:text-gray-900">
+                Mon compte
+              </Link>
+            )}
+            {isAuthenticated && user?.role === "admin" && (
+              <Link href="/admin" onClick={closeMobileMenu} className="flex min-h-11 items-center rounded-lg px-3 text-sm text-gray-600 transition hover:bg-gray-50 hover:text-gray-900">
+                Administration
+              </Link>
+            )}
           </nav>
         </div>
       )}

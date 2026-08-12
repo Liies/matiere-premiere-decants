@@ -127,21 +127,22 @@ export default function ProductDetail() {
     <div className="min-h-screen bg-white">
       <Header />
 
-      <main className="container mx-auto px-4 py-12">
+              <main className="container py-8 sm:py-12">
+
         {/* Back button */}
         <button
           onClick={() => window.history.back()}
-          className="flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-8 transition-colors"
+          className="mb-6 flex min-h-11 items-center gap-2 text-gray-600 transition-colors hover:text-gray-900 sm:mb-8"
         >
           <ArrowLeft className="w-4 h-4" />
           Retour au catalogue
         </button>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
+        <div className="grid grid-cols-1 gap-8 md:grid-cols-2 md:gap-12">
           {/* Product Image */}
           <div className="flex items-center justify-center">
             <div
-              className="relative w-full aspect-square rounded-lg overflow-hidden bg-gray-50 transition-transform duration-500"
+              className="relative mx-auto aspect-square w-full max-w-xl overflow-hidden rounded-lg bg-gray-50 transition-transform duration-500"
               style={{
                 transform: `scale(${1 + scrollY * 0.0001})`,
               }}
@@ -162,10 +163,10 @@ export default function ProductDetail() {
               <p className="text-sm text-gray-500 uppercase tracking-widest mb-4">
                 Collection Matière Première
               </p>
-              <h1 className="text-4xl md:text-5xl font-light mb-4 text-gray-900">
+              <h1 className="mb-4 text-3xl font-light text-gray-900 sm:text-4xl md:text-5xl">
                 {product.name}
               </h1>
-              <p className="text-xl text-gray-600 mb-6">{product.description}</p>
+              <p className="mb-6 text-base leading-7 text-gray-600 sm:text-xl">{product.description}</p>
               <div className="text-3xl font-light text-gray-900">
                 {formatPrice(product.price)}
               </div>
@@ -196,29 +197,33 @@ export default function ProductDetail() {
             {/* Actions */}
             <div className="space-y-4 animate-fade-in-delay-2">
               <div className="flex items-center gap-4">
-                <div className="flex items-center border border-gray-300 rounded-lg">
+                <div className="flex items-center self-start rounded-lg border border-gray-300">
                   <button
+                    type="button"
                     onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                    className="px-4 py-2 text-gray-600 hover:bg-gray-50"
+                    aria-label="Diminuer la quantité"
+                    className="flex h-11 w-11 items-center justify-center text-gray-600 transition hover:bg-gray-50"
                   >
                     −
                   </button>
-                  <span className="px-6 py-2">{quantity}</span>
+                  <span className="flex h-11 min-w-12 items-center justify-center px-3">{quantity}</span>
                   <button
+                    type="button"
                     onClick={() => setQuantity(quantity + 1)}
-                    className="px-4 py-2 text-gray-600 hover:bg-gray-50"
+                    aria-label="Augmenter la quantité"
+                    className="flex h-11 w-11 items-center justify-center text-gray-600 transition hover:bg-gray-50"
                   >
                     +
                   </button>
                 </div>
               </div>
 
-              <div className="flex gap-4">
+              <div className="flex flex-col gap-3 sm:flex-row sm:gap-4">
                 <Button
                   onClick={handleAddToCart}
                   disabled={isAddingToCart}
                   aria-live="polite"
-                  className={`relative flex-1 overflow-hidden bg-gray-900 hover:bg-gray-800 text-white py-3 rounded-lg flex items-center justify-center gap-2 transition-all hover:shadow-lg ${
+                  className={`relative min-h-12 w-full flex-1 overflow-hidden rounded-lg bg-gray-900 py-3 text-white transition-all hover:bg-gray-800 hover:shadow-lg sm:w-auto ${
                     isAddingToCart ? "scale-[0.98] bg-gray-800" : ""
                   }`}
                 >
@@ -228,8 +233,10 @@ export default function ProductDetail() {
                   {showAddedFeedback && <span className="cart-added-check" aria-hidden="true">✓</span>}
                 </Button>
                 <button
+                  type="button"
                   onClick={() => setIsWishlisted(!isWishlisted)}
-                  className="px-6 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                  aria-label={isWishlisted ? "Retirer des favoris" : "Ajouter aux favoris"}
+                  className="flex min-h-12 w-full items-center justify-center rounded-lg border border-gray-300 px-6 py-3 transition-colors hover:bg-gray-50 sm:w-auto"
                 >
                   <Heart
                     className={`w-5 h-5 ${
@@ -244,8 +251,8 @@ export default function ProductDetail() {
 
         {/* Similar Products */}
         {similarProducts && similarProducts.length > 0 && (
-          <div className="mt-20">
-            <h2 className="text-3xl font-light mb-8 text-gray-900">
+          <div className="mt-14 sm:mt-20">
+            <h2 className="mb-6 text-2xl font-light text-gray-900 sm:mb-8 sm:text-3xl">
               Parfums similaires
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">

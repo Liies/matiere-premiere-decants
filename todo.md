@@ -5835,3 +5835,13 @@
 - [x] Préserver l’accessibilité, les états de chargement et prefers-reduced-motion
 - [x] Ajouter ou mettre à jour les tests associés
 - [x] Vérifier le rendu dans le preview et sauvegarder un checkpoint
+
+
+## Amélioration mobile — demande courante
+- [x] Auditer la navigation et les principaux écrans à une largeur téléphone
+- [x] Optimiser le menu mobile et les zones tactiles
+- [x] Améliorer la grille et les contrôles du catalogue sur petit écran
+- [x] Ajuster la fiche produit, le panier et le tunnel de commande au mobile
+- [x] Vérifier les animations et prefers-reduced-motion sur mobile
+- [x] Ajouter ou mettre à jour les tests nécessaires
+- [ ] Valider le rendu responsive et sauvegarder un checkpoint

@@ -47,7 +47,7 @@ export default function Checkout() {
           <div className="container flex items-center justify-between py-6">
             <Link href="/" className="flex items-center gap-2 hover:opacity-70 transition">
               <Leaf className="w-6 h-6 text-gray-900" />
-              <h1 className="text-2xl font-light tracking-wider text-gray-900">
+              <h1 className="text-base font-light tracking-[0.12em] text-gray-900 sm:text-2xl sm:tracking-wider">
                 Matière Première
               </h1>
             </Link>
@@ -72,7 +72,7 @@ export default function Checkout() {
           <div className="container flex items-center justify-between py-6">
             <Link href="/" className="flex items-center gap-2 hover:opacity-70 transition">
               <Leaf className="w-6 h-6 text-gray-900" />
-              <h1 className="text-2xl font-light tracking-wider text-gray-900">
+              <h1 className="text-base font-light tracking-[0.12em] text-gray-900 sm:text-2xl sm:tracking-wider">
                 Matière Première
               </h1>
             </Link>
@@ -144,7 +144,7 @@ export default function Checkout() {
         <div className="container flex items-center justify-between py-6">
           <Link href="/" className="flex items-center gap-2 hover:opacity-70 transition">
             <Leaf className="w-6 h-6 text-gray-900" />
-            <h1 className="text-2xl font-light tracking-wider text-gray-900">
+            <h1 className="text-base font-light tracking-[0.12em] text-gray-900 sm:text-2xl sm:tracking-wider">
               Matière Première
             </h1>
           </Link>
@@ -152,15 +152,16 @@ export default function Checkout() {
       </header>
 
       {/* Content */}
-      <main className="flex-1 py-12 px-4">
+              <main className="flex-1 py-8 sm:py-12">
+
         <div className="container max-w-4xl">
-          <h2 className="text-4xl font-light text-gray-900 mb-8">Finaliser votre commande</h2>
+          <h2 className="mb-6 text-3xl font-light text-gray-900 sm:mb-8 sm:text-4xl">Finaliser votre commande</h2>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             {/* Form */}
             <div className="lg:col-span-2">
               <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-                <Card className="p-6">
+                <Card className="p-4 sm:p-6">
                   <h3 className="text-lg font-light text-gray-900 mb-4">Informations personnelles</h3>
                   <div className="space-y-4">
                     <div>
@@ -168,7 +169,7 @@ export default function Checkout() {
                       <input
                         {...register("customerName")}
                         type="text"
-                        className="w-full px-4 py-2 border border-gray-200 rounded"
+                        className="min-h-12 w-full rounded border border-gray-200 px-4 py-3 text-base"
                       />
                       {errors.customerName && (
                         <p className="text-red-600 text-sm mt-1">{errors.customerName.message}</p>
@@ -179,7 +180,7 @@ export default function Checkout() {
                       <input
                         {...register("customerEmail")}
                         type="email"
-                        className="w-full px-4 py-2 border border-gray-200 rounded"
+                        className="min-h-12 w-full rounded border border-gray-200 px-4 py-3 text-base"
                       />
                       {errors.customerEmail && (
                         <p className="text-red-600 text-sm mt-1">{errors.customerEmail.message}</p>
@@ -188,7 +189,7 @@ export default function Checkout() {
                   </div>
                 </Card>
 
-                <Card className="p-6">
+                <Card className="p-4 sm:p-6">
                   <h3 className="text-lg font-light text-gray-900 mb-4">Adresse de livraison</h3>
                   <div className="space-y-4">
                     <div>
@@ -196,19 +197,19 @@ export default function Checkout() {
                       <input
                         {...register("shippingAddress")}
                         type="text"
-                        className="w-full px-4 py-2 border border-gray-200 rounded"
+                        className="min-h-12 w-full rounded border border-gray-200 px-4 py-3 text-base"
                       />
                       {errors.shippingAddress && (
                         <p className="text-red-600 text-sm mt-1">{errors.shippingAddress.message}</p>
                       )}
                     </div>
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                       <div>
                         <label className="block text-sm text-gray-600 mb-1">Ville</label>
                         <input
                           {...register("shippingCity")}
                           type="text"
-                          className="w-full px-4 py-2 border border-gray-200 rounded"
+                          className="min-h-12 w-full rounded border border-gray-200 px-4 py-3 text-base"
                         />
                         {errors.shippingCity && (
                           <p className="text-red-600 text-sm mt-1">{errors.shippingCity.message}</p>
@@ -219,7 +220,7 @@ export default function Checkout() {
                         <input
                           {...register("shippingPostalCode")}
                           type="text"
-                          className="w-full px-4 py-2 border border-gray-200 rounded"
+                          className="min-h-12 w-full rounded border border-gray-200 px-4 py-3 text-base"
                         />
                         {errors.shippingPostalCode && (
                           <p className="text-red-600 text-sm mt-1">{errors.shippingPostalCode.message}</p>
@@ -231,7 +232,7 @@ export default function Checkout() {
                       <input
                         {...register("shippingCountry")}
                         type="text"
-                        className="w-full px-4 py-2 border border-gray-200 rounded"
+                        className="min-h-12 w-full rounded border border-gray-200 px-4 py-3 text-base"
                       />
                       {errors.shippingCountry && (
                         <p className="text-red-600 text-sm mt-1">{errors.shippingCountry.message}</p>
@@ -243,7 +244,7 @@ export default function Checkout() {
                 <Button
                   type="submit"
                   disabled={createOrder.isPending}
-                  className="w-full bg-gray-900 hover:bg-gray-800 text-white py-3"
+                  className="min-h-12 w-full bg-gray-900 py-3 text-white hover:bg-gray-800"
                 >
                   {createOrder.isPending ? "Traitement..." : "Confirmer la commande"}
                 </Button>
@@ -252,7 +253,7 @@ export default function Checkout() {
 
             {/* Summary */}
             <div className="lg:col-span-1">
-              <Card className="p-6 sticky top-4 space-y-4">
+              <Card className="space-y-4 p-4 lg:sticky lg:top-4 sm:p-6">
                 <h3 className="text-lg font-light text-gray-900">Résumé de la commande</h3>
                 <div className="space-y-2 max-h-64 overflow-y-auto">
                   {cartItems?.map((item) => (
