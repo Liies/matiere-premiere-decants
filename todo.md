@@ -5951,4 +5951,4 @@
 - [x] Tester le non-envoi réel en mode simulation et la préparation du mode Resend
 - [x] Tester les échecs isolés d’email sans impact sur les commandes ou statuts
 - [x] Exécuter Vitest, TypeScript et le build de production
-- [ ] Sauvegarder un checkpoint de la couverture email
+- [x] Sauvegarder un checkpoint de la couverture email
