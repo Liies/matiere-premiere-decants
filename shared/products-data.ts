@@ -14,6 +14,8 @@ export interface ProductData {
   stock: number;
 }
 
+export const UNIFORM_CATALOG_PRICE_CENTS = 12_000;
+
 export const MATIERE_PREMIERE_PRODUCTS: ProductData[] = [
   {
     name: "Vanilla Powder",
@@ -22,7 +24,7 @@ export const MATIERE_PREMIERE_PRODUCTS: ProductData[] = [
     topNotes: "Vanille de Madagascar",
     heartNotes: "Vanille poudreuse, amande",
     baseNotes: "Vanille, musc blanc",
-    price: 8500, // 85€
+    price: UNIFORM_CATALOG_PRICE_CENTS,
     stock: 50,
   },
   {
@@ -32,7 +34,7 @@ export const MATIERE_PREMIERE_PRODUCTS: ProductData[] = [
     topNotes: "Safran iranien, bergamote",
     heartNotes: "Safran, épices",
     baseNotes: "Ambre gris, bois de cèdre",
-    price: 9500, // 95€
+    price: UNIFORM_CATALOG_PRICE_CENTS,
     stock: 40,
   },
   {
@@ -42,7 +44,7 @@ export const MATIERE_PREMIERE_PRODUCTS: ProductData[] = [
     topNotes: "Rose centifolia, poivre rose",
     heartNotes: "Rose, géranium",
     baseNotes: "Vétiver, bois de santal",
-    price: 8500, // 85€
+    price: UNIFORM_CATALOG_PRICE_CENTS,
     stock: 55,
   },
   {
@@ -52,7 +54,7 @@ export const MATIERE_PREMIERE_PRODUCTS: ProductData[] = [
     topNotes: "Cuir brut, bergamote",
     heartNotes: "Cuir, tabac",
     baseNotes: "Cuir, ambre, musc",
-    price: 9000, // 90€
+    price: UNIFORM_CATALOG_PRICE_CENTS,
     stock: 35,
   },
   {
@@ -62,7 +64,7 @@ export const MATIERE_PREMIERE_PRODUCTS: ProductData[] = [
     topNotes: "Bois de santal australien",
     heartNotes: "Bois de santal, vanille",
     baseNotes: "Bois de santal, musc blanc",
-    price: 8500, // 85€
+    price: UNIFORM_CATALOG_PRICE_CENTS,
     stock: 48,
   },
   {
@@ -72,7 +74,7 @@ export const MATIERE_PREMIERE_PRODUCTS: ProductData[] = [
     topNotes: "Encens de Somalie, citron",
     heartNotes: "Encens, résine",
     baseNotes: "Encens, vanille, ambre",
-    price: 8500, // 85€
+    price: UNIFORM_CATALOG_PRICE_CENTS,
     stock: 42,
   },
   {
@@ -82,7 +84,7 @@ export const MATIERE_PREMIERE_PRODUCTS: ProductData[] = [
     topNotes: "Lavande de Provence, notes minérales",
     heartNotes: "Lavande, géranium",
     baseNotes: "Bois de cèdre, musc",
-    price: 8500, // 85€
+    price: UNIFORM_CATALOG_PRICE_CENTS,
     stock: 50,
   },
   {
@@ -92,7 +94,7 @@ export const MATIERE_PREMIERE_PRODUCTS: ProductData[] = [
     topNotes: "Bois d'ébène, poivre noir",
     heartNotes: "Bois d'ébène, épices",
     baseNotes: "Bois d'ébène, vétiver, musc",
-    price: 9000, // 90€
+    price: UNIFORM_CATALOG_PRICE_CENTS,
     stock: 38,
   },
   {
@@ -102,7 +104,7 @@ export const MATIERE_PREMIERE_PRODUCTS: ProductData[] = [
     topNotes: "Néroli de Tunisie, bergamote",
     heartNotes: "Néroli, fleurs blanches",
     baseNotes: "Bois de santal, musc blanc",
-    price: 8500, // 85€
+    price: UNIFORM_CATALOG_PRICE_CENTS,
     stock: 45,
   },
   {
@@ -112,7 +114,7 @@ export const MATIERE_PREMIERE_PRODUCTS: ProductData[] = [
     topNotes: "Cédrat de Calabre, citron",
     heartNotes: "Cédrat, notes vertes",
     baseNotes: "Bois blanc, musc léger",
-    price: 8000, // 80€
+    price: UNIFORM_CATALOG_PRICE_CENTS,
     stock: 60,
   },
 ];

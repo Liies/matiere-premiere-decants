@@ -6004,3 +6004,12 @@
 - [x] Tester le délai, l’annulation à la sortie et les parcours accessibles
 - [x] Vérifier le rendu, les tests et le build
 - [x] Sauvegarder la version publiée
+
+## Prix uniforme à 120 € — demande courante
+- [x] Identifier les sources de prix et les tests affectés
+- [x] Mettre à jour tous les prix catalogue à 120,00 €
+- [x] Appliquer la migration de données non destructive si nécessaire
+- [x] Vérifier le catalogue, le panier et le checkout
+- [x] Ajouter ou ajuster la couverture Vitest de tarification
+- [x] Vérifier les types, les tests et le build
+- [ ] Sauvegarder la version publiée
