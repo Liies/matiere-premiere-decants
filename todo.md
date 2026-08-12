@@ -6003,4 +6003,4 @@
 - [x] Préserver le retournement immédiat au focus clavier et au toucher
 - [x] Tester le délai, l’annulation à la sortie et les parcours accessibles
 - [x] Vérifier le rendu, les tests et le build
-- [ ] Sauvegarder la version publiée
+- [x] Sauvegarder la version publiée
