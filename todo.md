@@ -6035,4 +6035,4 @@
 - [x] Ajouter le défilement fluide vers la section suivante, avec mouvement réduit respecté
 - [x] Ajouter ou ajuster la couverture Vitest des nouveaux contrats
 - [x] Vérifier le rendu, les interactions, les tests et le build
-- [ ] Sauvegarder la version publiée
+- [x] Sauvegarder la version publiée
