@@ -3,14 +3,12 @@ import { useAuth } from "@/_core/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import { getProductImage } from "@shared/image-assets";
 import { MASTER_PERFUMER_PROFILE } from "@shared/perfumer-profile";
 import { Link } from "wouter";
 import { ArrowRight } from "lucide-react";
 
 export default function HomePremium() {
   const { user, isAuthenticated } = useAuth();
-  const heroBottle = getProductImage(1);
   const [scrollY, setScrollY] = useState(0);
   const [visibleSections, setVisibleSections] = useState<Record<string, boolean>>({});
   const sectionRefs = useRef<Record<string, HTMLDivElement | null>>({});
@@ -86,20 +84,7 @@ export default function HomePremium() {
         <span className="luxury-orb luxury-orb-one" aria-hidden="true" />
         <span className="luxury-orb luxury-orb-two" aria-hidden="true" />
 
-        {heroBottle && (
-          <div className="pointer-events-none absolute inset-x-0 bottom-4 z-0 flex justify-center sm:bottom-0" aria-hidden="true">
-            <div className="hero-bottle-reveal relative h-56 w-44 sm:h-72 sm:w-56 md:h-80 md:w-64">
-              <span className="hero-bottle-halo" />
-              <img
-                src={heroBottle.compressed}
-                alt=""
-                className="relative z-10 h-full w-full object-contain drop-shadow-[0_24px_30px_rgba(17,24,39,0.14)]"
-              />
-            </div>
-          </div>
-        )}
-
-        <div className="container relative z-10 mx-auto max-w-4xl space-y-8 text-center">
+        <div className="container relative z-10 mx-auto flex min-h-[calc(100svh-14.5rem)] max-w-4xl flex-col justify-center space-y-8 text-center sm:min-h-[calc(100svh-17rem)]">
           <div className="space-y-6">
             <p className="hero-copy-reveal text-sm uppercase tracking-[0.24em] text-gray-600" style={{ animationDelay: "80ms" }}>Bienvenue chez</p>
             <h1 className="hero-copy-reveal text-4xl font-light leading-tight tracking-tight text-gray-900 sm:text-6xl md:text-7xl" style={{ animationDelay: "180ms" }}>

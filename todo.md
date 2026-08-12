@@ -6019,3 +6019,10 @@
 - [x] Réduire l’intensité, l’ampleur et l’opacité du halo
 - [x] Vérifier le rendu, le mouvement réduit, les tests et le build
 - [x] Sauvegarder la version publiée
+
+## Retrait du flacon du hero — demande courante
+- [x] Identifier l’image du flacon et les styles du hero concernés
+- [x] Retirer le flacon sous le bouton « Explorer la collection »
+- [x] Rééquilibrer la hauteur et les espacements du hero
+- [x] Vérifier le rendu, les tests et le build
+- [ ] Sauvegarder la version publiée
