@@ -3,6 +3,7 @@ import { useAuth } from "@/_core/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import { getHeroScrollBehavior, HERO_NEXT_SECTION_ID } from "@shared/home-hero";
 import { MASTER_PERFUMER_PROFILE } from "@shared/perfumer-profile";
 import { Link } from "wouter";
 import { ArrowRight } from "lucide-react";
@@ -62,6 +63,17 @@ export default function HomePremium() {
     sectionRefs.current[id] = el;
   };
 
+  const scrollToStory = () => {
+    const storySection = document.getElementById(HERO_NEXT_SECTION_ID);
+    if (!storySection) return;
+
+    const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    storySection.scrollIntoView({
+      behavior: getHeroScrollBehavior(prefersReducedMotion),
+      block: "start",
+    });
+  };
+
   return (
     <div className="min-h-screen bg-white">
       <Header />
@@ -99,12 +111,25 @@ export default function HomePremium() {
             <p className="mx-auto mb-8 max-w-2xl text-sm font-light leading-7 text-gray-600 sm:text-base">
               Découvrez une collection exclusive de décants 50ml, où chaque fragrance célèbre la pureté d'une seule matière première.
             </p>
-            <Link href="/products">
-              <Button className="min-h-12 gap-2 bg-gray-900 px-8 py-6 text-base text-white shadow-lg shadow-gray-900/10 transition-transform hover:-translate-y-0.5 hover:bg-gray-800">
-                Explorer la Collection
-                <ArrowRight className="w-4 h-4" />
-              </Button>
-            </Link>
+            <Button
+              type="button"
+              onClick={scrollToStory}
+              className="min-h-12 gap-2 bg-gray-900 px-8 py-6 text-base text-white shadow-lg shadow-gray-900/10 transition-transform hover:-translate-y-0.5 hover:bg-gray-800"
+            >
+              Explorer la Collection
+              <ArrowRight className="w-4 h-4" />
+            </Button>
+          </div>
+          <div className="hero-copy-reveal mx-auto w-full max-w-[13rem] pt-1 sm:max-w-[15rem]" style={{ animationDelay: "560ms" }}>
+            <div className="relative overflow-hidden rounded-[1.5rem] border border-white/70 bg-white/25 p-2 shadow-[0_20px_60px_rgba(104,80,54,0.12)] backdrop-blur-sm">
+              <img
+                src="/manus-storage/hero-matieres-premieres-editorial_2b588364.jpg"
+                alt="Composition de rose, safran et bois de santal, matières premières de parfumerie"
+                className="aspect-[4/5] w-full rounded-[1.1rem] object-cover"
+                loading="eager"
+              />
+              <div className="pointer-events-none absolute inset-2 rounded-[1.1rem] bg-gradient-to-t from-white/20 via-transparent to-white/10" aria-hidden="true" />
+            </div>
           </div>
           <div className="mt-10 flex justify-center text-gray-500" aria-hidden="true">
             <span className="h-12 w-px animate-pulse-subtle bg-gray-400" />

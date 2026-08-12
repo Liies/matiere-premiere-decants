@@ -6026,3 +6026,13 @@
 - [x] Rééquilibrer la hauteur et les espacements du hero
 - [x] Vérifier le rendu, les tests et le build
 - [x] Sauvegarder la version publiée
+
+## Défilement hero et nouveau visuel — demande courante
+- [x] Examiner l’ancre de la section suivante et les interactions du bouton hero
+- [x] Préparer une direction artistique de visuel hero premium sans texte
+- [x] Générer un nouveau visuel éditorial adapté au hero
+- [x] Intégrer le visuel avec une composition responsive et accessible
+- [x] Ajouter le défilement fluide vers la section suivante, avec mouvement réduit respecté
+- [x] Ajouter ou ajuster la couverture Vitest des nouveaux contrats
+- [x] Vérifier le rendu, les interactions, les tests et le build
+- [ ] Sauvegarder la version publiée
