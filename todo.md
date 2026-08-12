@@ -5919,4 +5919,4 @@
 - [x] Gérer les doublons, quantités, produits indisponibles et erreurs de reprise
 - [x] Ajouter les tests unitaires et d’intégration du parcours de synchronisation
 - [x] Vérifier le parcours en interface, TypeScript et build de production
-- [ ] Sauvegarder un checkpoint de la synchronisation panier
+- [x] Sauvegarder un checkpoint de la synchronisation panier
