@@ -4,6 +4,7 @@ import {
   createOrderStatusEmail,
   createOwnerOrderEmail,
   sendOrderCreatedEmails,
+  sendOrderStatusEmail,
   sendTransactionalEmail,
 } from "./transactionalEmail";
 
@@ -67,5 +68,87 @@ describe("adaptateur d’email", () => {
 
     expect(results).toHaveLength(2);
     expect(results.every((result) => result.status === "fulfilled")).toBe(true);
+  });
+
+  it("utilise EMAIL_FROM comme destinataire propriétaire de secours", async () => {
+    vi.stubEnv("EMAIL_DELIVERY_MODE", "mock");
+    vi.stubEnv("EMAIL_FROM", "boutique@example.com");
+    vi.stubEnv("ORDER_NOTIFICATION_EMAIL", "");
+    const sentTo: string[] = [];
+
+    await sendOrderCreatedEmails(order, async (email) => {
+      sentTo.push(email.to);
+      return { mode: "mock", delivered: true };
+    });
+
+    expect(sentTo).toEqual(["boutique@example.com", "camille@example.com"]);
+  });
+
+  it("isole un échec propriétaire et conserve la confirmation client", async () => {
+    vi.stubEnv("ORDER_NOTIFICATION_EMAIL", "owner@example.com");
+    const sentTo: string[] = [];
+
+    const results = await sendOrderCreatedEmails(order, async (email) => {
+      sentTo.push(email.to);
+      if (email.to === "owner@example.com") throw new Error("Boîte propriétaire indisponible");
+      return { mode: "mock", delivered: true };
+    });
+
+    expect(results.map((result) => result.status)).toEqual(["rejected", "fulfilled"]);
+    expect(sentTo).toEqual(["owner@example.com", "camille@example.com"]);
+  });
+
+  it("envoie l’email de statut au seul client concerné", async () => {
+    const sender = vi.fn(async () => ({ mode: "mock" as const, delivered: true }));
+
+    await sendOrderStatusEmail({
+      orderNumber: order.orderNumber,
+      customerName: order.customerName,
+      customerEmail: order.customerEmail,
+      status: "delivered",
+    }, sender);
+
+    expect(sender).toHaveBeenCalledWith(expect.objectContaining({
+      to: "camille@example.com",
+      subject: expect.stringContaining("livrée"),
+    }));
+  });
+
+  it("prépare la requête Resend avec les champs attendus sans appeler le réseau réel", async () => {
+    vi.stubEnv("RESEND_API_KEY", "re_test_key");
+    vi.stubEnv("EMAIL_FROM", "boutique@example.com");
+    const fetchSpy = vi.spyOn(globalThis, "fetch").mockResolvedValue(new Response("{}", { status: 200 }));
+
+    await expect(sendTransactionalEmail({
+      to: "camille@example.com",
+      subject: "Confirmation test",
+      html: "<p>Test</p>",
+      text: "Test",
+    }, "resend")).resolves.toEqual({ mode: "resend", delivered: true });
+
+    expect(fetchSpy).toHaveBeenCalledWith("https://api.resend.com/emails", expect.objectContaining({
+      method: "POST",
+      headers: expect.objectContaining({ Authorization: "Bearer re_test_key" }),
+    }));
+    expect(JSON.parse((fetchSpy.mock.calls[0]?.[1] as RequestInit).body as string)).toMatchObject({
+      from: "boutique@example.com",
+      to: ["camille@example.com"],
+      subject: "Confirmation test",
+    });
+    fetchSpy.mockRestore();
+  });
+
+  it("signale proprement le refus de Resend", async () => {
+    vi.stubEnv("RESEND_API_KEY", "re_test_key");
+    vi.stubEnv("EMAIL_FROM", "boutique@example.com");
+    const fetchSpy = vi.spyOn(globalThis, "fetch").mockResolvedValue(new Response("{}", { status: 422 }));
+
+    await expect(sendTransactionalEmail({
+      to: "camille@example.com",
+      subject: "Confirmation test",
+      html: "<p>Test</p>",
+      text: "Test",
+    }, "resend")).rejects.toThrow("Resend a refusé l’envoi (422)");
+    fetchSpy.mockRestore();
   });
 });

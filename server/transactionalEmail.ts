@@ -7,6 +7,8 @@ export type TransactionalEmail = {
   text: string;
 };
 
+export type TransactionalEmailSender = (email: TransactionalEmail) => Promise<{ mode: EmailDeliveryMode; delivered: boolean }>;
+
 export type OrderEmailItem = {
   productName: string;
   quantity: number;
@@ -142,14 +144,17 @@ export async function sendTransactionalEmail(email: TransactionalEmail, mode = g
   return { mode: "resend" as const, delivered: true };
 }
 
-export async function sendOrderCreatedEmails(order: OrderEmailData) {
+export async function sendOrderCreatedEmails(order: OrderEmailData, sender: TransactionalEmailSender = sendTransactionalEmail) {
   const ownerEmail = process.env.ORDER_NOTIFICATION_EMAIL || process.env.EMAIL_FROM;
   const emails = [createOrderConfirmationEmail(order)];
   if (ownerEmail) emails.unshift(createOwnerOrderEmail(order, ownerEmail));
 
-  return Promise.allSettled(emails.map((email) => sendTransactionalEmail(email)));
+  return Promise.allSettled(emails.map((email) => sender(email)));
 }
 
-export async function sendOrderStatusEmail(order: Pick<OrderEmailData, "orderNumber" | "customerName" | "customerEmail"> & { status: string }) {
-  return sendTransactionalEmail(createOrderStatusEmail(order));
+export async function sendOrderStatusEmail(
+  order: Pick<OrderEmailData, "orderNumber" | "customerName" | "customerEmail"> & { status: string },
+  sender: TransactionalEmailSender = sendTransactionalEmail,
+) {
+  return sender(createOrderStatusEmail(order));
 }

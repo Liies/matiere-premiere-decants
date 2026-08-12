@@ -5944,3 +5944,11 @@
 - [x] Tester les notifications simulées et l’absence de blocage du flux de commande
 - [x] Exécuter Vitest, TypeScript et le build de production
 - [x] Sauvegarder un checkpoint de la couverture d’intégration commande
+
+## Tests des notifications email — demande courante
+- [x] Auditer les cas de notification et les changements de statut non couverts
+- [x] Tester les destinataires, contenus et échappements des emails transactionnels
+- [x] Tester le non-envoi réel en mode simulation et la préparation du mode Resend
+- [x] Tester les échecs isolés d’email sans impact sur les commandes ou statuts
+- [x] Exécuter Vitest, TypeScript et le build de production
+- [ ] Sauvegarder un checkpoint de la couverture email
