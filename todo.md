@@ -5986,4 +5986,4 @@
 - [x] Remplacer les portraits par une présentation éditoriale sans images
 - [x] Ajouter une couverture Vitest adaptée au nouveau contenu
 - [x] Vérifier le rendu, les types et les tests
-- [ ] Sauvegarder la version publiée
+- [x] Sauvegarder la version publiée
