@@ -5910,4 +5910,4 @@
 - [x] Créer l’interface d’administration pour modifier nom, description, prix et contenance
 - [x] Valider les formulaires, autorisations et tests de non-régression
 - [x] Vérifier desktop/mobile, TypeScript et build de production
-- [ ] Sauvegarder un checkpoint de la navigation et de l’administration catalogue
+- [x] Sauvegarder un checkpoint de la navigation et de l’administration catalogue
