@@ -5,6 +5,7 @@ import Header from "@/components/Header";
 import { Link, useLocation } from "wouter";
 import { CheckCircle } from "lucide-react";
 import { useAuth } from "@/_core/hooks/useAuth";
+import AddressAutocomplete from "@/components/AddressAutocomplete";
 import { toast } from "sonner";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
@@ -32,6 +33,8 @@ export default function Checkout() {
   const {
     register,
     handleSubmit,
+    setValue,
+    watch,
     formState: { errors },
   } = useForm<CheckoutFormData>({
     resolver: zodResolver(checkoutSchema),
@@ -40,6 +43,15 @@ export default function Checkout() {
       customerEmail: user?.email || "",
     },
   });
+  const shippingAddress = watch("shippingAddress") || "";
+  const shippingAddressField = register("shippingAddress");
+
+  const applySuggestedAddress = (address: { address: string; city: string; postalCode: string; country: string }) => {
+    setValue("shippingAddress", address.address, { shouldDirty: true, shouldValidate: true });
+    setValue("shippingCity", address.city, { shouldDirty: true, shouldValidate: true });
+    setValue("shippingPostalCode", address.postalCode, { shouldDirty: true, shouldValidate: true });
+    setValue("shippingCountry", address.country, { shouldDirty: true, shouldValidate: true });
+  };
 
   if (!isAuthenticated) {
     return (
@@ -165,17 +177,14 @@ export default function Checkout() {
                 <Card className="p-4 sm:p-6">
                   <h3 className="text-lg font-light text-gray-900 mb-4">Adresse de livraison</h3>
                   <div className="space-y-4">
-                    <div>
-                      <label className="block text-sm text-gray-600 mb-1">Adresse</label>
-                      <input
-                        {...register("shippingAddress")}
-                        type="text"
-                        className="min-h-12 w-full rounded border border-gray-200 px-4 py-3 text-base"
-                      />
-                      {errors.shippingAddress && (
-                        <p className="text-red-600 text-sm mt-1">{errors.shippingAddress.message}</p>
-                      )}
-                    </div>
+                    <AddressAutocomplete
+                      value={shippingAddress}
+                      inputRef={shippingAddressField.ref}
+                      onBlur={shippingAddressField.onBlur}
+                      onValueChange={(address) => setValue("shippingAddress", address, { shouldDirty: true, shouldValidate: true })}
+                      onAddressSelected={applySuggestedAddress}
+                      error={errors.shippingAddress?.message}
+                    />
                     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                       <div>
                         <label className="block text-sm text-gray-600 mb-1">Ville</label>

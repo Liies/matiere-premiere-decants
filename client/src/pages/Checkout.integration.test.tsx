@@ -41,6 +41,24 @@ vi.mock("@/_core/hooks/useAuth", () => ({
 }));
 
 vi.mock("@/components/Header", () => ({ default: () => <header>Navigation</header> }));
+vi.mock("@/components/AddressAutocomplete", () => ({
+  default: ({ value, onValueChange, onAddressSelected }: any) => (
+    <div>
+      <input name="shippingAddress" value={value} onChange={(event) => onValueChange(event.target.value)} />
+      <button
+        type="button"
+        onClick={() => onAddressSelected({
+          address: "27 Rue du Maroc",
+          city: "Paris",
+          postalCode: "75019",
+          country: "France",
+        })}
+      >
+        Sélectionner 27 Rue du Maroc
+      </button>
+    </div>
+  ),
+}));
 vi.mock("sonner", () => ({ toast: toastSpies }));
 vi.mock("wouter", () => ({
   Link: ({ children }: { children: React.ReactNode }) => <>{children}</>,
@@ -94,6 +112,20 @@ describe("intégration checkout", () => {
     }), expect.any(Object));
     expect(screen.getByText("Commande confirmée !")).toBeTruthy();
     expect(screen.getByText("MP-TEST-CHECKOUT")).toBeTruthy();
+  });
+
+  it("renseigne ville, code postal et pays lorsqu’une adresse suggérée est sélectionnée", () => {
+    const { container } = render(<Checkout />);
+
+    fireEvent.click(screen.getByRole("button", { name: "Sélectionner 27 Rue du Maroc" }));
+
+    expect(container.querySelector<HTMLInputElement>('input[name="shippingAddress"]')?.value).toBe("27 Rue du Maroc");
+    expect(container.querySelector<HTMLInputElement>('input[name="shippingCity"]')?.value).toBe("Paris");
+    expect(container.querySelector<HTMLInputElement>('input[name="shippingPostalCode"]')?.value).toBe("75019");
+    expect(container.querySelector<HTMLInputElement>('input[name="shippingCountry"]')?.value).toBe("France");
+
+    setInput(container, "shippingCity", "Pantin");
+    expect(container.querySelector<HTMLInputElement>('input[name="shippingCity"]')?.value).toBe("Pantin");
   });
 
   it("empêche la création d’une commande lorsque le panier est vide", async () => {

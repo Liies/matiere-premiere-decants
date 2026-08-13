@@ -6150,3 +6150,11 @@
 - [x] Documenter les frontières architecturales et conventions de code
 - [x] Vérifier les parcours, les tests, TypeScript et le build
 - [x] Sauvegarder la version publiée
+
+## Autocomplétion d’adresse au checkout — demande courante
+- [x] Examiner le formulaire checkout et l’intégration cartographique disponible
+- [x] Créer une saisie d’adresse avec suggestions accessibles
+- [x] Renseigner automatiquement l’adresse, la ville et le code postal sélectionnés
+- [x] Couvrir le préremplissage et conserver la modification manuelle des champs
+- [x] Vérifier le rendu, les tests, TypeScript et le build
+- [ ] Sauvegarder la version publiée
