@@ -6053,4 +6053,4 @@
 - [x] Appliquer une migration non destructive et aligner la création de commande
 - [x] Ajouter un test de non-régression pour le statut awaiting_payment
 - [x] Vérifier le checkout, les types, les tests et le build
-- [ ] Sauvegarder la version publiée
+- [x] Sauvegarder la version publiée
