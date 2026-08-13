@@ -6140,4 +6140,4 @@
 - [x] Optimiser le chargement des polices et des images éditoriales
 - [x] Ajouter la couverture de non-régression des stratégies de chargement
 - [x] Vérifier les parcours, les tests, TypeScript et le build
-- [ ] Sauvegarder la version publiée
+- [x] Sauvegarder la version publiée
