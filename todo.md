@@ -6118,4 +6118,4 @@
 - [x] Relier la recommandation à la fiche parfum correspondante
 - [x] Ajouter la couverture Vitest du scoring et du parcours
 - [x] Vérifier le rendu desktop et mobile, les tests et le build
-- [ ] Sauvegarder la version publiée
+- [x] Sauvegarder la version publiée
