@@ -6101,4 +6101,4 @@
 - [x] Ajuster les dimensions et espacements pour éviter les chevauchements
 - [x] Ajouter ou adapter la couverture Vitest du prix et du contrat de carte
 - [x] Vérifier le rendu desktop et mobile, les tests et le build
-- [ ] Sauvegarder la version publiée
+- [x] Sauvegarder la version publiée
