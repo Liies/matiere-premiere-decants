@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link, useRoute } from 'wouter';
-import { ArrowLeft, ShoppingCart, Heart, Leaf } from 'lucide-react';
+import { ArrowLeft, ShoppingCart, Heart, Leaf, BookOpen, MapPin, ExternalLink } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
@@ -11,6 +11,7 @@ import { getProductImage } from '@shared/image-assets';
 import { formatPrice } from '@shared/price';
 import { CART_CONFIRMATION_DURATION_MS, getCartConfirmationLabel } from '@shared/cart-feedback';
 import { getOlfactoryRevealDelay } from '@shared/olfactory-reveal';
+import { getProductStory } from '@shared/product-stories';
 import { useWishlist } from '@/hooks/useWishlist';
 import { useAuth } from '@/_core/hooks/useAuth';
 
@@ -79,6 +80,7 @@ export default function ProductDetail() {
     { enabled: !!stableMatch },
   );
   const product = stableProduct ?? legacyProduct;
+  const productStory = getProductStory(product?.slug);
   const productVariants = stableProduct?.variants ?? [];
   const productBrandName = stableProduct?.brand.name ?? "Collection Matière Première";
   const selectedVariant = productVariants.find((variant) => variant.id === selectedVariantId) ?? productVariants.find((variant) => variant.availableQuantity > 0) ?? null;
@@ -316,6 +318,37 @@ export default function ProductDetail() {
                 </div>
               ))}
             </div>
+
+            {productStory && (
+              <section
+                data-testid="product-story"
+                className="mb-8 border-y border-gray-200 py-7 sm:py-8"
+                aria-labelledby="product-story-title"
+              >
+                <div className="flex items-center gap-2 text-xs font-medium uppercase tracking-[0.18em] text-gray-500">
+                  <BookOpen className="h-4 w-4" aria-hidden="true" />
+                  La matière en récit
+                </div>
+                <h2 id="product-story-title" className="mt-3 text-2xl font-light text-gray-900 sm:text-3xl">
+                  {productStory.title}
+                </h2>
+                <p className="mt-4 flex items-center gap-2 text-sm text-gray-600">
+                  <MapPin className="h-4 w-4 shrink-0 text-gray-500" aria-hidden="true" />
+                  <span>{productStory.origin}</span>
+                </p>
+                <p className="mt-5 text-base leading-7 text-gray-700">{productStory.story}</p>
+                <p className="mt-4 text-sm leading-6 text-gray-600">{productStory.detail}</p>
+                <a
+                  href={productStory.sourceUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="mt-5 inline-flex min-h-11 items-center gap-2 text-sm font-medium text-gray-800 underline-offset-4 transition hover:text-gray-500 hover:underline"
+                >
+                  Source : Matière Première
+                  <ExternalLink className="h-4 w-4" aria-hidden="true" />
+                </a>
+              </section>
+            )}
 
             {/* Actions */}
             <div className="space-y-4 animate-fade-in-delay-2">

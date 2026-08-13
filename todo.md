@@ -6085,3 +6085,12 @@
 - [x] Ajouter ou adapter la couverture Vitest de non-régression
 - [x] Vérifier le rendu, les tests et le build
 - [x] Sauvegarder la version publiée
+
+## Histoires et origines des parfums — demande courante
+- [x] Inventorier les dix parfums et le modèle de données des fiches
+- [x] Rechercher et recouper les origines et inspirations auprès de sources fiables
+- [x] Rédiger les récits éditoriaux propres à chaque parfum
+- [x] Intégrer les histoires, origines et liens sources dans les fiches
+- [x] Ajouter ou adapter la couverture Vitest des récits produit
+- [x] Vérifier le rendu, les sources, les tests et le build
+- [ ] Sauvegarder la version publiée
