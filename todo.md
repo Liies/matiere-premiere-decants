@@ -6084,4 +6084,4 @@
 - [x] Isoler l’état et les classes d’animation à la carte cliquée
 - [x] Ajouter ou adapter la couverture Vitest de non-régression
 - [x] Vérifier le rendu, les tests et le build
-- [ ] Sauvegarder la version publiée
+- [x] Sauvegarder la version publiée
