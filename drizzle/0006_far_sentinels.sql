@@ -1,0 +1,1 @@
+ALTER TABLE `orders` MODIFY COLUMN `shippingCountry` varchar(120) NOT NULL;

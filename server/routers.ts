@@ -314,7 +314,7 @@ export const appRouter = router({
           shippingAddress: z.string().min(1),
           shippingCity: z.string().min(1),
           shippingPostalCode: z.string().min(1),
-          shippingCountry: z.string().min(1),
+          shippingCountry: z.string().trim().min(1).max(120),
           items: z.array(
             z.object({
               productId: z.number(),

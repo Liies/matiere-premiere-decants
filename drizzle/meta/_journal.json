@@ -43,6 +43,13 @@
       "when": 1786558014068,
       "tag": "0005_milky_unus",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "5",
+      "when": 1786628224086,
+      "tag": "0006_far_sentinels",
+      "breakpoints": true
     }
   ]
 }

@@ -161,7 +161,7 @@ export const orders = mysqlTable("orders", {
   shippingAddress: text("shippingAddress").notNull(),
   shippingCity: varchar("shippingCity", { length: 255 }).notNull(),
   shippingPostalCode: varchar("shippingPostalCode", { length: 20 }).notNull(),
-  shippingCountry: varchar("shippingCountry", { length: 2 }).notNull(),
+  shippingCountry: varchar("shippingCountry", { length: 120 }).notNull(),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 });

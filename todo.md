@@ -6036,3 +6036,21 @@
 - [x] Ajouter ou ajuster la couverture Vitest des nouveaux contrats
 - [x] Vérifier le rendu, les interactions, les tests et le build
 - [x] Sauvegarder la version publiée
+
+## Stripe en mode test — demande courante
+- [ ] Vérifier l’état de l’intégration Stripe et les dépendances de checkout
+- [ ] Sécuriser les clés Stripe de test fournies
+- [ ] Activer l’infrastructure Stripe du projet
+- [ ] Créer ou mettre à jour le checkout Stripe et les retours de paiement
+- [ ] Ajouter la couverture Vitest du paiement et des statuts
+- [ ] Vérifier le parcours avec les identifiants de test Stripe
+- [ ] Vérifier les types, les tests et le build
+- [ ] Sauvegarder la version publiée
+
+## Correctif insertion de commande — demande courante
+- [x] Comparer le schéma des commandes en code avec la table réellement déployée
+- [x] Identifier la contrainte ou la colonne qui bloque la commande en attente de paiement
+- [x] Appliquer une migration non destructive et aligner la création de commande
+- [x] Ajouter un test de non-régression pour le statut awaiting_payment
+- [x] Vérifier le checkout, les types, les tests et le build
+- [ ] Sauvegarder la version publiée
