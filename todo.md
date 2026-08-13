@@ -6132,4 +6132,4 @@
 - [x] Étendre le parcours d’intégration du quiz et ses actions de résultat
 - [x] Étendre le parcours catalogue, panier et commande prioritaire
 - [x] Exécuter la suite complète, TypeScript et le build
-- [ ] Sauvegarder la version publiée
+- [x] Sauvegarder la version publiée
