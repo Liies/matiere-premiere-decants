@@ -132,11 +132,11 @@ export const cartItems = mysqlTable("cartItems", {
   id: int("id").autoincrement().primaryKey(),
   userId: int("userId").notNull(),
   productId: int("productId").notNull().references(() => products.id, { onDelete: "restrict", onUpdate: "cascade" }),
-  variantId: int("variantId").references(() => variants.id, { onDelete: "set null", onUpdate: "cascade" }),
+  variantId: int("variantId").notNull().references(() => variants.id, { onDelete: "restrict", onUpdate: "cascade" }),
   quantity: int("quantity").notNull().default(1),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
-});
+}, (table) => [uniqueIndex("cart_items_user_variant_unique").on(table.userId, table.variantId)]);
 
 export type CartItem = typeof cartItems.$inferSelect;
 export type InsertCartItem = typeof cartItems.$inferInsert;

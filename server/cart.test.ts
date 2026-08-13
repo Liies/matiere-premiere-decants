@@ -28,7 +28,7 @@ describe("Cart Router", () => {
     expect(cartItems).toBeDefined();
   });
 
-  it("should add item to cart", async () => {
+  it("refuse un ajout de produit lorsqu’aucune contenance n’est sélectionnée", async () => {
     const caller = appRouter.createCaller({
       user: mockUser,
       req: {} as any,
@@ -41,32 +41,23 @@ describe("Cart Router", () => {
 
     const firstProduct = products[0];
 
-    // Add to cart
-    const result = await caller.cart.addItem({
+    await expect(caller.cart.addItem({
       productId: firstProduct.id,
       quantity: 1,
-    });
-
-    expect(result.success).toBe(true);
+    })).rejects.toThrow("Choisissez une contenance");
   });
 
-  it("should reject adding item with insufficient stock", async () => {
+  it("refuse aussi un produit inexistant tant qu’aucune contenance n’est sélectionnée", async () => {
     const caller = appRouter.createCaller({
       user: mockUser,
       req: {} as any,
       res: {} as any,
     });
 
-    // Try to add non-existent product
-    try {
-      await caller.cart.addItem({
-        productId: 99999,
-        quantity: 1,
-      });
-      expect.fail("Should have thrown an error");
-    } catch (error: any) {
-      expect(error.message).toContain("Produit non trouvé");
-    }
+    await expect(caller.cart.addItem({
+      productId: 99999,
+      quantity: 1,
+    })).rejects.toThrow("Choisissez une contenance");
   });
 
   it("should reject invalid quantity", async () => {

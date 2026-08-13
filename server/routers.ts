@@ -82,7 +82,12 @@ export const appRouter = router({
   products: router({
     list: publicProcedure.query(async () => {
       const catalog = await getCatalogProducts();
-      return catalog.map(({ product, brand }) => ({ ...product, brand }));
+      const catalogWithVariants = await Promise.all(catalog.map(async ({ product, brand }) => ({
+        ...product,
+        brand,
+        variants: await getProductVariants(product.id),
+      })));
+      return catalogWithVariants.filter((product) => product.variants.length > 0);
     }),
     brands: publicProcedure.query(() => getBrands()),
     getByBrandSlug: publicProcedure
@@ -90,7 +95,10 @@ export const appRouter = router({
       .query(({ input }) => getProductByBrandSlug(input.brand, input.slug)),
     getById: publicProcedure
       .input(z.object({ id: z.number().int().positive() }))
-      .query(({ input }) => getProductById(input.id)),
+      .query(async ({ input }) => {
+        const product = await getProductById(input.id);
+        return product ? { ...product, variants: await getProductVariants(product.id) } : undefined;
+      }),
   }),
 
   adminCatalog: router({

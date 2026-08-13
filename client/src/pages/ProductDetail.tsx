@@ -81,7 +81,7 @@ export default function ProductDetail() {
   );
   const product = stableProduct ?? legacyProduct;
   const productStory = getProductStory(product?.slug);
-  const productVariants = stableProduct?.variants ?? [];
+  const productVariants = product?.variants ?? [];
   const productBrandName = stableProduct?.brand.name ?? "Collection Matière Première";
   const selectedVariant = productVariants.find((variant) => variant.id === selectedVariantId) ?? productVariants.find((variant) => variant.availableQuantity > 0) ?? null;
   const isLoading = stableMatch ? isLoadingStable : isLoadingLegacy;
@@ -143,15 +143,11 @@ export default function ProductDetail() {
   const handleAddToCart = () => {
     if (!product || isAddingToCart) return;
 
-    if (stableMatch) {
-      if (!isAuthenticated) {
-        toast.info("Connectez-vous pour ajouter un décant à votre panier.");
-        return;
-      }
-      if (!selectedVariant || selectedVariant.availableQuantity < quantity) {
-        toast.error("Le format choisi n’est pas disponible dans cette quantité.");
-        return;
-      }
+    if (!selectedVariant || selectedVariant.availableQuantity < quantity) {
+      toast.error("Le format choisi n’est pas disponible dans cette quantité.");
+      return;
+    }
+    if (isAuthenticated) {
       addVariantToCart.mutate(
         { productId: product.id, variantId: selectedVariant.id, quantity },
         {
@@ -171,7 +167,7 @@ export default function ProductDetail() {
       return;
     }
 
-    addToCart(product, quantity, { announce: false });
+    addToCart(product, selectedVariant, quantity, { announce: false });
     setIsAddingToCart(true);
     setShowAddedFeedback(true);
 
@@ -262,7 +258,7 @@ export default function ProductDetail() {
                 {product.name}
               </h1>
               <p className="mb-6 text-base leading-7 text-gray-600 sm:text-xl">{product.description}</p>
-              {stableMatch && productVariants.length === 0 ? (
+              {productVariants.length === 0 ? (
                 <p className="text-base leading-7 text-gray-600">Référence en préparation : les formats, tarifs et disponibilités seront affichés après l’enregistrement du stock réel.</p>
               ) : (
                 <>
@@ -272,7 +268,7 @@ export default function ProductDetail() {
                   <p className="mt-2 text-sm text-gray-500">{productVariants.length ? "Formats disponibles sous réserve du stock réel" : `Décant ${product.volumeMl ?? 50} ml`}</p>
                 </>
               )}
-              {stableMatch && productVariants.length > 0 && (
+              {productVariants.length > 0 && (
                 <label className="mt-5 block max-w-xs text-sm text-gray-700">
                   <span className="mb-2 block text-xs uppercase tracking-widest text-gray-500">Format</span>
                   <select
@@ -377,7 +373,7 @@ export default function ProductDetail() {
               <div className="flex flex-col gap-3 sm:flex-row sm:gap-4">
                 <Button
                   onClick={handleAddToCart}
-                  disabled={isAddingToCart || addVariantToCart.isPending || (stableMatch && (!isAuthenticated || !selectedVariant || selectedVariant.availableQuantity < quantity))}
+                  disabled={isAddingToCart || addVariantToCart.isPending || !selectedVariant || selectedVariant.availableQuantity < quantity}
                   aria-live="polite"
                   className={`relative min-h-12 w-full flex-1 overflow-hidden rounded-lg bg-gray-900 py-3 text-white transition-all hover:bg-gray-800 hover:shadow-lg sm:w-auto ${
                     isAddingToCart ? "scale-[0.98] bg-gray-800" : ""
@@ -385,7 +381,7 @@ export default function ProductDetail() {
                 >
                   {showAddedFeedback && <span className="cart-added-ripple" aria-hidden="true" />}
                   <ShoppingCart className={`relative z-10 w-5 h-5 ${isAddingToCart ? "cart-icon-bounce" : ""}`} />
-                  <span className="relative z-10">{stableMatch && !isAuthenticated ? "Connectez-vous pour acheter" : stableMatch && (!selectedVariant || selectedVariant.availableQuantity < quantity) ? "Indisponible" : getCartConfirmationLabel(isAddingToCart)}</span>
+                  <span className="relative z-10">{!selectedVariant || selectedVariant.availableQuantity < quantity ? "Indisponible" : getCartConfirmationLabel(isAddingToCart)}</span>
                   {showAddedFeedback && <span className="cart-added-check" aria-hidden="true">✓</span>}
                 </Button>
                 <button

@@ -7,6 +7,7 @@ import { Trash2, Plus, Minus } from "lucide-react";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { useLocalCart } from "@/hooks/useLocalCart";
 import { toast } from "sonner";
+import { formatPrice } from "@shared/price";
 
 export default function Cart() {
   const { isAuthenticated } = useAuth();
@@ -93,17 +94,17 @@ export default function Cart() {
               {/* Cart Items */}
               <div className="lg:col-span-2 space-y-4">
                 {displayItems?.map((item) => (
-                                      <Card key={isAuthenticated ? (item as any).id : (item as any).productId} className="p-4 sm:p-6">
+                                      <Card key={isAuthenticated ? (item as any).id : (item as any).variantId} className="p-4 sm:p-6">
 
                     <div className="mb-4 flex items-start justify-between gap-3">
                       <div>
                         <h3 className="text-lg font-light text-gray-900">
                           {isAuthenticated ? (item as any).product?.name : (item as any).name}
                         </h3>
-                        <p className="text-sm text-gray-500">Décant {(isAuthenticated ? (item as any).variant?.sizeMl ?? (item as any).product?.volumeMl : (item as any).volumeMl) ?? 50} ml</p>
+                        <p className="text-sm text-gray-500">Décant {(isAuthenticated ? (item as any).variant?.sizeMl : (item as any).sizeMl) ?? 50} ml</p>
                       </div>
                       <p className="text-lg font-light text-gray-900">
-                        €{((isAuthenticated ? (item as any).variant?.priceCents ?? (item as any).product?.price ?? 0 : (item as any).price) / 100).toFixed(2)}
+                        {formatPrice(isAuthenticated ? (item as any).variant?.priceCents ?? (item as any).product?.price ?? 0 : (item as any).price)}
                       </p>
                     </div>
 
@@ -114,7 +115,7 @@ export default function Cart() {
                             if (isAuthenticated) {
                               handleUpdateQuantity((item as any).id, item.quantity - 1);
                             } else {
-                              updateLocalQuantity((item as any).productId, item.quantity - 1);
+                              updateLocalQuantity((item as any).variantId, item.quantity - 1);
                             }
                           }}
                           className="p-1 hover:bg-gray-100 rounded transition"
@@ -128,7 +129,7 @@ export default function Cart() {
                             if (isAuthenticated) {
                               handleUpdateQuantity((item as any).id, item.quantity + 1);
                             } else {
-                              updateLocalQuantity((item as any).productId, item.quantity + 1);
+                              updateLocalQuantity((item as any).variantId, item.quantity + 1);
                             }
                           }}
                           className="p-1 hover:bg-gray-100 rounded transition"
@@ -142,7 +143,7 @@ export default function Cart() {
                           if (isAuthenticated) {
                             handleRemoveItem((item as any).id);
                           } else {
-                            removeLocalItem((item as any).productId);
+                            removeLocalItem((item as any).variantId);
                           }
                         }}
                         className="p-2 hover:bg-red-50 rounded transition text-red-600"
@@ -162,7 +163,7 @@ export default function Cart() {
                     <div className="space-y-2 text-sm">
                       <div className="flex justify-between">
                         <span className="text-gray-600">Sous-total</span>
-                        <span className="text-gray-900">€{(totalAmount / 100).toFixed(2)}</span>
+                        <span className="text-gray-900">{formatPrice(totalAmount)}</span>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-gray-600">Livraison</span>
@@ -175,7 +176,7 @@ export default function Cart() {
                     <div className="flex justify-between mb-4">
                       <span className="font-light text-gray-900">Total</span>
                       <span className="text-xl font-light text-gray-900">
-                        €{(totalAmount / 100).toFixed(2)}
+                        {formatPrice(totalAmount)}
                       </span>
                     </div>
 

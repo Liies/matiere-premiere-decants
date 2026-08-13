@@ -127,10 +127,14 @@ export default function Checkout() {
       return;
     }
 
+    if (cartItems.some((item) => !item.variantId)) {
+      toast.error("Un article du panier doit être associé à un format avant la commande.");
+      return;
+    }
     const items = cartItems.map((item) => ({
       productId: item.productId,
+      variantId: item.variantId!,
       quantity: item.quantity,
-      ...(item.variantId ? { variantId: item.variantId } : {}),
     }));
 
     createOrder.mutate(

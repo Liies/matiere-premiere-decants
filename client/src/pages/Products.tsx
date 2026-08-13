@@ -22,8 +22,9 @@ export default function Products() {
   const { isAuthenticated, user } = useAuth();
   const { addToCart: addToLocalCart } = useLocalCart();
   const { isWishlisted, toggleWishlist } = useWishlist();
-  const addToCart = trpc.cart.addItem.useMutation();
+  const addToCart = trpc.cart.addVariant.useMutation();
   const [selectedQuantity, setSelectedQuantity] = useState<Record<number, number>>({});
+  const [selectedVariantIds, setSelectedVariantIds] = useState<Record<number, number>>({});
   const [selectedFilters, setSelectedFilters] = useState<string[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [isSearchFocused, setIsSearchFocused] = useState(false);
@@ -100,6 +101,14 @@ export default function Products() {
   const isProductRecentlyAdded = (product: CatalogProduct) =>
     recentlyAddedProductKeys.has(getCartFeedbackKey(product));
 
+  const getSelectedVariant = (product: CatalogProduct) => {
+    const variants = product.variants ?? [];
+    return variants.find((variant) => variant.id === selectedVariantIds[product.id])
+      ?? variants.find((variant) => variant.availableQuantity > 0)
+      ?? variants[0]
+      ?? null;
+  };
+
   const clearHoverFlipTimer = () => {
     if (hoverFlipTimer.current) {
       window.clearTimeout(hoverFlipTimer.current);
@@ -158,6 +167,11 @@ export default function Products() {
 
   const handleAddToCart = (product: CatalogProduct) => {
     const quantity = selectedQuantity[product.id] || 1;
+    const variant = getSelectedVariant(product);
+    if (!variant || variant.availableQuantity < quantity) {
+      toast.error("Le format choisi n’est pas disponible dans cette quantité.");
+      return;
+    }
     const handleSuccessfulAddition = () => {
       setSelectedQuantity((prev) => ({ ...prev, [product.id]: 1 }));
       confirmAddedProduct(product);
@@ -165,7 +179,7 @@ export default function Products() {
 
     if (isAuthenticated && user) {
       addToCart.mutate(
-        { productId: product.id, quantity },
+        { productId: product.id, variantId: variant.id, quantity },
         {
           onSuccess: () => {
             handleSuccessfulAddition();
@@ -176,7 +190,7 @@ export default function Products() {
         },
       );
     } else {
-      addToLocalCart(product, quantity, { announce: false });
+      addToLocalCart(product, variant, quantity, { announce: false });
       handleSuccessfulAddition();
     }
   };
@@ -190,7 +204,7 @@ export default function Products() {
           <div className="mb-10">
             <p className="text-xs uppercase tracking-[0.25em] text-gray-500 mb-3">La collection</p>
             <h2 className="text-3xl font-light text-gray-900 mb-2 sm:text-4xl">Catalogue Complet</h2>
-            <p className="max-w-xl text-sm leading-6 text-gray-600 sm:text-base">Découvrez nos 10 parfums de niche en décants 50ml</p>
+            <p className="max-w-xl text-sm leading-6 text-gray-600 sm:text-base">Découvrez nos parfums de niche en décants 2 ml et 50 ml.</p>
           </div>
 
           <section aria-labelledby="catalog-search-title" className="mb-6 animate-slide-up">
@@ -424,7 +438,7 @@ export default function Products() {
                       </div>
                       <a href={productPath(product)} className="mt-5 block" aria-label={`Voir la fiche de ${product.name}`}>
                         <h3 className="text-lg font-light text-gray-900 hover:text-gray-600 transition-colors">{product.name}</h3>
-                        <p className="text-xs text-gray-500 font-medium mt-1">Décant {product.volumeMl ?? 50} ml</p>
+                        <p className="text-xs text-gray-500 font-medium mt-1">Décants 2 ml et 50 ml</p>
                       </a>
                     </div>
 
@@ -442,13 +456,30 @@ export default function Products() {
 
                     <div data-testid={`catalog-card-actions-${product.id}`} className="mt-auto flex flex-col gap-3 border-t border-gray-200 pt-4 sm:flex-row sm:items-end sm:justify-between sm:gap-4">
                       <div className="shrink-0">
-                        <p data-testid={`catalog-price-${product.id}`} className="text-2xl font-light text-gray-900">{formatPrice(product.price)}</p>
+                        <p data-testid={`catalog-price-${product.id}`} className="text-2xl font-light text-gray-900">{formatPrice(getSelectedVariant(product)?.priceCents ?? product.price)}</p>
                         <p className="text-xs text-gray-500 font-medium">
-                          {product.stock > 0 ? "✓ En stock" : "Rupture"}
+                          {getSelectedVariant(product)?.availableQuantity ? "✓ En stock" : "Rupture"}
                         </p>
                       </div>
 
-                      <div className="flex w-full min-w-0 items-center gap-2 sm:w-auto sm:justify-end">
+                      <div className="flex w-full min-w-0 flex-col gap-2 sm:w-auto sm:items-end">
+                        {(product.variants?.length ?? 0) > 0 && (
+                          <label className="w-full text-xs text-gray-600 sm:w-auto">
+                            <span className="sr-only">Format de {product.name}</span>
+                            <select
+                              value={getSelectedVariant(product)?.id ?? ""}
+                              onChange={(event) => setSelectedVariantIds((current) => ({ ...current, [product.id]: Number(event.target.value) }))}
+                              className="min-h-11 w-full rounded border border-gray-200 bg-white px-2 text-sm text-gray-900 sm:w-36"
+                            >
+                              {product.variants.map((variant) => (
+                                <option key={variant.id} value={variant.id} disabled={variant.availableQuantity <= 0}>
+                                  {variant.sizeMl} ml — {formatPrice(variant.priceCents)}
+                                </option>
+                              ))}
+                            </select>
+                          </label>
+                        )}
+                        <div className="flex w-full min-w-0 items-center gap-2 sm:justify-end">
                         <label htmlFor={`quantity-${product.id}`} className="sr-only">
                           Quantité de {product.name}
                         </label>
@@ -456,7 +487,7 @@ export default function Products() {
                           id={`quantity-${product.id}`}
                           type="number"
                           min="1"
-                          max={product.stock}
+                          max={getSelectedVariant(product)?.availableQuantity ?? 0}
                           value={selectedQuantity[product.id] || 1}
                           onChange={(event) =>
                             setSelectedQuantity((prev) => ({
@@ -465,12 +496,12 @@ export default function Products() {
                             }))
                           }
                           className="h-11 w-14 rounded border border-gray-200 px-2 text-center text-sm"
-                          disabled={product.stock === 0}
+                          disabled={!getSelectedVariant(product)?.availableQuantity}
                         />
                         <Button
                           type="button"
                           onClick={() => handleAddToCart(product)}
-                          disabled={addToCart.isPending || product.stock === 0}
+                          disabled={addToCart.isPending || !getSelectedVariant(product)?.availableQuantity}
                           aria-live="polite"
                           className={`relative min-h-11 min-w-0 flex-1 overflow-hidden bg-gray-900 text-white font-light whitespace-nowrap transition-all duration-500 touch-manipulation hover:-translate-y-0.5 hover:bg-gray-800 hover:shadow-lg lg:w-36 lg:flex-none lg:translate-y-1 lg:opacity-0 lg:group-hover/product-card:translate-y-0 lg:group-hover/product-card:opacity-100 lg:group-focus-within/product-card:translate-y-0 lg:group-focus-within/product-card:opacity-100 motion-reduce:transform-none motion-reduce:transition-none ${
                             isProductRecentlyAdded(product) ? "scale-[0.97] bg-gray-800" : ""
@@ -492,6 +523,7 @@ export default function Products() {
                             <span className="cart-added-check" aria-hidden="true">✓</span>
                           )}
                         </Button>
+                        </div>
                       </div>
                     </div>
                   </div>

@@ -8,8 +8,9 @@ const state = vi.hoisted(() => ({
   localCartItems: [
     {
       productId: 1,
+      variantId: 102,
       name: "Vanilla Powder",
-      volumeMl: 50,
+      sizeMl: 50,
       price: 12_000,
       quantity: 2,
     },
@@ -57,7 +58,7 @@ describe("intégration panier invité", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     state.localCartItems = [
-      { productId: 1, name: "Vanilla Powder", volumeMl: 50, price: 12_000, quantity: 2 },
+      { productId: 1, variantId: 102, name: "Vanilla Powder", sizeMl: 50, price: 12_000, quantity: 2 },
     ];
   });
 
@@ -67,7 +68,7 @@ describe("intégration panier invité", () => {
     render(<Cart />);
 
     expect(screen.getByText("Vanilla Powder")).toBeTruthy();
-    expect(screen.getAllByText("€240.00")).toHaveLength(2);
+    expect(screen.getAllByText("240,00 €")).toHaveLength(2);
     expect(screen.getByRole("link", { name: "Procéder au paiement" }).getAttribute("href")).toBe("/checkout");
   });
 

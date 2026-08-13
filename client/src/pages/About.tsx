@@ -43,7 +43,7 @@ export default function About() {
               Nous croyons que la parfumerie véritable commence par la qualité des matières premières. C'est pourquoi nous travaillons exclusivement avec les meilleures sources mondiales : vanille de Madagascar, safran de Grasse, roses de Bulgarie, cuir d'Espagne.
             </p>
             <p className="text-lg text-gray-600 font-light leading-relaxed">
-              Chaque ingrédient est sélectionné avec soin, chaque formule est perfectionnée par nos nez expérimentés. Le résultat ? Des fragrances qui ne ressemblent à aucune autre, des décants 50ml de pur luxe minimaliste.
+              Chaque ingrédient est sélectionné avec soin, chaque formule est perfectionnée par nos nez expérimentés. Le résultat ? Des fragrances qui ne ressemblent à aucune autre, proposées en décants 2 ml et 50 ml de pur luxe minimaliste.
             </p>
           </div>
 

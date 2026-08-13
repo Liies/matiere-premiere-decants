@@ -7,7 +7,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 const state = {
   authenticated: true,
   loaded: true,
-  items: [{ productId: 1, quantity: 2, name: "Vanilla Powder", price: 8500 }],
+  items: [{ productId: 1, variantId: 101, sizeMl: 2, quantity: 2, name: "Vanilla Powder", price: 1000 }],
 };
 const clearCart = vi.fn();
 const invalidateCart = vi.fn().mockResolvedValue(undefined);
@@ -47,7 +47,7 @@ describe("useCartSyncOnSignIn", () => {
     window.localStorage.clear();
     state.authenticated = true;
     state.loaded = true;
-    state.items = [{ productId: 1, quantity: 2, name: "Vanilla Powder", price: 8500 }];
+    state.items = [{ productId: 1, variantId: 101, sizeMl: 2, quantity: 2, name: "Vanilla Powder", price: 1000 }];
   });
 
   afterEach(() => cleanup());
@@ -60,7 +60,7 @@ describe("useCartSyncOnSignIn", () => {
 
     await waitFor(() => expect(clearCart).toHaveBeenCalledTimes(1));
     expect(mutate).toHaveBeenCalledWith(
-      expect.objectContaining({ items: [{ productId: 1, quantity: 2 }] }),
+      expect.objectContaining({ items: [{ productId: 1, variantId: 101, quantity: 2 }] }),
       expect.any(Object),
     );
     expect(invalidateCart).toHaveBeenCalledTimes(1);

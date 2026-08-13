@@ -30,7 +30,7 @@ export function useCartSyncOnSignIn() {
     syncGuestCart.mutate(
       {
         syncKey,
-        items: cartItems.map(({ productId, quantity }) => ({ productId, quantity })),
+        items: cartItems.map(({ productId, variantId, quantity }) => ({ productId, variantId, quantity })),
       },
       {
         onSuccess: async (result) => {

@@ -1,58 +1,57 @@
 import { describe, expect, it } from "vitest";
 import { buildCartSyncPlan, CartSyncValidationError } from "@shared/cart-sync";
 
+const variants = [
+  { id: 11, productId: 1, sizeMl: 2 },
+  { id: 12, productId: 1, sizeMl: 50 },
+  { id: 21, productId: 2, sizeMl: 2 },
+];
+
 describe("buildCartSyncPlan", () => {
-  it("fusionne les quantités du panier compte et du panier invité", () => {
+  it("fusionne une même variante sans mélanger deux contenances du même parfum", () => {
     const plan = buildCartSyncPlan({
-      accountItems: [{ productId: 1, quantity: 2 }],
+      accountItems: [{ productId: 1, variantId: 11, quantity: 2 }],
       guestItems: [
-        { productId: 1, quantity: 1 },
-        { productId: 2, quantity: 2 },
+        { productId: 1, variantId: 11, quantity: 1 },
+        { productId: 1, variantId: 12, quantity: 1 },
+        { productId: 2, variantId: 21, quantity: 2 },
       ],
-      products: [
-        { id: 1, stock: 5 },
-        { id: 2, stock: 3 },
+      variants,
+      productVolumes: [
+        { productId: 1, availableMl: 100 },
+        { productId: 2, availableMl: 10 },
       ],
     });
 
-    expect(plan).toEqual([
-      { productId: 1, quantity: 3 },
-      { productId: 2, quantity: 2 },
-    ]);
+    expect(plan).toEqual(expect.arrayContaining([
+      { productId: 1, variantId: 11, quantity: 3 },
+      { productId: 1, variantId: 12, quantity: 1 },
+      { productId: 2, variantId: 21, quantity: 2 },
+    ]));
   });
 
-  it("agrège les doublons transmis par un ancien panier invité", () => {
-    const plan = buildCartSyncPlan({
-      accountItems: [],
-      guestItems: [
-        { productId: 3, quantity: 1 },
-        { productId: 3, quantity: 2 },
-      ],
-      products: [{ id: 3, stock: 4 }],
-    });
-
-    expect(plan).toEqual([{ productId: 3, quantity: 3 }]);
-  });
-
-  it("refuse la fusion entière si la quantité fusionnée dépasse le stock", () => {
+  it("refuse une fusion lorsque les formats cumulés dépassent le volume source", () => {
     expect(() => buildCartSyncPlan({
-      accountItems: [{ productId: 4, quantity: 2 }],
-      guestItems: [{ productId: 4, quantity: 2 }],
-      products: [{ id: 4, stock: 3 }],
+      accountItems: [{ productId: 1, variantId: 11, quantity: 24 }],
+      guestItems: [{ productId: 1, variantId: 12, quantity: 1 }],
+      variants,
+      productVolumes: [{ productId: 1, availableMl: 50 }],
     })).toThrow(CartSyncValidationError);
   });
 
-  it("refuse les produits supprimés et les quantités malformées", () => {
+  it("refuse une variante supprimée, associée au mauvais parfum ou une quantité invalide", () => {
     expect(() => buildCartSyncPlan({
       accountItems: [],
-      guestItems: [{ productId: 99, quantity: 1 }],
-      products: [],
+      guestItems: [{ productId: 99, variantId: 11, quantity: 1 }],
+      variants,
+      productVolumes: [],
     })).toThrow("n’existe plus");
 
     expect(() => buildCartSyncPlan({
       accountItems: [],
-      guestItems: [{ productId: 1, quantity: 0 }],
-      products: [{ id: 1, stock: 10 }],
-    })).toThrow("quantité invalide");
+      guestItems: [{ productId: 1, variantId: 11, quantity: 0 }],
+      variants,
+      productVolumes: [{ productId: 1, availableMl: 10 }],
+    })).toThrow("quantité ou un format invalide");
   });
 });

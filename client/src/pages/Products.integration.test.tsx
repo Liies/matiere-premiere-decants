@@ -21,6 +21,10 @@ vi.mock("@/lib/trpc", () => ({
               baseNotes: "Musc blanc",
               price: 19500,
               stock: 5,
+              variants: [
+                { id: 101, sizeMl: 2, priceCents: 1000, availableQuantity: 25 },
+                { id: 102, sizeMl: 50, priceCents: 12000, availableQuantity: 1 },
+              ],
             },
             {
               id: 2,
@@ -31,6 +35,10 @@ vi.mock("@/lib/trpc", () => ({
               baseNotes: "Cèdre",
               price: 19500,
               stock: 5,
+              variants: [
+                { id: 201, sizeMl: 2, priceCents: 1000, availableQuantity: 25 },
+                { id: 202, sizeMl: 50, priceCents: 12000, availableQuantity: 1 },
+              ],
             },
           ],
           isLoading: false,
@@ -38,7 +46,7 @@ vi.mock("@/lib/trpc", () => ({
       },
     },
     cart: {
-      addItem: {
+      addVariant: {
         useMutation: () => ({ mutate: vi.fn(), isPending: false }),
       },
     },
@@ -143,8 +151,8 @@ describe("intégration catalogue — panier et souhaits", () => {
     render(<Products />);
 
     const vanillaPrice = screen.getByTestId("catalog-price-1");
-    expect(vanillaPrice.textContent).toContain("195,00");
-    expect(vanillaPrice.textContent?.indexOf("€")).toBeGreaterThan(vanillaPrice.textContent?.indexOf("195,00") ?? -1);
+    expect(vanillaPrice.textContent).toContain("10,00");
+    expect(vanillaPrice.textContent?.indexOf("€")).toBeGreaterThan(vanillaPrice.textContent?.indexOf("10,00") ?? -1);
 
     expect(screen.getByTestId("catalog-card-body-1").className).toContain("h-full");
     expect(screen.getByTestId("catalog-card-actions-1").className).toContain("mt-auto");

@@ -46,7 +46,7 @@ const orderPayload = {
   shippingCity: "Paris",
   shippingPostalCode: "75001",
   shippingCountry: "France",
-  items: [{ productId: 1, quantity: 1, unitPrice: 8500 }],
+  items: [{ productId: 1, variantId: 101, quantity: 1, unitPrice: 8500 }],
   totalAmount: 8500,
 };
 
@@ -77,7 +77,7 @@ describe("déclencheurs d’emails de commande", () => {
     expect(mocks.createReservedOrder).toHaveBeenCalledWith(expect.objectContaining({
       userId: customer.id,
       shippingCountry: "France",
-      lines: [{ productId: 1, quantity: 1, unitPrice: 8500 }],
+      lines: [{ productId: 1, variantId: 101, quantity: 1, unitPrice: 8500 }],
     }));
     expect(mocks.sendOrderCreatedEmails).toHaveBeenCalledWith(expect.objectContaining({
       customerEmail: "camille@example.com",
@@ -137,11 +137,11 @@ describe("déclencheurs d’emails de commande", () => {
 
     await expect(caller.orders.create({
       ...orderPayload,
-      items: [{ productId: 1, quantity: 1, unitPrice: 1 }],
+      items: [{ productId: 1, variantId: 101, quantity: 1, unitPrice: 1 }],
       totalAmount: 1,
     })).resolves.toMatchObject({ success: true });
     expect(mocks.createReservedOrder).toHaveBeenCalledWith(expect.objectContaining({
-      lines: [{ productId: 1, quantity: 1, unitPrice: 1 }],
+      lines: [{ productId: 1, variantId: 101, quantity: 1, unitPrice: 1 }],
     }));
 
     mocks.createReservedOrder.mockRejectedValueOnce(new Error("Produit 1 non trouvé"));

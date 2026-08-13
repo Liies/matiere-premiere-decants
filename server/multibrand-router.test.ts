@@ -4,6 +4,7 @@ const mocks = vi.hoisted(() => ({
   getCatalogProducts: vi.fn(),
   getBrands: vi.fn(),
   getProductByBrandSlug: vi.fn(),
+  getProductVariants: vi.fn(),
 }));
 
 vi.mock("./db", async (importOriginal) => ({
@@ -11,6 +12,7 @@ vi.mock("./db", async (importOriginal) => ({
   getCatalogProducts: mocks.getCatalogProducts,
   getBrands: mocks.getBrands,
   getProductByBrandSlug: mocks.getProductByBrandSlug,
+  getProductVariants: mocks.getProductVariants,
 }));
 
 import { appRouter } from "./routers";
@@ -20,6 +22,7 @@ const publicContext = { user: null, req: {} as any, res: {} as any };
 describe("endpoints catalogue multi-maisons", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mocks.getProductVariants.mockResolvedValue([{ id: 22, sizeMl: 5, priceCents: 1800, availableQuantity: 3 }]);
   });
 
   it("aplatit le produit et sa maison pour la liste publique", async () => {
@@ -34,6 +37,7 @@ describe("endpoints catalogue multi-maisons", () => {
       name: "Oud Satin Mood",
       slug: "oud-satin-mood",
       brand: { id: 4, name: "Maison Francis Kurkdjian", slug: "maison-francis-kurkdjian" },
+      variants: [{ id: 22, sizeMl: 5, priceCents: 1800, availableQuantity: 3 }],
     }]);
   });
 

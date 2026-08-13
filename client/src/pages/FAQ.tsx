@@ -20,7 +20,7 @@ export default function FAQ() {
     {
       question: "Qu'est-ce qu'un décant ?",
       answer:
-        "Un décant est une petite portion d'un parfum, généralement 50ml, présentée dans un flacon de luxe. C'est le format parfait pour découvrir une fragrance ou l'emporter en voyage.",
+        "Un décant est une portion de parfum présentée dans un flacon dédié. Nous proposons un format 2 ml pour découvrir une fragrance et un format 50 ml pour en profiter plus longtemps.",
     },
     {
       question: "Quelle est la différence entre une Eau de Parfum et une Eau de Toilette ?",
@@ -33,9 +33,9 @@ export default function FAQ() {
         "Conservez votre décant à l'abri de la lumière directe, à température ambiante stable. Évitez les variations de température extrêmes. Un placard ou un tiroir est idéal. Gardez le bouchon fermé pour éviter l'évaporation.",
     },
     {
-      question: "Combien de temps dure un décant 50ml ?",
+      question: "Quels formats de décant sont disponibles ?",
       answer:
-        "Cela dépend de votre utilisation. En moyenne, 2-3 pulvérisations par jour, un décant 50ml dure environ 2-3 mois. Chaque personne a une consommation différente selon ses préférences.",
+        "Le format 2 ml est idéal pour explorer une création avant de s’engager, tandis que le format 50 ml convient à un usage régulier. La durée exacte dépend du nombre de pulvérisations et de vos habitudes.",
     },
     {
       question: "Livrez-vous en dehors de l'Europe ?",

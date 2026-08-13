@@ -6168,3 +6168,18 @@
 - [x] Couvrir les zones, le profil et le parcours de checkout par des tests
 - [x] Vérifier le rendu, TypeScript et le build
 - [x] Sauvegarder la version publiée
+
+## Ticket 01 — Contenances, variantes, stock et transaction
+- [x] Cadrer les prérequis applicables à partir des validations utilisateur ; le cahier détaillé n’a pas été fourni
+- [x] Confirmer les contenances 2 ml et 50 ml ainsi que leurs prix : 10,00 € et 120,00 €
+- [x] Auditer le modèle existant : tables de variantes et de flacons source déjà présentes, sans variante cataloguée
+- [x] Confirmer le périmètre Matière Première et convertir chaque stock historique en flacons source de 50 ml
+- [x] Initialiser le prix d’achat des flacons source à 0,00 € en attendant sa saisie réelle
+- [x] Concevoir et vérifier une migration de variantes avec simulation préalable : 20 variantes, 461 flacons source et 23 050 ml
+- [x] Appliquer la migration approuvée puis contrôler les données persistées : 20 variantes, 461 flacons, 23 050 ml et aucun panier historique non rattaché
+- [x] Adapter le schéma, les règles de stock, le panier et les commandes aux variantes
+- [x] Ajouter le sélecteur de contenance et les montants associés dans l’interface
+- [x] Harmoniser les textes d’accueil avec les formats 2 ml et 50 ml
+- [x] Couvrir les parcours de variantes, stock et transaction par des tests
+- [x] Valider la migration, TypeScript, le build et les parcours essentiels : 144 tests, vérification TypeScript et build réussis
+- [ ] Publier la version et remettre le rapport de fin du ticket

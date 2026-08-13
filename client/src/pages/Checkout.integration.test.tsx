@@ -10,8 +10,10 @@ const state = vi.hoisted(() => ({
     {
       id: 1,
       productId: 1,
+      variantId: 101,
       quantity: 2,
       product: { id: 1, name: "Vanilla Powder", price: 8500 },
+      variant: { id: 101, sizeMl: 2, priceCents: 8500 },
     },
   ] as Array<any>,
   savedDeliveryAddress: null as any,
@@ -93,8 +95,10 @@ describe("intégration checkout", () => {
     state.cartItems = [{
       id: 1,
       productId: 1,
+      variantId: 101,
       quantity: 2,
       product: { id: 1, name: "Vanilla Powder", price: 8500 },
+      variant: { id: 101, sizeMl: 2, priceCents: 8500 },
     }];
     state.savedDeliveryAddress = null;
     createOrderMutate.mockImplementation((_input, callbacks) => callbacks.onSuccess({
@@ -120,7 +124,7 @@ describe("intégration checkout", () => {
     expect(createOrderMutate).toHaveBeenCalledWith(expect.objectContaining({
       customerName: "Camille Martin",
       customerEmail: "camille@example.com",
-      items: [{ productId: 1, quantity: 2 }],
+      items: [{ productId: 1, variantId: 101, quantity: 2 }],
       totalAmount: 17_000,
     }), expect.any(Object));
     expect(screen.getByText("Commande confirmée !")).toBeTruthy();

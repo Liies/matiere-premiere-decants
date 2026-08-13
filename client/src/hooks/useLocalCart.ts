@@ -3,6 +3,8 @@ import { toast } from "sonner";
 
 export interface LocalCartItem {
   productId: number;
+  variantId: number;
+  sizeMl: number;
   quantity: number;
   name: string;
   price: number;
@@ -20,7 +22,19 @@ export function useLocalCart() {
     try {
       const stored = localStorage.getItem(CART_STORAGE_KEY);
       if (stored) {
-        setCartItems(JSON.parse(stored));
+        const parsed: unknown = JSON.parse(stored);
+        const validLines = Array.isArray(parsed)
+          ? parsed.filter((item): item is LocalCartItem => (
+            Number.isInteger(item?.productId)
+            && Number.isInteger(item?.variantId)
+            && Number.isInteger(item?.sizeMl)
+            && Number.isInteger(item?.quantity)
+            && item.quantity > 0
+            && typeof item?.name === "string"
+            && Number.isInteger(item?.price)
+          ))
+          : [];
+        setCartItems(validLines);
       }
     } catch (error) {
       console.error("Failed to load cart from localStorage:", error);
@@ -40,40 +54,48 @@ export function useLocalCart() {
   }, [cartItems, isLoaded]);
 
   const addToCart = (
-    product: { id: number; name: string; price: number },
+    product: { id: number; name: string },
+    variant: { id: number; sizeMl: number; priceCents: number },
     quantity: number,
     options: { announce?: boolean } = {},
   ) => {
     setCartItems((prev) => {
-      const existing = prev.find((item) => item.productId === product.id);
+      const existing = prev.find((item) => item.variantId === variant.id);
       if (existing) {
         return prev.map((item) =>
-          item.productId === product.id
+          item.variantId === variant.id
             ? { ...item, quantity: item.quantity + quantity }
             : item
         );
       }
-      return [...prev, { productId: product.id, quantity, name: product.name, price: product.price }];
+      return [...prev, {
+        productId: product.id,
+        variantId: variant.id,
+        sizeMl: variant.sizeMl,
+        quantity,
+        name: product.name,
+        price: variant.priceCents,
+      }];
     });
     if (options.announce !== false) {
       toast.success(`${product.name} ajouté au panier`);
     }
   };
 
-  const updateQuantity = (productId: number, quantity: number) => {
+  const updateQuantity = (variantId: number, quantity: number) => {
     if (quantity <= 0) {
-      removeItem(productId);
+      removeItem(variantId);
       return;
     }
     setCartItems((prev) =>
       prev.map((item) =>
-        item.productId === productId ? { ...item, quantity } : item
+        item.variantId === variantId ? { ...item, quantity } : item
       )
     );
   };
 
-  const removeItem = (productId: number) => {
-    setCartItems((prev) => prev.filter((item) => item.productId !== productId));
+  const removeItem = (variantId: number) => {
+    setCartItems((prev) => prev.filter((item) => item.variantId !== variantId));
     toast.success("Article supprimé du panier");
   };
 

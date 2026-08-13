@@ -1,30 +1,28 @@
 /** @vitest-environment jsdom */
 
-import { describe, it, expect, beforeEach, vi } from "vitest";
-import { renderHook, act } from "@testing-library/react";
-import { useLocalCart } from "./useLocalCart";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import { act, renderHook } from "@testing-library/react";
+import { CART_STORAGE_KEY, useLocalCart } from "./useLocalCart";
 
-// Mock localStorage
+vi.mock("sonner", () => ({ toast: { success: vi.fn() } }));
+
 const localStorageMock = (() => {
   let store: Record<string, string> = {};
-
   return {
     getItem: (key: string) => store[key] || null,
-    setItem: (key: string, value: string) => {
-      store[key] = value.toString();
-    },
-    removeItem: (key: string) => {
-      delete store[key];
-    },
-    clear: () => {
-      store = {};
-    },
+    setItem: (key: string, value: string) => { store[key] = value.toString(); },
+    removeItem: (key: string) => { delete store[key]; },
+    clear: () => { store = {}; },
   };
 })();
 
-Object.defineProperty(window, "localStorage", {
-  value: localStorageMock,
-});
+Object.defineProperty(window, "localStorage", { value: localStorageMock });
+
+const vanilla = { id: 1, name: "Vanilla Powder" };
+const vanilla2ml = { id: 101, sizeMl: 2, priceCents: 1_000 };
+const vanilla50ml = { id: 102, sizeMl: 50, priceCents: 12_000 };
+const saffron = { id: 2, name: "Crystal Saffron" };
+const saffron2ml = { id: 201, sizeMl: 2, priceCents: 1_000 };
 
 describe("useLocalCart", () => {
   beforeEach(() => {
@@ -32,127 +30,70 @@ describe("useLocalCart", () => {
     vi.clearAllMocks();
   });
 
-  it("should initialize with empty cart", () => {
+  it("initialise un panier vide", () => {
     const { result } = renderHook(() => useLocalCart());
-
     expect(result.current.cartItems).toEqual([]);
     expect(result.current.getTotalItems()).toBe(0);
     expect(result.current.getTotalPrice()).toBe(0);
   });
 
-  it("should add item to cart", () => {
+  it("conserve deux lignes distinctes pour les formats 2 ml et 50 ml du même parfum", () => {
     const { result } = renderHook(() => useLocalCart());
-
     act(() => {
-      result.current.addToCart({ id: 1, name: "Vanilla Powder", price: 5000 }, 1);
+      result.current.addToCart(vanilla, vanilla2ml, 1);
+      result.current.addToCart(vanilla, vanilla50ml, 1);
+    });
+
+    expect(result.current.cartItems).toEqual(expect.arrayContaining([
+      expect.objectContaining({ productId: 1, variantId: 101, sizeMl: 2, price: 1_000, quantity: 1 }),
+      expect.objectContaining({ productId: 1, variantId: 102, sizeMl: 50, price: 12_000, quantity: 1 }),
+    ]));
+    expect(result.current.getTotalPrice()).toBe(13_000);
+  });
+
+  it("fusionne seulement les ajouts portant sur une même variante", () => {
+    const { result } = renderHook(() => useLocalCart());
+    act(() => {
+      result.current.addToCart(vanilla, vanilla2ml, 1);
+      result.current.addToCart(vanilla, vanilla2ml, 2);
     });
 
     expect(result.current.cartItems).toHaveLength(1);
-    expect(result.current.cartItems[0]).toMatchObject({
-      productId: 1,
-      quantity: 1,
-      name: "Vanilla Powder",
-      price: 5000,
-    });
+    expect(result.current.cartItems[0]).toMatchObject({ variantId: 101, quantity: 3 });
   });
 
-  it("should increase quantity when adding same product twice", () => {
+  it("met à jour et retire une ligne par identifiant de variante", () => {
     const { result } = renderHook(() => useLocalCart());
-
     act(() => {
-      result.current.addToCart({ id: 1, name: "Vanilla Powder", price: 5000 }, 1);
-      result.current.addToCart({ id: 1, name: "Vanilla Powder", price: 5000 }, 2);
+      result.current.addToCart(vanilla, vanilla2ml, 1);
+      result.current.addToCart(vanilla, vanilla50ml, 1);
+      result.current.updateQuantity(vanilla2ml.id, 4);
+      result.current.removeItem(vanilla50ml.id);
     });
 
-    expect(result.current.cartItems).toHaveLength(1);
-    expect(result.current.cartItems[0]?.quantity).toBe(3);
+    expect(result.current.cartItems).toEqual([expect.objectContaining({ variantId: vanilla2ml.id, quantity: 4 })]);
   });
 
-  it("should update quantity", () => {
+  it("calcule les totaux des prix propres à chaque variante", () => {
     const { result } = renderHook(() => useLocalCart());
-
     act(() => {
-      result.current.addToCart({ id: 1, name: "Vanilla Powder", price: 5000 }, 1);
-      result.current.updateQuantity(1, 5);
-    });
-
-    expect(result.current.cartItems[0]?.quantity).toBe(5);
-  });
-
-  it("should remove item when quantity is set to 0", () => {
-    const { result } = renderHook(() => useLocalCart());
-
-    act(() => {
-      result.current.addToCart({ id: 1, name: "Vanilla Powder", price: 5000 }, 1);
-      result.current.updateQuantity(1, 0);
-    });
-
-    expect(result.current.cartItems).toHaveLength(0);
-  });
-
-  it("should remove item", () => {
-    const { result } = renderHook(() => useLocalCart());
-
-    act(() => {
-      result.current.addToCart({ id: 1, name: "Vanilla Powder", price: 5000 }, 1);
-      result.current.addToCart({ id: 2, name: "Crystal Saffron", price: 6000 }, 1);
-      result.current.removeItem(1);
-    });
-
-    expect(result.current.cartItems).toHaveLength(1);
-    expect(result.current.cartItems[0]?.productId).toBe(2);
-  });
-
-  it("should calculate total price correctly", () => {
-    const { result } = renderHook(() => useLocalCart());
-
-    act(() => {
-      result.current.addToCart({ id: 1, name: "Vanilla Powder", price: 5000 }, 2);
-      result.current.addToCart({ id: 2, name: "Crystal Saffron", price: 6000 }, 1);
-    });
-
-    expect(result.current.getTotalPrice()).toBe(16000);
-  });
-
-  it("should calculate total items correctly", () => {
-    const { result } = renderHook(() => useLocalCart());
-
-    act(() => {
-      result.current.addToCart({ id: 1, name: "Vanilla Powder", price: 5000 }, 2);
-      result.current.addToCart({ id: 2, name: "Crystal Saffron", price: 6000 }, 3);
+      result.current.addToCart(vanilla, vanilla2ml, 2);
+      result.current.addToCart(saffron, saffron2ml, 3);
     });
 
     expect(result.current.getTotalItems()).toBe(5);
+    expect(result.current.getTotalPrice()).toBe(5_000);
   });
 
-  it("should clear cart", () => {
+  it("persiste les métadonnées de variante et écarte les lignes historiques non convertibles", () => {
     const { result } = renderHook(() => useLocalCart());
+    act(() => result.current.addToCart(vanilla, vanilla2ml, 1));
+    expect(JSON.parse(localStorage.getItem(CART_STORAGE_KEY)!)).toEqual([
+      expect.objectContaining({ productId: 1, variantId: 101, sizeMl: 2, price: 1_000, quantity: 1 }),
+    ]);
 
-    act(() => {
-      result.current.addToCart({ id: 1, name: "Vanilla Powder", price: 5000 }, 1);
-      result.current.addToCart({ id: 2, name: "Crystal Saffron", price: 6000 }, 1);
-      result.current.clearCart();
-    });
-
-    expect(result.current.cartItems).toHaveLength(0);
-    expect(result.current.getTotalItems()).toBe(0);
-    expect(result.current.getTotalPrice()).toBe(0);
-  });
-
-  it("should persist cart to localStorage", () => {
-    const { result } = renderHook(() => useLocalCart());
-
-    act(() => {
-      result.current.addToCart({ id: 1, name: "Vanilla Powder", price: 5000 }, 1);
-    });
-
-    const stored = localStorage.getItem("matiere-premiere-cart");
-    expect(stored).toBeDefined();
-    const parsed = JSON.parse(stored!);
-    expect(parsed).toHaveLength(1);
-    expect(parsed[0]).toMatchObject({
-      productId: 1,
-      quantity: 1,
-    });
+    localStorage.setItem(CART_STORAGE_KEY, JSON.stringify([{ productId: 1, quantity: 2, name: "Vanilla Powder", price: 12_000 }]));
+    const { result: reloaded } = renderHook(() => useLocalCart());
+    expect(reloaded.current.cartItems).toEqual([]);
   });
 });

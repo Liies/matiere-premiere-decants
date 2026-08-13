@@ -28,7 +28,7 @@ const ORDER_INPUT = z.object({
     productId: z.number(),
     quantity: z.number().min(1),
     unitPrice: z.number().min(0).optional(),
-    variantId: z.number().int().positive().optional(),
+    variantId: z.number().int().positive(),
   })),
   totalAmount: z.number().min(0),
 });

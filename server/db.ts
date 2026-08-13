@@ -127,6 +127,16 @@ export async function getProductVariants(productId: number) {
   return productVariants.map((variant) => ({ ...variant, availableQuantity: Math.floor(availableMl / variant.sizeMl) }));
 }
 
+export async function getProductAvailableMl(productId: number) {
+  const db = await getDb();
+  if (!db) return 0;
+  const bottles = await db
+    .select({ remainingMl: sourceBottles.remainingMl })
+    .from(sourceBottles)
+    .where(and(eq(sourceBottles.productId, productId), gt(sourceBottles.remainingMl, "0")));
+  return bottles.reduce((sum, bottle) => sum + Number(bottle.remainingMl), 0);
+}
+
 export async function getProductBySlug(slug: string) {
   const db = await getDb();
   if (!db) return undefined;
@@ -202,27 +212,6 @@ export async function getCartItems(userId: number) {
   return db.select().from(cartItems).where(eq(cartItems.userId, userId));
 }
 
-export async function addCartItem(userId: number, productId: number, quantity: number) {
-  const db = await getDb();
-  if (!db) return;
-
-  const existingItems = await db
-    .select()
-    .from(cartItems)
-    .where(and(eq(cartItems.userId, userId), eq(cartItems.productId, productId)));
-
-  if (existingItems.length > 0) {
-    const mergedQuantity = existingItems.reduce((total, item) => total + item.quantity, quantity);
-    await db.update(cartItems).set({ quantity: mergedQuantity }).where(eq(cartItems.id, existingItems[0].id));
-    for (const duplicate of existingItems.slice(1)) {
-      await db.delete(cartItems).where(eq(cartItems.id, duplicate.id));
-    }
-    return;
-  }
-
-  await db.insert(cartItems).values({ userId, productId, quantity });
-}
-
 export async function addCartVariant(userId: number, productId: number, variantId: number, quantity: number) {
   const db = await getDb();
   if (!db) return;
@@ -265,7 +254,7 @@ export async function clearUserCart(userId: number) {
 export async function syncGuestCartToUserCart(
   userId: number,
   syncKey: string,
-  guestItems: Array<{ productId: number; quantity: number }>,
+  guestItems: Array<{ productId: number; variantId: number; quantity: number }>,
 ) {
   const db = await getDb();
   if (!db) {
@@ -288,28 +277,39 @@ export async function syncGuestCartToUserCart(
   try {
     await db.transaction(async (tx) => {
       const accountItems = await tx.select().from(cartItems).where(eq(cartItems.userId, userId));
-      const catalog = await tx.select({ id: products.id, stock: products.stock }).from(products);
-      const plan = buildCartSyncPlan({
-        accountItems: accountItems.map(({ productId, quantity }) => ({ productId, quantity })),
-        guestItems,
-        products: catalog,
+
+      const [activeVariants, availableBottles] = await Promise.all([
+        tx.select().from(variants).where(eq(variants.isActive, true)),
+        tx.select({ productId: sourceBottles.productId, remainingMl: sourceBottles.remainingMl })
+          .from(sourceBottles)
+          .where(gt(sourceBottles.remainingMl, "0")),
+      ]);
+      const volumesByProduct = new Map<number, number>();
+      availableBottles.forEach((bottle) => {
+        volumesByProduct.set(bottle.productId, (volumesByProduct.get(bottle.productId) ?? 0) + Number(bottle.remainingMl));
       });
-      const existingByProduct = new Map<number, typeof accountItems>();
+      const plan = buildCartSyncPlan({
+        accountItems: accountItems.map(({ productId, variantId, quantity }) => ({ productId, variantId, quantity })),
+        guestItems,
+        variants: activeVariants,
+        productVolumes: Array.from(volumesByProduct, ([productId, availableMl]) => ({ productId, availableMl })),
+      });
+      const existingByVariant = new Map<number, typeof accountItems>();
 
       accountItems.forEach((item) => {
-        const rows = existingByProduct.get(item.productId) ?? [];
+        const rows = existingByVariant.get(item.variantId) ?? [];
         rows.push(item);
-        existingByProduct.set(item.productId, rows);
+        existingByVariant.set(item.variantId, rows);
       });
 
       for (const item of plan) {
-        const rows = existingByProduct.get(item.productId) ?? [];
+        const rows = existingByVariant.get(item.variantId) ?? [];
         if (rows.length === 0) {
-          await tx.insert(cartItems).values({ userId, productId: item.productId, quantity: item.quantity });
+          await tx.insert(cartItems).values({ userId, productId: item.productId, variantId: item.variantId, quantity: item.quantity });
           continue;
         }
 
-        await tx.update(cartItems).set({ quantity: item.quantity }).where(eq(cartItems.id, rows[0].id));
+        await tx.update(cartItems).set({ productId: item.productId, variantId: item.variantId, quantity: item.quantity }).where(eq(cartItems.id, rows[0].id));
         for (const duplicateRow of rows.slice(1)) {
           await tx.delete(cartItems).where(eq(cartItems.id, duplicateRow.id));
         }
