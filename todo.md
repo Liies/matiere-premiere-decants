@@ -6109,4 +6109,4 @@
 - [x] Créer un second visuel éditorial cohérent pour la section suivante
 - [x] Intégrer les nouveaux visuels avec leurs alternatives accessibles
 - [x] Vérifier le rendu desktop et mobile, les tests et le build
-- [ ] Sauvegarder la version publiée
+- [x] Sauvegarder la version publiée
