@@ -6182,4 +6182,4 @@
 - [x] Harmoniser les textes d’accueil avec les formats 2 ml et 50 ml
 - [x] Couvrir les parcours de variantes, stock et transaction par des tests
 - [x] Valider la migration, TypeScript, le build et les parcours essentiels : 144 tests, vérification TypeScript et build réussis
-- [ ] Publier la version et remettre le rapport de fin du ticket
+- [x] Publier la version et remettre le rapport de fin du ticket
