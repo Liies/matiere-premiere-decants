@@ -6110,3 +6110,12 @@
 - [x] Intégrer les nouveaux visuels avec leurs alternatives accessibles
 - [x] Vérifier le rendu desktop et mobile, les tests et le build
 - [x] Sauvegarder la version publiée
+
+## Quiz de recommandation olfactive — demande courante
+- [x] Examiner le CTA de l’accueil et les données de notes parfum
+- [x] Définir les questions et la logique de recommandation
+- [x] Créer un parcours de quiz accessible avec résultat personnalisé
+- [x] Relier la recommandation à la fiche parfum correspondante
+- [x] Ajouter la couverture Vitest du scoring et du parcours
+- [x] Vérifier le rendu desktop et mobile, les tests et le build
+- [ ] Sauvegarder la version publiée

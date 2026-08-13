@@ -7,6 +7,7 @@ import { getHeroScrollBehavior, HERO_NEXT_SECTION_ID } from "@shared/home-hero";
 import { MASTER_PERFUMER_PROFILE } from "@shared/perfumer-profile";
 import { Link } from "wouter";
 import { ArrowRight } from "lucide-react";
+import ScentQuizDialog from "@/components/ScentQuizDialog";
 
 export const HOME_COLLECTION_EDITORIAL_IMAGE = "/manus-storage/matiere-premiere-ten-bottles-editorial_30095232.jpg";
 export const HOME_STORY_ATELIER_IMAGE = "/manus-storage/matiere-premiere-atelier-origins-editorial_6e6945e3.jpg";
@@ -15,6 +16,7 @@ export default function HomePremium() {
   const { user, isAuthenticated } = useAuth();
   const [scrollY, setScrollY] = useState(0);
   const [visibleSections, setVisibleSections] = useState<Record<string, boolean>>({});
+  const [isScentQuizOpen, setIsScentQuizOpen] = useState(false);
   const sectionRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
   useEffect(() => {
@@ -378,16 +380,15 @@ export default function HomePremium() {
           <p className="text-base font-light leading-7 text-gray-300 sm:text-xl">
             Explorez notre collection exclusive et trouvez votre fragrance signature.
           </p>
-          <Link href="/products">
-            <Button className="gap-2 bg-white hover:bg-gray-100 text-gray-900 px-8 py-6 text-base">
-              Commencer l'Exploration
-              <ArrowRight className="w-4 h-4" />
-            </Button>
-          </Link>
+          <Button type="button" onClick={() => setIsScentQuizOpen(true)} className="gap-2 bg-white px-8 py-6 text-base text-gray-900 hover:bg-gray-100">
+            Commencer l'Exploration
+            <ArrowRight className="w-4 h-4" />
+          </Button>
         </div>
       </section>
 
       <Footer />
+      <ScentQuizDialog open={isScentQuizOpen} onOpenChange={setIsScentQuizOpen} />
     </div>
   );
 }

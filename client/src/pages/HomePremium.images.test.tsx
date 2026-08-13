@@ -1,7 +1,7 @@
 /** @vitest-environment jsdom */
 
 import React from "react";
-import { cleanup, render, screen } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import HomePremium, {
   HOME_COLLECTION_EDITORIAL_IMAGE,
@@ -29,7 +29,7 @@ vi.mock("@shared/perfumer-profile", () => ({
   },
 }));
 vi.mock("wouter", () => ({
-  Link: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+  Link: ({ children, href }: { children: React.ReactNode; href: string }) => <a href={href}>{children}</a>,
 }));
 
 describe("visuels éditoriaux de l’accueil", () => {
@@ -56,6 +56,35 @@ describe("visuels éditoriaux de l’accueil", () => {
     );
     expect(screen.getByAltText("Atelier de création de Matière Première, matières et flacons de parfum").getAttribute("src")).toBe(
       HOME_STORY_ATELIER_IMAGE,
+    );
+  });
+
+  it("ouvre le quiz de recommandation depuis le CTA Commencer l’Exploration", () => {
+    render(<HomePremium />);
+
+    fireEvent.click(screen.getByRole("button", { name: "Commencer l'Exploration" }));
+
+    expect(screen.getByRole("dialog")).toBeTruthy();
+    expect(screen.getByText("Quelques gestes, une recommandation.")).toBeTruthy();
+  });
+
+  it("parcourt les préférences fraîches jusqu’à la recommandation Cologne Cédrat", () => {
+    render(<HomePremium />);
+
+    fireEvent.click(screen.getByRole("button", { name: "Commencer l'Exploration" }));
+    fireEvent.click(screen.getByRole("radio", { name: /Un éclat frais/ }));
+    fireEvent.click(screen.getByRole("button", { name: "Continuer" }));
+    fireEvent.click(screen.getByRole("radio", { name: /Lumineuse/ }));
+    fireEvent.click(screen.getByRole("button", { name: "Continuer" }));
+    fireEvent.click(screen.getByRole("radio", { name: /Près de la peau/ }));
+    fireEvent.click(screen.getByRole("button", { name: "Continuer" }));
+    fireEvent.click(screen.getByRole("radio", { name: /En journée/ }));
+    fireEvent.click(screen.getByRole("button", { name: "Voir ma recommandation" }));
+
+    expect(screen.getByTestId("scent-quiz-result")).toBeTruthy();
+    expect(screen.getByRole("heading", { name: "Cologne Cédrat" })).toBeTruthy();
+    expect(screen.getByRole("link", { name: "Découvrir ce parfum" }).getAttribute("href")).toBe(
+      "/parfum/matiere-premiere/cologne-cedrat",
     );
   });
 });
