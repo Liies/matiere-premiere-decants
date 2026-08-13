@@ -27,11 +27,11 @@ export default function Products() {
   const [searchQuery, setSearchQuery] = useState("");
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const [activeSuggestionIndex, setActiveSuggestionIndex] = useState(-1);
-  const [recentlyAddedProductKey, setRecentlyAddedProductKey] = useState<string | null>(null);
+  const [recentlyAddedProductKeys, setRecentlyAddedProductKeys] = useState<Set<string>>(() => new Set());
   const [wishlistAnimationKey, setWishlistAnimationKey] = useState<string | null>(null);
   const [flippedProductId, setFlippedProductId] = useState<number | null>(null);
   const [hoverFlippedProductId, setHoverFlippedProductId] = useState<number | null>(null);
-  const addFeedbackTimer = useRef<number | null>(null);
+  const addFeedbackTimers = useRef<Map<string, number>>(new Map());
   const wishlistAnimationTimer = useRef<number | null>(null);
   const hoverFlipTimer = useRef<number | null>(null);
 
@@ -54,7 +54,8 @@ export default function Products() {
 
   useEffect(() => {
     return () => {
-      if (addFeedbackTimer.current) window.clearTimeout(addFeedbackTimer.current);
+      addFeedbackTimers.current.forEach((timer) => window.clearTimeout(timer));
+      addFeedbackTimers.current.clear();
       if (wishlistAnimationTimer.current) window.clearTimeout(wishlistAnimationTimer.current);
       if (hoverFlipTimer.current) window.clearTimeout(hoverFlipTimer.current);
     };
@@ -77,15 +78,26 @@ export default function Products() {
   }, []);
 
   const confirmAddedProduct = (product: CatalogProduct) => {
-    setRecentlyAddedProductKey(getCartFeedbackKey(product));
-    if (addFeedbackTimer.current) window.clearTimeout(addFeedbackTimer.current);
-    addFeedbackTimer.current = window.setTimeout(() => {
-      setRecentlyAddedProductKey(null);
+    const feedbackKey = getCartFeedbackKey(product);
+    setRecentlyAddedProductKeys((current) => new Set(current).add(feedbackKey));
+
+    const existingTimer = addFeedbackTimers.current.get(feedbackKey);
+    if (existingTimer) window.clearTimeout(existingTimer);
+
+    const timer = window.setTimeout(() => {
+      setRecentlyAddedProductKeys((current) => {
+        if (!current.has(feedbackKey)) return current;
+        const next = new Set(current);
+        next.delete(feedbackKey);
+        return next;
+      });
+      addFeedbackTimers.current.delete(feedbackKey);
     }, CART_CONFIRMATION_DURATION_MS);
+    addFeedbackTimers.current.set(feedbackKey, timer);
   };
 
   const isProductRecentlyAdded = (product: CatalogProduct) =>
-    recentlyAddedProductKey === getCartFeedbackKey(product);
+    recentlyAddedProductKeys.has(getCartFeedbackKey(product));
 
   const clearHoverFlipTimer = () => {
     if (hoverFlipTimer.current) {

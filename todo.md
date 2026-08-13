@@ -6078,3 +6078,10 @@
 - [x] Ajouter ou adapter la couverture Vitest du contrat de mise en page
 - [x] Vérifier le rendu, les tests et le build
 - [x] Sauvegarder la version publiée
+
+## Animation panier isolée — demande courante
+- [x] Examiner l’état de confirmation et les clés de carte utilisées
+- [x] Isoler l’état et les classes d’animation à la carte cliquée
+- [x] Ajouter ou adapter la couverture Vitest de non-régression
+- [x] Vérifier le rendu, les tests et le build
+- [ ] Sauvegarder la version publiée

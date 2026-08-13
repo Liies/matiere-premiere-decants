@@ -73,10 +73,16 @@ describe("intégration catalogue — panier et souhaits", () => {
   it("affiche la confirmation d’ajout uniquement sur la carte actionnée", () => {
     render(<Products />);
 
-    fireEvent.click(screen.getAllByRole("button", { name: "Ajouter" })[0]!);
+    const addButtons = screen.getAllByRole("button", { name: "Ajouter" });
+    const vanillaButton = addButtons[0]!;
+    const saffronButton = addButtons[1]!;
+
+    fireEvent.click(vanillaButton);
 
     expect(screen.getAllByRole("button", { name: "Ajouté" })).toHaveLength(1);
     expect(screen.getAllByRole("button", { name: "Ajouter" })).toHaveLength(1);
+    expect(vanillaButton.textContent).toContain("Ajouté");
+    expect(saffronButton.textContent).toContain("Ajouter");
   });
 
   it("renouvelle le délai de confirmation après deux ajouts rapprochés", () => {
