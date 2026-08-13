@@ -6094,3 +6094,11 @@
 - [x] Ajouter ou adapter la couverture Vitest des récits produit
 - [x] Vérifier le rendu, les sources, les tests et le build
 - [x] Sauvegarder la version publiée
+
+## Prix euro et cartes lisibles — demande courante
+- [x] Examiner le format de montant et la structure des cartes catalogue
+- [x] Afficher les montants au format français avec € placé après le prix
+- [x] Ajuster les dimensions et espacements pour éviter les chevauchements
+- [x] Ajouter ou adapter la couverture Vitest du prix et du contrat de carte
+- [x] Vérifier le rendu desktop et mobile, les tests et le build
+- [ ] Sauvegarder la version publiée

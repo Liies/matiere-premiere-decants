@@ -15,6 +15,7 @@ import { getCatalogSuggestions, searchProductsByName } from "@shared/catalog-sea
 import { CART_CONFIRMATION_DURATION_MS, getCartFeedbackKey } from "@shared/cart-feedback";
 import { getOlfactoryFilterIdFromHash } from "@shared/catalog-category-route";
 import { useWishlist } from "@/hooks/useWishlist";
+import { formatPrice } from "@shared/price";
 
 export default function Products() {
   const { data: products, isLoading } = trpc.products.list.useQuery();
@@ -363,12 +364,12 @@ export default function Products() {
               {filteredProducts.map((product, index) => (
                 <Card
                   key={getCartFeedbackKey(product)}
-                  className="catalog-product-card group/product-card overflow-hidden border-gray-200 transition-all duration-500 animate-fade-in hover:-translate-y-1 hover:shadow-xl motion-reduce:transform-none motion-reduce:transition-none"
+                  className="catalog-product-card group/product-card h-full overflow-hidden border-gray-200 transition-all duration-500 animate-fade-in hover:-translate-y-1 hover:shadow-xl motion-reduce:transform-none motion-reduce:transition-none"
                   style={{ animationDelay: `${Math.min(index, 5) * 70}ms` }}
                   onMouseEnter={() => scheduleHoverFlip(product.id)}
                   onMouseLeave={() => cancelHoverFlip(product.id)}
                 >
-                  <div className="space-y-4 p-4 sm:p-5">
+                  <div data-testid={`catalog-card-body-${product.id}`} className="flex h-full flex-col gap-4 p-4 sm:p-5">
                     <div className="relative">
                       <button
                         type="button"
@@ -437,17 +438,17 @@ export default function Products() {
                       {flippedProductId === product.id ? "Masquer les notes" : "Afficher les notes"}
                     </button>
 
-                    <p className="text-gray-600 text-sm line-clamp-3">{product.description}</p>
+                    <p className="min-h-[3.75rem] text-sm text-gray-600 line-clamp-3">{product.description}</p>
 
-                    <div className="flex flex-col gap-3 border-t border-gray-200 pt-4 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
-                      <div>
-                        <p className="text-2xl font-light text-gray-900">€{(product.price / 100).toFixed(2)}</p>
+                    <div data-testid={`catalog-card-actions-${product.id}`} className="mt-auto flex flex-col gap-3 border-t border-gray-200 pt-4 sm:flex-row sm:items-end sm:justify-between sm:gap-4">
+                      <div className="shrink-0">
+                        <p data-testid={`catalog-price-${product.id}`} className="text-2xl font-light text-gray-900">{formatPrice(product.price)}</p>
                         <p className="text-xs text-gray-500 font-medium">
                           {product.stock > 0 ? "✓ En stock" : "Rupture"}
                         </p>
                       </div>
 
-                      <div className="flex w-full items-center justify-between gap-2 sm:w-auto sm:justify-end">
+                      <div className="flex w-full min-w-0 items-center gap-2 sm:w-auto sm:justify-end">
                         <label htmlFor={`quantity-${product.id}`} className="sr-only">
                           Quantité de {product.name}
                         </label>
@@ -471,7 +472,7 @@ export default function Products() {
                           onClick={() => handleAddToCart(product)}
                           disabled={addToCart.isPending || product.stock === 0}
                           aria-live="polite"
-                          className={`relative min-h-11 flex-1 overflow-hidden bg-gray-900 text-white font-light whitespace-nowrap transition-all duration-500 touch-manipulation hover:-translate-y-0.5 hover:bg-gray-800 hover:shadow-lg sm:max-w-0 sm:min-w-0 sm:flex-none sm:scale-95 sm:translate-y-2 sm:px-0 sm:opacity-0 sm:group-hover/product-card:max-w-44 sm:group-hover/product-card:scale-100 sm:group-hover/product-card:translate-y-0 sm:group-hover/product-card:px-4 sm:group-hover/product-card:opacity-100 sm:group-focus-within/product-card:max-w-44 sm:group-focus-within/product-card:scale-100 sm:group-focus-within/product-card:translate-y-0 sm:group-focus-within/product-card:px-4 sm:group-focus-within/product-card:opacity-100 motion-reduce:transform-none motion-reduce:transition-none ${
+                          className={`relative min-h-11 min-w-0 flex-1 overflow-hidden bg-gray-900 text-white font-light whitespace-nowrap transition-all duration-500 touch-manipulation hover:-translate-y-0.5 hover:bg-gray-800 hover:shadow-lg lg:w-36 lg:flex-none lg:translate-y-1 lg:opacity-0 lg:group-hover/product-card:translate-y-0 lg:group-hover/product-card:opacity-100 lg:group-focus-within/product-card:translate-y-0 lg:group-focus-within/product-card:opacity-100 motion-reduce:transform-none motion-reduce:transition-none ${
                             isProductRecentlyAdded(product) ? "scale-[0.97] bg-gray-800" : ""
                           }`}
                         >

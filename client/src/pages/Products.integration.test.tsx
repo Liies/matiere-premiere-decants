@@ -139,6 +139,17 @@ describe("intégration catalogue — panier et souhaits", () => {
     expect(screen.getByRole("button", { name: "Masquer les notes" }).getAttribute("aria-expanded")).toBe("true");
   });
 
+  it("affiche le prix avec le symbole euro après le montant et réserve une zone d’action distincte", () => {
+    render(<Products />);
+
+    const vanillaPrice = screen.getByTestId("catalog-price-1");
+    expect(vanillaPrice.textContent).toContain("195,00");
+    expect(vanillaPrice.textContent?.indexOf("€")).toBeGreaterThan(vanillaPrice.textContent?.indexOf("195,00") ?? -1);
+
+    expect(screen.getByTestId("catalog-card-body-1").className).toContain("h-full");
+    expect(screen.getByTestId("catalog-card-actions-1").className).toContain("mt-auto");
+  });
+
   it("attend 1,2 seconde de survol et annule le retournement si la souris quitte la carte", () => {
     vi.useFakeTimers();
     render(<Products />);
