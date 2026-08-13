@@ -6157,4 +6157,4 @@
 - [x] Renseigner automatiquement l’adresse, la ville et le code postal sélectionnés
 - [x] Couvrir le préremplissage et conserver la modification manuelle des champs
 - [x] Vérifier le rendu, les tests, TypeScript et le build
-- [ ] Sauvegarder la version publiée
+- [x] Sauvegarder la version publiée
