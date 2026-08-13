@@ -15,8 +15,9 @@ describe("initial loader", () => {
   });
 
   it("reste bref afin de ne pas freiner la navigation", () => {
-    expect(INITIAL_LOADER_VISIBLE_MS).toBeLessThanOrEqual(1200);
-    expect(INITIAL_LOADER_EXIT_MS).toBeLessThanOrEqual(400);
+    expect(INITIAL_LOADER_VISIBLE_MS).toBeLessThanOrEqual(500);
+    expect(INITIAL_LOADER_EXIT_MS).toBeLessThanOrEqual(200);
+    expect(INITIAL_LOADER_VISIBLE_MS + INITIAL_LOADER_EXIT_MS).toBeLessThanOrEqual(700);
   });
 
   it("conserve les ancres d’accueil après la révélation", () => {

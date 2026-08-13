@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { lazy, Suspense, useEffect, useRef, useState } from "react";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import Header from "@/components/Header";
@@ -7,7 +7,8 @@ import { getHeroScrollBehavior, HERO_NEXT_SECTION_ID } from "@shared/home-hero";
 import { MASTER_PERFUMER_PROFILE } from "@shared/perfumer-profile";
 import { Link } from "wouter";
 import { ArrowRight } from "lucide-react";
-import ScentQuizDialog from "@/components/ScentQuizDialog";
+
+const ScentQuizDialog = lazy(() => import("@/components/ScentQuizDialog"));
 
 export const HOME_COLLECTION_EDITORIAL_IMAGE = "/manus-storage/matiere-premiere-ten-bottles-editorial_30095232.jpg";
 export const HOME_STORY_ATELIER_IMAGE = "/manus-storage/matiere-premiere-atelier-origins-editorial_6e6945e3.jpg";
@@ -18,14 +19,22 @@ export default function HomePremium() {
   const [visibleSections, setVisibleSections] = useState<Record<string, boolean>>({});
   const [isScentQuizOpen, setIsScentQuizOpen] = useState(false);
   const sectionRefs = useRef<Record<string, HTMLDivElement | null>>({});
+  const scrollFrame = useRef<number | null>(null);
 
   useEffect(() => {
     const handleScroll = () => {
-      setScrollY(window.scrollY);
+      if (scrollFrame.current !== null) return;
+      scrollFrame.current = window.requestAnimationFrame(() => {
+        setScrollY(window.scrollY);
+        scrollFrame.current = null;
+      });
     };
 
     window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+      if (scrollFrame.current !== null) window.cancelAnimationFrame(scrollFrame.current);
+    };
   }, []);
 
   useEffect(() => {
@@ -95,6 +104,9 @@ export default function HomePremium() {
             src="https://d2xsxph8kpxj0f.cloudfront.net/310519663634453748/oKjLk7qKw3XzkAh8kgeZU3/mp-story-hero-88whgjPV3o5cgctoSVF89Q.webp"
             alt="Matière Première"
             className="h-full w-full object-cover opacity-35 will-change-transform"
+            loading="eager"
+            fetchPriority="high"
+            decoding="async"
           />
         </div>
         <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-white/20 via-white/10 to-white/85" aria-hidden="true" />
@@ -132,6 +144,8 @@ export default function HomePremium() {
                 alt="Dix flacons de la collection Matière Première, composition éditoriale"
                 className="aspect-[4/5] w-full rounded-[1.1rem] object-cover brightness-[0.96] contrast-[1.12] saturate-[1.08]"
                 loading="eager"
+                fetchPriority="high"
+                decoding="async"
               />
               <div className="pointer-events-none absolute inset-2 rounded-[1.1rem] bg-gradient-to-t from-stone-900/15 via-transparent to-white/5" aria-hidden="true" />
             </div>
@@ -178,6 +192,9 @@ export default function HomePremium() {
                 src={HOME_STORY_ATELIER_IMAGE}
                 alt="Atelier de création de Matière Première, matières et flacons de parfum"
                 className="aspect-[3/2] w-full rounded-lg object-cover shadow-lg transition-transform duration-1000 group-hover:scale-[1.02]"
+                loading="lazy"
+                fetchPriority="low"
+                decoding="async"
               />
             </div>
           </div>
@@ -203,6 +220,9 @@ export default function HomePremium() {
                 src="https://d2xsxph8kpxj0f.cloudfront.net/310519663634453748/oKjLk7qKw3XzkAh8kgeZU3/mp-ingredients-W6x6mGy9Xy9zMzRqyytYqp.webp"
                 alt="Matières premières luxe"
                 className="h-auto w-full rounded-lg shadow-lg transition-transform duration-1000 group-hover:scale-[1.02]"
+                loading="lazy"
+                fetchPriority="low"
+                decoding="async"
               />
             </div>
 
@@ -388,7 +408,11 @@ export default function HomePremium() {
       </section>
 
       <Footer />
-      <ScentQuizDialog open={isScentQuizOpen} onOpenChange={setIsScentQuizOpen} />
+      {isScentQuizOpen ? (
+        <Suspense fallback={null}>
+          <ScentQuizDialog open={isScentQuizOpen} onOpenChange={setIsScentQuizOpen} />
+        </Suspense>
+      ) : null}
     </div>
   );
 }

@@ -48,6 +48,11 @@ describe("accueil premium — visuels et quiz", () => {
     vi.unstubAllGlobals();
   });
 
+  async function openQuiz() {
+    fireEvent.click(screen.getByRole("button", { name: "Commencer l'Exploration" }));
+    return screen.findByRole("dialog");
+  }
+
   it("présente les dix flacons dans le hero et l’atelier dans la section Notre Histoire", () => {
     render(<HomePremium />);
 
@@ -59,19 +64,19 @@ describe("accueil premium — visuels et quiz", () => {
     );
   });
 
-  it("ouvre le quiz de recommandation depuis le CTA Commencer l’Exploration", () => {
+  it("ouvre le quiz de recommandation depuis le CTA Commencer l’Exploration", async () => {
     render(<HomePremium />);
 
-    fireEvent.click(screen.getByRole("button", { name: "Commencer l'Exploration" }));
+    await openQuiz();
 
     expect(screen.getByRole("dialog")).toBeTruthy();
     expect(screen.getByText("Quelques gestes, une recommandation.")).toBeTruthy();
   });
 
-  it("désactive la progression sans réponse et réinitialise le quiz à la fermeture", () => {
+  it("désactive la progression sans réponse et réinitialise le quiz à la fermeture", async () => {
     render(<HomePremium />);
 
-    fireEvent.click(screen.getByRole("button", { name: "Commencer l'Exploration" }));
+    await openQuiz();
     const continueButton = screen.getByRole("button", { name: "Continuer" });
     expect(continueButton.hasAttribute("disabled")).toBe(true);
 
@@ -81,15 +86,15 @@ describe("accueil premium — visuels et quiz", () => {
 
     expect(screen.queryByRole("dialog")).toBeNull();
 
-    fireEvent.click(screen.getByRole("button", { name: "Commencer l'Exploration" }));
+    await openQuiz();
     expect(screen.getByText("1 / 4")).toBeTruthy();
     expect(screen.getByRole("button", { name: "Continuer" }).hasAttribute("disabled")).toBe(true);
   });
 
-  it("parcourt les préférences fraîches jusqu’à la recommandation Cologne Cédrat", () => {
+  it("parcourt les préférences fraîches jusqu’à la recommandation Cologne Cédrat", async () => {
     render(<HomePremium />);
 
-    fireEvent.click(screen.getByRole("button", { name: "Commencer l'Exploration" }));
+    await openQuiz();
     fireEvent.click(screen.getByRole("radio", { name: /Un éclat frais/ }));
     fireEvent.click(screen.getByRole("button", { name: "Continuer" }));
     fireEvent.click(screen.getByRole("radio", { name: /Lumineuse/ }));
@@ -106,10 +111,10 @@ describe("accueil premium — visuels et quiz", () => {
     );
   });
 
-  it("permet de recommencer le quiz depuis le résultat sans conserver les réponses", () => {
+  it("permet de recommencer le quiz depuis le résultat sans conserver les réponses", async () => {
     render(<HomePremium />);
 
-    fireEvent.click(screen.getByRole("button", { name: "Commencer l'Exploration" }));
+    await openQuiz();
     fireEvent.click(screen.getByRole("radio", { name: /Un éclat frais/ }));
     fireEvent.click(screen.getByRole("button", { name: "Continuer" }));
     fireEvent.click(screen.getByRole("radio", { name: /Lumineuse/ }));

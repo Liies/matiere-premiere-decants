@@ -6133,3 +6133,11 @@
 - [x] Étendre le parcours catalogue, panier et commande prioritaire
 - [x] Exécuter la suite complète, TypeScript et le build
 - [x] Sauvegarder la version publiée
+
+## Optimisation des performances — demande courante
+- [x] Mesurer le bundle et identifier les ressources critiques au chargement
+- [x] Différer les routes et éléments non critiques au premier affichage
+- [x] Optimiser le chargement des polices et des images éditoriales
+- [x] Ajouter la couverture de non-régression des stratégies de chargement
+- [x] Vérifier les parcours, les tests, TypeScript et le build
+- [ ] Sauvegarder la version publiée
