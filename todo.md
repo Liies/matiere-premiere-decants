@@ -6054,3 +6054,27 @@
 - [x] Ajouter un test de non-régression pour le statut awaiting_payment
 - [x] Vérifier le checkout, les types, les tests et le build
 - [x] Sauvegarder la version publiée
+
+## Prix et cartes catalogue — demande courante
+- [ ] Examiner le format des montants et la structure des cartes produit
+- [ ] Afficher le symbole euro après le montant sur les cartes
+- [ ] Ajuster les dimensions et espacements des cartes pour éviter les chevauchements
+- [ ] Ajouter ou adapter la couverture Vitest du format et de la présentation
+- [ ] Vérifier le rendu desktop et mobile, les tests et le build
+- [ ] Sauvegarder la version publiée
+
+## Visuels accueil renouvelés — demande courante
+- [ ] Identifier les deux visuels actuels et les images des dix parfums à représenter
+- [ ] Créer une composition premium des dix parfums proposés
+- [ ] Créer un nouveau visuel de storytelling complémentaire
+- [ ] Intégrer les deux visuels avec textes alternatifs et rendu responsive
+- [ ] Ajouter ou adapter la couverture Vitest des contrats de visuel
+- [ ] Vérifier le rendu, les tests et le build
+- [ ] Sauvegarder la version publiée
+
+## Hero resserré — demande courante
+- [x] Examiner les hauteurs et marges responsables de l’espace vide
+- [x] Réduire la hauteur et les espacements du hero de manière responsive
+- [x] Ajouter ou adapter la couverture Vitest du contrat de mise en page
+- [x] Vérifier le rendu, les tests et le build
+- [ ] Sauvegarder la version publiée

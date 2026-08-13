@@ -79,7 +79,7 @@ export default function HomePremium() {
       <Header />
 
       {/* Hero Section */}
-      <section className="relative min-h-[calc(100svh-4.5rem)] overflow-hidden px-4 py-20 sm:py-28 md:py-32">
+      <section className="relative overflow-hidden px-4 py-14 sm:py-16 md:py-20">
         <div
           className="absolute inset-0 -z-10"
           style={{
@@ -96,7 +96,7 @@ export default function HomePremium() {
         <span className="luxury-orb luxury-orb-one" aria-hidden="true" />
         <span className="luxury-orb luxury-orb-two" aria-hidden="true" />
 
-        <div className="container relative z-10 mx-auto flex min-h-[calc(100svh-14.5rem)] max-w-4xl flex-col justify-center space-y-8 text-center sm:min-h-[calc(100svh-17rem)]">
+        <div className="container relative z-10 mx-auto max-w-4xl space-y-6 text-center sm:space-y-7">
           <div className="space-y-6">
             <p className="hero-copy-reveal text-sm uppercase tracking-[0.24em] text-gray-600" style={{ animationDelay: "80ms" }}>Bienvenue chez</p>
             <h1 className="hero-copy-reveal text-4xl font-light leading-tight tracking-tight text-gray-900 sm:text-6xl md:text-7xl" style={{ animationDelay: "180ms" }}>
@@ -107,8 +107,8 @@ export default function HomePremium() {
             </p>
           </div>
 
-          <div className="hero-copy-reveal pt-8" style={{ animationDelay: "420ms" }}>
-            <p className="mx-auto mb-8 max-w-2xl text-sm font-light leading-7 text-gray-600 sm:text-base">
+          <div className="hero-copy-reveal pt-3 sm:pt-4" style={{ animationDelay: "420ms" }}>
+            <p className="mx-auto mb-6 max-w-2xl text-sm font-light leading-7 text-gray-600 sm:text-base">
               Découvrez une collection exclusive de décants 50ml, où chaque fragrance célèbre la pureté d'une seule matière première.
             </p>
             <Button
@@ -120,7 +120,7 @@ export default function HomePremium() {
               <ArrowRight className="w-4 h-4" />
             </Button>
           </div>
-          <div className="hero-copy-reveal mx-auto w-full max-w-[13rem] pt-1 sm:max-w-[15rem]" style={{ animationDelay: "560ms" }}>
+          <div className="hero-copy-reveal mx-auto w-full max-w-[12rem] pt-0 sm:max-w-[14rem]" style={{ animationDelay: "560ms" }}>
             <div className="relative overflow-hidden rounded-[1.5rem] border border-white/70 bg-white/25 p-2 shadow-[0_20px_60px_rgba(104,80,54,0.12)] backdrop-blur-sm">
               <img
                 src="/manus-storage/hero-matieres-premieres-editorial_2b588364.jpg"
@@ -131,8 +131,8 @@ export default function HomePremium() {
               <div className="pointer-events-none absolute inset-2 rounded-[1.1rem] bg-gradient-to-t from-white/20 via-transparent to-white/10" aria-hidden="true" />
             </div>
           </div>
-          <div className="mt-10 flex justify-center text-gray-500" aria-hidden="true">
-            <span className="h-12 w-px animate-pulse-subtle bg-gray-400" />
+          <div className="mt-4 flex justify-center text-gray-500" aria-hidden="true">
+            <span className="h-8 w-px animate-pulse-subtle bg-gray-400" />
           </div>
         </div>
       </section>

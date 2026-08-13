@@ -25,4 +25,10 @@ describe("hero de l’accueil premium", () => {
     expect(homePremiumSource).toContain("hero-matieres-premieres-editorial_2b588364.jpg");
     expect(homePremiumSource).toContain("Composition de rose, safran et bois de santal");
   });
+
+  it("ne réserve plus une hauteur plein écran sous le visuel hero", () => {
+    expect(homePremiumSource).not.toContain("min-h-[calc(100svh-4.5rem)]");
+    expect(homePremiumSource).not.toContain("min-h-[calc(100svh-14.5rem)]");
+    expect(homePremiumSource).toContain("relative overflow-hidden px-4 py-14");
+  });
 });
