@@ -6093,4 +6093,4 @@
 - [x] Intégrer les histoires, origines et liens sources dans les fiches
 - [x] Ajouter ou adapter la couverture Vitest des récits produit
 - [x] Vérifier le rendu, les sources, les tests et le build
-- [ ] Sauvegarder la version publiée
+- [x] Sauvegarder la version publiée
