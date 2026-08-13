@@ -8,6 +8,9 @@ import { MASTER_PERFUMER_PROFILE } from "@shared/perfumer-profile";
 import { Link } from "wouter";
 import { ArrowRight } from "lucide-react";
 
+export const HOME_COLLECTION_EDITORIAL_IMAGE = "/manus-storage/matiere-premiere-ten-bottles-editorial_30095232.jpg";
+export const HOME_STORY_ATELIER_IMAGE = "/manus-storage/matiere-premiere-atelier-origins-editorial_6e6945e3.jpg";
+
 export default function HomePremium() {
   const { user, isAuthenticated } = useAuth();
   const [scrollY, setScrollY] = useState(0);
@@ -120,15 +123,15 @@ export default function HomePremium() {
               <ArrowRight className="w-4 h-4" />
             </Button>
           </div>
-          <div className="hero-copy-reveal mx-auto w-full max-w-[12rem] pt-0 sm:max-w-[14rem]" style={{ animationDelay: "560ms" }}>
+          <div className="hero-copy-reveal mx-auto w-full max-w-[16rem] pt-0 sm:max-w-[22rem]" style={{ animationDelay: "560ms" }}>
             <div className="relative overflow-hidden rounded-[1.5rem] border border-white/70 bg-white/25 p-2 shadow-[0_20px_60px_rgba(104,80,54,0.12)] backdrop-blur-sm">
               <img
-                src="/manus-storage/hero-matieres-premieres-editorial_2b588364.jpg"
-                alt="Composition de rose, safran et bois de santal, matières premières de parfumerie"
-                className="aspect-[4/5] w-full rounded-[1.1rem] object-cover"
+                src={HOME_COLLECTION_EDITORIAL_IMAGE}
+                alt="Dix flacons de la collection Matière Première, composition éditoriale"
+                className="aspect-[4/5] w-full rounded-[1.1rem] object-cover brightness-[0.96] contrast-[1.12] saturate-[1.08]"
                 loading="eager"
               />
-              <div className="pointer-events-none absolute inset-2 rounded-[1.1rem] bg-gradient-to-t from-white/20 via-transparent to-white/10" aria-hidden="true" />
+              <div className="pointer-events-none absolute inset-2 rounded-[1.1rem] bg-gradient-to-t from-stone-900/15 via-transparent to-white/5" aria-hidden="true" />
             </div>
           </div>
           <div className="mt-4 flex justify-center text-gray-500" aria-hidden="true">
@@ -170,9 +173,9 @@ export default function HomePremium() {
               }`}
             >
               <img
-                src="https://d2xsxph8kpxj0f.cloudfront.net/310519663634453748/oKjLk7qKw3XzkAh8kgeZU3/mp-history-EUBK4GLMuWtze4obx7Syvj.webp"
-                alt="L'histoire de Matière Première"
-                className="h-auto w-full rounded-lg shadow-lg transition-transform duration-1000 group-hover:scale-[1.02]"
+                src={HOME_STORY_ATELIER_IMAGE}
+                alt="Atelier de création de Matière Première, matières et flacons de parfum"
+                className="aspect-[3/2] w-full rounded-lg object-cover shadow-lg transition-transform duration-1000 group-hover:scale-[1.02]"
               />
             </div>
           </div>

@@ -21,9 +21,9 @@ describe("hero de l’accueil premium", () => {
     expect(homePremiumSource).toContain('onClick={scrollToStory}');
   });
 
-  it("utilise le nouveau visuel éditorial des matières premières", () => {
-    expect(homePremiumSource).toContain("hero-matieres-premieres-editorial_2b588364.jpg");
-    expect(homePremiumSource).toContain("Composition de rose, safran et bois de santal");
+  it("utilise la composition éditoriale des dix flacons sous le hero", () => {
+    expect(homePremiumSource).toContain("matiere-premiere-ten-bottles-editorial_30095232.jpg");
+    expect(homePremiumSource).toContain("Dix flacons de la collection Matière Première, composition éditoriale");
   });
 
   it("ne réserve plus une hauteur plein écran sous le visuel hero", () => {

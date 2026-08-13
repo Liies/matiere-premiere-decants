@@ -6102,3 +6102,11 @@
 - [x] Ajouter ou adapter la couverture Vitest du prix et du contrat de carte
 - [x] Vérifier le rendu desktop et mobile, les tests et le build
 - [x] Sauvegarder la version publiée
+
+## Visuels éditoriaux de l’accueil — demande courante
+- [x] Examiner les emplacements et dimensions des deux images à remplacer
+- [x] Créer une composition premium réunissant les dix parfums de la collection
+- [x] Créer un second visuel éditorial cohérent pour la section suivante
+- [x] Intégrer les nouveaux visuels avec leurs alternatives accessibles
+- [x] Vérifier le rendu desktop et mobile, les tests et le build
+- [ ] Sauvegarder la version publiée
