@@ -1,6 +1,6 @@
 import { and, asc, eq, gt, gte, sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import { InsertUser, users, brands, products, cartItems, cartSyncReceipts, orders, orderItems, InsertOrder, InsertOrderItem, sourceBottles, variants } from "../drizzle/schema";
+import { InsertUser, users, brands, products, cartItems, cartSyncReceipts, orders, orderItems, InsertOrder, InsertOrderItem, sourceBottles, variants, savedDeliveryAddresses } from "../drizzle/schema";
 import { ENV } from './_core/env';
 import { buildCartSyncPlan } from "@shared/cart-sync";
 import { consolidateOrderLines, requiredMilliliters, type RequestedOrderLine } from "@shared/inventory";
@@ -331,6 +331,27 @@ export async function syncGuestCartToUserCart(
   }
 
   return { alreadySynced: false } as const;
+}
+
+/** Adresse de livraison par défaut du profil client. */
+export async function getSavedDeliveryAddress(userId: number) {
+  const db = await getDb();
+  if (!db) return undefined;
+  const rows = await db.select().from(savedDeliveryAddresses).where(eq(savedDeliveryAddresses.userId, userId)).limit(1);
+  return rows[0];
+}
+
+export async function saveDeliveryAddress(userId: number, address: {
+  address: string;
+  city: string;
+  postalCode: string;
+  country: string;
+}) {
+  const db = await getDb();
+  if (!db) throw new Error("La sauvegarde de l’adresse est temporairement indisponible");
+  await db.insert(savedDeliveryAddresses).values({ userId, ...address }).onDuplicateKeyUpdate({
+    set: { ...address },
+  });
 }
 
 /**

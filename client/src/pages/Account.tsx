@@ -11,6 +11,7 @@ export default function Account() {
   const { user, isAuthenticated, logout } = useAuth();
   const [, setLocation] = useLocation();
   const { data: orders, isLoading } = trpc.orders.getMyOrders.useQuery();
+  const { data: savedDeliveryAddress, isLoading: isSavedAddressLoading } = trpc.profile.getDeliveryAddress.useQuery();
   const logoutMutation = trpc.auth.logout.useMutation();
 
   if (!isAuthenticated) {
@@ -70,6 +71,22 @@ export default function Account() {
               Déconnexion
             </button>
           </div>
+
+          <section className="mb-10">
+            <h3 className="mb-4 text-2xl font-light text-gray-900">Adresse de livraison</h3>
+            <Card className="p-5">
+              {isSavedAddressLoading ? <p className="text-gray-600">Chargement de votre adresse…</p> : savedDeliveryAddress ? (
+                <p className="text-gray-700">
+                  <span className="mb-1 block font-medium text-gray-900">Adresse enregistrée</span>
+                  {savedDeliveryAddress.address}<br />
+                  {savedDeliveryAddress.postalCode} {savedDeliveryAddress.city}<br />
+                  {savedDeliveryAddress.country}
+                </p>
+              ) : (
+                <p className="text-gray-600">Aucune adresse enregistrée. Vous pourrez en sauvegarder une lors de votre prochaine commande.</p>
+              )}
+            </Card>
+          </section>
 
           {/* Orders Section */}
           <div>

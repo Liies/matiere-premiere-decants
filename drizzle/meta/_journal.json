@@ -50,6 +50,13 @@
       "when": 1786628224086,
       "tag": "0006_far_sentinels",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "5",
+      "when": 1786644149024,
+      "tag": "0007_sour_morgan_stark",
+      "breakpoints": true
     }
   ]
 }

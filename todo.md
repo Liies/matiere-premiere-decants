@@ -6158,3 +6158,13 @@
 - [x] Couvrir le préremplissage et conserver la modification manuelle des champs
 - [x] Vérifier le rendu, les tests, TypeScript et le build
 - [x] Sauvegarder la version publiée
+
+## Carte, adresse sauvegardée et zones de livraison — demande courante
+- [x] Examiner le checkout, le profil et les modèles de données utilisateur
+- [x] Définir les zones autorisées : France métropolitaine et Europe
+- [x] Ajouter une carte de confirmation sous l’adresse sélectionnée
+- [x] Ajouter la sauvegarde et la réutilisation d’adresse pour les clients connectés
+- [x] Empêcher la commande si l’adresse est hors zone de livraison
+- [x] Couvrir les zones, le profil et le parcours de checkout par des tests
+- [x] Vérifier le rendu, TypeScript et le build
+- [ ] Sauvegarder la version publiée

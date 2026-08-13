@@ -20,6 +20,7 @@ import { contactMessageSchema, CONTACT_SUBJECT_LABELS } from "@shared/contact";
 import { requireAdmin } from "./routers/authorization";
 import { cartRouter } from "./routers/cartRouter";
 import { ordersRouter } from "./routers/ordersRouter";
+import { profileRouter } from "./routers/profileRouter";
 
 const PRODUCT_CATALOG_UPDATE = z.object({
   id: z.number().int().positive(),
@@ -136,6 +137,7 @@ export const appRouter = router({
 
   cart: cartRouter,
   orders: ordersRouter,
+  profile: profileRouter,
 });
 
 export type AppRouter = typeof appRouter;

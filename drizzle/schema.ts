@@ -149,6 +149,21 @@ export const cartSyncReceipts = mysqlTable("cartSyncReceipts", {
   createdAt: timestamp("createdAt").defaultNow().notNull(),
 });
 
+/** Une adresse de livraison par défaut par client, réutilisable au checkout. */
+export const savedDeliveryAddresses = mysqlTable("savedDeliveryAddresses", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  address: text("address").notNull(),
+  city: varchar("city", { length: 255 }).notNull(),
+  postalCode: varchar("postalCode", { length: 20 }).notNull(),
+  country: varchar("country", { length: 120 }).notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+}, (table) => [uniqueIndex("saved_delivery_addresses_user_unique").on(table.userId)]);
+
+export type SavedDeliveryAddress = typeof savedDeliveryAddresses.$inferSelect;
+export type InsertSavedDeliveryAddress = typeof savedDeliveryAddresses.$inferInsert;
+
 export const orders = mysqlTable("orders", {
   id: int("id").autoincrement().primaryKey(),
   userId: int("userId").notNull(),

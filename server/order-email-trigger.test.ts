@@ -120,6 +120,18 @@ describe("déclencheurs d’emails de commande", () => {
     expect(mocks.createReservedOrder).not.toHaveBeenCalled();
   });
 
+  it("refuse une adresse hors zone avant de réserver le stock ou d’envoyer un email", async () => {
+    const caller = appRouter.createCaller({ user: customer, req: {} as any, res: {} as any });
+
+    await expect(caller.orders.create({
+      ...orderPayload,
+      shippingCountry: "États-Unis",
+      shippingPostalCode: "94105",
+    })).rejects.toThrow("France métropolitaine et en Europe");
+    expect(mocks.createReservedOrder).not.toHaveBeenCalled();
+    expect(mocks.sendOrderCreatedEmails).not.toHaveBeenCalled();
+  });
+
   it("délègue le prix et l’existence des produits à la transaction côté serveur", async () => {
     const caller = appRouter.createCaller({ user: customer, req: {} as any, res: {} as any });
 

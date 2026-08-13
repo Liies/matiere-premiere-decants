@@ -14,6 +14,7 @@ import {
 } from "../db";
 import { sendOrderCreatedEmails, sendOrderStatusEmail } from "../transactionalEmail";
 import { requireAdmin } from "./authorization";
+import { getDeliveryEligibility } from "../../shared/delivery-zones";
 
 const ORDER_STATUS = z.enum(["awaiting_payment", "pending", "paid", "processing", "shipped", "delivered", "cancelled"]);
 const ORDER_INPUT = z.object({
@@ -40,6 +41,13 @@ export const ordersRouter = router({
   create: protectedProcedure.input(ORDER_INPUT).mutation(async ({ input, ctx }) => {
     if (input.items.length === 0) {
       throw new TRPCError({ code: "BAD_REQUEST", message: "Aucun article dans la commande" });
+    }
+    const deliveryEligibility = getDeliveryEligibility({
+      country: input.shippingCountry,
+      postalCode: input.shippingPostalCode,
+    });
+    if (!deliveryEligibility.eligible) {
+      throw new TRPCError({ code: "BAD_REQUEST", message: deliveryEligibility.reason || "Cette adresse est hors zone de livraison." });
     }
 
     const orderNumber = `MP-${Date.now()}-${nanoid(8)}`;

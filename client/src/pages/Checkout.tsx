@@ -6,11 +6,13 @@ import { Link, useLocation } from "wouter";
 import { CheckCircle } from "lucide-react";
 import { useAuth } from "@/_core/hooks/useAuth";
 import AddressAutocomplete from "@/components/AddressAutocomplete";
+import DeliveryLocationMap from "@/components/DeliveryLocationMap";
 import { toast } from "sonner";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { getDeliveryEligibility } from "@shared/delivery-zones";
 
 const checkoutSchema = z.object({
   customerName: z.string().min(1, "Le nom est requis"),
@@ -28,7 +30,10 @@ export default function Checkout() {
   const [, setLocation] = useLocation();
   const { data: cartItems } = trpc.cart.getItems.useQuery();
   const createOrder = trpc.orders.create.useMutation();
+  const { data: savedDeliveryAddress, isLoading: isSavedAddressLoading } = trpc.profile.getDeliveryAddress.useQuery();
+  const saveDeliveryAddress = trpc.profile.saveDeliveryAddress.useMutation();
   const [orderCreated, setOrderCreated] = useState<{ orderNumber: string; orderId: number } | null>(null);
+  const [saveAddressForLater, setSaveAddressForLater] = useState(false);
 
   const {
     register,
@@ -44,13 +49,30 @@ export default function Checkout() {
     },
   });
   const shippingAddress = watch("shippingAddress") || "";
+  const shippingCity = watch("shippingCity") || "";
+  const shippingPostalCode = watch("shippingPostalCode") || "";
+  const shippingCountry = watch("shippingCountry") || "";
   const shippingAddressField = register("shippingAddress");
+  const hasCompleteDeliveryAddress = Boolean(shippingAddress && shippingCity && shippingPostalCode && shippingCountry);
+  const deliveryEligibility = hasCompleteDeliveryAddress
+    ? getDeliveryEligibility({ country: shippingCountry, postalCode: shippingPostalCode })
+    : null;
 
   const applySuggestedAddress = (address: { address: string; city: string; postalCode: string; country: string }) => {
     setValue("shippingAddress", address.address, { shouldDirty: true, shouldValidate: true });
     setValue("shippingCity", address.city, { shouldDirty: true, shouldValidate: true });
     setValue("shippingPostalCode", address.postalCode, { shouldDirty: true, shouldValidate: true });
     setValue("shippingCountry", address.country, { shouldDirty: true, shouldValidate: true });
+  };
+
+  const applySavedAddress = () => {
+    if (!savedDeliveryAddress) return;
+    applySuggestedAddress({
+      address: savedDeliveryAddress.address,
+      city: savedDeliveryAddress.city,
+      postalCode: savedDeliveryAddress.postalCode,
+      country: savedDeliveryAddress.country,
+    });
   };
 
   if (!isAuthenticated) {
@@ -99,7 +121,7 @@ export default function Checkout() {
     0
   );
 
-  const onSubmit = (data: CheckoutFormData) => {
+  const submitOrder = (data: CheckoutFormData) => {
     if (!cartItems || cartItems.length === 0) {
       toast.error("Votre panier est vide");
       return;
@@ -130,6 +152,30 @@ export default function Checkout() {
         },
       }
     );
+  };
+
+  const onSubmit = (data: CheckoutFormData) => {
+    const eligibility = getDeliveryEligibility({ country: data.shippingCountry, postalCode: data.shippingPostalCode });
+    if (!eligibility.eligible) {
+      toast.error(eligibility.reason || "Cette adresse est hors zone de livraison.");
+      return;
+    }
+    if (!saveAddressForLater) {
+      submitOrder(data);
+      return;
+    }
+    saveDeliveryAddress.mutate({
+      address: data.shippingAddress,
+      city: data.shippingCity,
+      postalCode: data.shippingPostalCode,
+      country: data.shippingCountry,
+    }, {
+      onSuccess: () => {
+        toast.success("Adresse enregistrée dans votre profil.");
+        submitOrder(data);
+      },
+      onError: (error) => toast.error(error.message || "Impossible d’enregistrer l’adresse."),
+    });
   };
 
   return (
@@ -177,6 +223,17 @@ export default function Checkout() {
                 <Card className="p-4 sm:p-6">
                   <h3 className="text-lg font-light text-gray-900 mb-4">Adresse de livraison</h3>
                   <div className="space-y-4">
+                    {savedDeliveryAddress ? (
+                      <div className="flex flex-col gap-3 rounded border border-stone-200 bg-stone-50 p-4 sm:flex-row sm:items-center sm:justify-between">
+                        <p className="text-sm text-gray-700">
+                          <span className="block font-medium text-gray-900">Adresse enregistrée</span>
+                          {savedDeliveryAddress.address}, {savedDeliveryAddress.postalCode} {savedDeliveryAddress.city}, {savedDeliveryAddress.country}
+                        </p>
+                        <Button type="button" variant="outline" className="min-h-11 border-gray-300 bg-white" onClick={applySavedAddress}>
+                          Utiliser cette adresse
+                        </Button>
+                      </div>
+                    ) : isSavedAddressLoading ? <p className="text-sm text-gray-500">Chargement de votre adresse enregistrée…</p> : null}
                     <AddressAutocomplete
                       value={shippingAddress}
                       inputRef={shippingAddressField.ref}
@@ -220,15 +277,41 @@ export default function Checkout() {
                         <p className="text-red-600 text-sm mt-1">{errors.shippingCountry.message}</p>
                       )}
                     </div>
+                    {deliveryEligibility ? (
+                      <div className={`rounded border px-4 py-3 text-sm ${deliveryEligibility.eligible ? "border-emerald-200 bg-emerald-50 text-emerald-900" : "border-red-200 bg-red-50 text-red-800"}`} role="status">
+                        {deliveryEligibility.eligible
+                          ? "Cette adresse se trouve dans notre zone de livraison."
+                          : deliveryEligibility.reason}
+                      </div>
+                    ) : null}
+                    {hasCompleteDeliveryAddress && deliveryEligibility?.eligible ? (
+                      <>
+                        <DeliveryLocationMap
+                          address={shippingAddress}
+                          city={shippingCity}
+                          postalCode={shippingPostalCode}
+                          country={shippingCountry}
+                        />
+                        <label className="flex min-h-11 items-start gap-3 rounded border border-gray-200 p-3 text-sm text-gray-700">
+                          <input
+                            type="checkbox"
+                            checked={saveAddressForLater}
+                            onChange={(event) => setSaveAddressForLater(event.target.checked)}
+                            className="mt-0.5 h-4 w-4 rounded border-gray-300"
+                          />
+                          <span>Enregistrer cette adresse dans mon profil pour mes prochaines commandes.</span>
+                        </label>
+                      </>
+                    ) : null}
                   </div>
                 </Card>
 
                 <Button
                   type="submit"
-                  disabled={createOrder.isPending}
+                  disabled={createOrder.isPending || saveDeliveryAddress.isPending || deliveryEligibility?.eligible === false}
                   className="min-h-12 w-full bg-gray-900 py-3 text-white hover:bg-gray-800"
                 >
-                  {createOrder.isPending ? "Traitement..." : "Confirmer la commande"}
+                  {createOrder.isPending || saveDeliveryAddress.isPending ? "Traitement..." : "Confirmer la commande"}
                 </Button>
               </form>
             </div>
