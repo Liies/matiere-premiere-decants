@@ -6167,4 +6167,4 @@
 - [x] Empêcher la commande si l’adresse est hors zone de livraison
 - [x] Couvrir les zones, le profil et le parcours de checkout par des tests
 - [x] Vérifier le rendu, TypeScript et le build
-- [ ] Sauvegarder la version publiée
+- [x] Sauvegarder la version publiée
