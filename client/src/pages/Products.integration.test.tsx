@@ -162,6 +162,27 @@ describe("intégration catalogue — panier et souhaits", () => {
     expect(addButton.className).toContain("min-h-11");
   });
 
+  it("filtre en temps réel, propose une suggestion, puis restaure la collection après une recherche vide", () => {
+    render(<Products />);
+
+    const search = screen.getByRole("combobox", { name: "Rechercher un parfum par son nom" });
+    fireEvent.focus(search);
+    fireEvent.change(search, { target: { value: "Crystal" } });
+
+    expect(screen.getByRole("listbox", { name: "Suggestions de parfums" })).toBeTruthy();
+    expect(screen.getByRole("option", { name: /Crystal Saffron/ })).toBeTruthy();
+    expect(screen.getByText("1 parfum correspondant")).toBeTruthy();
+    expect(screen.queryByText("Vanilla Powder")).toBeNull();
+
+    fireEvent.change(search, { target: { value: "introuvable" } });
+    expect(screen.getByText("Aucun parfum trouvé")).toBeTruthy();
+
+    fireEvent.click(screen.getByRole("button", { name: "Voir toute la collection" }));
+    expect((search as HTMLInputElement).value).toBe("");
+    expect(screen.getByText("2 parfums affichés")).toBeTruthy();
+    expect(screen.getByText("Vanilla Powder")).toBeTruthy();
+  });
+
   it("attend 1,2 seconde de survol et annule le retournement si la souris quitte la carte", () => {
     vi.useFakeTimers();
     render(<Products />);

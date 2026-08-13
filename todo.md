@@ -6126,3 +6126,10 @@
 - [x] Ajouter des cas de non-régression pour le contrat de navigation et le catalogue
 - [x] Exécuter la suite complète, TypeScript et le build
 - [x] Sauvegarder la version publiée
+
+## Mise à jour des tests d’intégration — demande courante
+- [x] Auditer les scénarios d’intégration existants et leurs lacunes
+- [x] Étendre le parcours d’intégration du quiz et ses actions de résultat
+- [x] Étendre le parcours catalogue, panier et commande prioritaire
+- [x] Exécuter la suite complète, TypeScript et le build
+- [ ] Sauvegarder la version publiée

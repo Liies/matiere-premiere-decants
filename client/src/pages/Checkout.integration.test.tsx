@@ -16,6 +16,7 @@ const state = vi.hoisted(() => ({
   ] as Array<any>,
 }));
 const createOrderMutate = vi.fn();
+const toastSpies = vi.hoisted(() => ({ error: vi.fn(), success: vi.fn() }));
 
 vi.mock("@/lib/trpc", () => ({
   trpc: {
@@ -40,7 +41,7 @@ vi.mock("@/_core/hooks/useAuth", () => ({
 }));
 
 vi.mock("@/components/Header", () => ({ default: () => <header>Navigation</header> }));
-vi.mock("sonner", () => ({ toast: { error: vi.fn(), success: vi.fn() } }));
+vi.mock("sonner", () => ({ toast: toastSpies }));
 vi.mock("wouter", () => ({
   Link: ({ children }: { children: React.ReactNode }) => <>{children}</>,
   useLocation: () => ["/checkout", vi.fn()],
@@ -57,6 +58,8 @@ function setInput(container: HTMLElement, name: string, value: string) {
 describe("intégration checkout", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    toastSpies.error.mockClear();
+    toastSpies.success.mockClear();
     state.authenticated = true;
     state.cartItems = [{
       id: 1,
@@ -104,5 +107,30 @@ describe("intégration checkout", () => {
     fireEvent.submit(container.querySelector("form")!);
 
     await waitFor(() => expect(createOrderMutate).not.toHaveBeenCalled());
+  });
+
+  it("protège le tunnel de commande lorsque le client n’est pas connecté", () => {
+    state.authenticated = false;
+
+    render(<Checkout />);
+
+    expect(screen.getByText("Veuillez vous connecter pour continuer")).toBeTruthy();
+    expect(screen.queryByRole("button", { name: "Confirmer la commande" })).toBeNull();
+    expect(createOrderMutate).not.toHaveBeenCalled();
+  });
+
+  it("conserve le formulaire et signale une erreur si la création de commande échoue", async () => {
+    createOrderMutate.mockImplementation((_input, callbacks) => callbacks.onError(new Error("Paiement indisponible")));
+    const { container } = render(<Checkout />);
+    setInput(container, "shippingAddress", "12 rue des Fleurs");
+    setInput(container, "shippingCity", "Paris");
+    setInput(container, "shippingPostalCode", "75001");
+    setInput(container, "shippingCountry", "France");
+
+    fireEvent.submit(container.querySelector("form")!);
+
+    await waitFor(() => expect(toastSpies.error).toHaveBeenCalledWith("Paiement indisponible"));
+    expect(screen.queryByText("Commande confirmée !")).toBeNull();
+    expect(screen.getByRole("button", { name: "Confirmer la commande" })).toBeTruthy();
   });
 });

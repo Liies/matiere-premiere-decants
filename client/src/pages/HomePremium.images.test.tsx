@@ -105,4 +105,24 @@ describe("accueil premium — visuels et quiz", () => {
       "/parfum/matiere-premiere/cologne-cedrat",
     );
   });
+
+  it("permet de recommencer le quiz depuis le résultat sans conserver les réponses", () => {
+    render(<HomePremium />);
+
+    fireEvent.click(screen.getByRole("button", { name: "Commencer l'Exploration" }));
+    fireEvent.click(screen.getByRole("radio", { name: /Un éclat frais/ }));
+    fireEvent.click(screen.getByRole("button", { name: "Continuer" }));
+    fireEvent.click(screen.getByRole("radio", { name: /Lumineuse/ }));
+    fireEvent.click(screen.getByRole("button", { name: "Continuer" }));
+    fireEvent.click(screen.getByRole("radio", { name: /Près de la peau/ }));
+    fireEvent.click(screen.getByRole("button", { name: "Continuer" }));
+    fireEvent.click(screen.getByRole("radio", { name: /En journée/ }));
+    fireEvent.click(screen.getByRole("button", { name: "Voir ma recommandation" }));
+
+    fireEvent.click(screen.getByRole("button", { name: "Recommencer" }));
+
+    expect(screen.queryByTestId("scent-quiz-result")).toBeNull();
+    expect(screen.getByText("1 / 4")).toBeTruthy();
+    expect(screen.getByRole("button", { name: "Continuer" }).hasAttribute("disabled")).toBe(true);
+  });
 });
