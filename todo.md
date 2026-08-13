@@ -6125,4 +6125,4 @@
 - [x] Ajouter des cas unitaires pour le quiz et ses états limites
 - [x] Ajouter des cas de non-régression pour le contrat de navigation et le catalogue
 - [x] Exécuter la suite complète, TypeScript et le build
-- [ ] Sauvegarder la version publiée
+- [x] Sauvegarder la version publiée
