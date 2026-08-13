@@ -6077,4 +6077,4 @@
 - [x] Réduire la hauteur et les espacements du hero de manière responsive
 - [x] Ajouter ou adapter la couverture Vitest du contrat de mise en page
 - [x] Vérifier le rendu, les tests et le build
-- [ ] Sauvegarder la version publiée
+- [x] Sauvegarder la version publiée
