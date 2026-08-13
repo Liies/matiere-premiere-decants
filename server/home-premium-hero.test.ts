@@ -21,6 +21,11 @@ describe("hero de l’accueil premium", () => {
     expect(homePremiumSource).toContain('onClick={scrollToStory}');
   });
 
+  it("ouvre le quiz de recommandation depuis le CTA final d’exploration", () => {
+    expect(homePremiumSource).toContain('onClick={() => setIsScentQuizOpen(true)}');
+    expect(homePremiumSource).toContain("<ScentQuizDialog open={isScentQuizOpen} onOpenChange={setIsScentQuizOpen} />");
+  });
+
   it("utilise la composition éditoriale des dix flacons sous le hero", () => {
     expect(homePremiumSource).toContain("matiere-premiere-ten-bottles-editorial_30095232.jpg");
     expect(homePremiumSource).toContain("Dix flacons de la collection Matière Première, composition éditoriale");

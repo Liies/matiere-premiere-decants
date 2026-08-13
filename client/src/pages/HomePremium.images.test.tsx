@@ -32,7 +32,7 @@ vi.mock("wouter", () => ({
   Link: ({ children, href }: { children: React.ReactNode; href: string }) => <a href={href}>{children}</a>,
 }));
 
-describe("visuels éditoriaux de l’accueil", () => {
+describe("accueil premium — visuels et quiz", () => {
   beforeEach(() => {
     vi.stubGlobal(
       "IntersectionObserver",
@@ -66,6 +66,24 @@ describe("visuels éditoriaux de l’accueil", () => {
 
     expect(screen.getByRole("dialog")).toBeTruthy();
     expect(screen.getByText("Quelques gestes, une recommandation.")).toBeTruthy();
+  });
+
+  it("désactive la progression sans réponse et réinitialise le quiz à la fermeture", () => {
+    render(<HomePremium />);
+
+    fireEvent.click(screen.getByRole("button", { name: "Commencer l'Exploration" }));
+    const continueButton = screen.getByRole("button", { name: "Continuer" });
+    expect(continueButton.hasAttribute("disabled")).toBe(true);
+
+    fireEvent.click(screen.getByRole("radio", { name: /Un éclat frais/ }));
+    expect(continueButton.hasAttribute("disabled")).toBe(false);
+    fireEvent.click(screen.getByRole("button", { name: "Close" }));
+
+    expect(screen.queryByRole("dialog")).toBeNull();
+
+    fireEvent.click(screen.getByRole("button", { name: "Commencer l'Exploration" }));
+    expect(screen.getByText("1 / 4")).toBeTruthy();
+    expect(screen.getByRole("button", { name: "Continuer" }).hasAttribute("disabled")).toBe(true);
   });
 
   it("parcourt les préférences fraîches jusqu’à la recommandation Cologne Cédrat", () => {

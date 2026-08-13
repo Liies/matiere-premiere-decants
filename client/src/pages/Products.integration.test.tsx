@@ -150,6 +150,18 @@ describe("intégration catalogue — panier et souhaits", () => {
     expect(screen.getByTestId("catalog-card-actions-1").className).toContain("mt-auto");
   });
 
+  it("conserve des contrôles d’achat tactiles et séparés du contenu descriptif", () => {
+    render(<Products />);
+
+    const actions = screen.getByTestId("catalog-card-actions-1");
+    const quantity = screen.getByLabelText("Quantité de Vanilla Powder");
+    const addButton = screen.getAllByRole("button", { name: "Ajouter" })[0]!;
+
+    expect(actions.className).toContain("sm:items-end");
+    expect(quantity.className).toContain("h-11");
+    expect(addButton.className).toContain("min-h-11");
+  });
+
   it("attend 1,2 seconde de survol et annule le retournement si la souris quitte la carte", () => {
     vi.useFakeTimers();
     render(<Products />);

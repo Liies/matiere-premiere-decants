@@ -6119,3 +6119,10 @@
 - [x] Ajouter la couverture Vitest du scoring et du parcours
 - [x] Vérifier le rendu desktop et mobile, les tests et le build
 - [x] Sauvegarder la version publiée
+
+## Mise à jour des tests unitaires — demande courante
+- [x] Auditer les suites existantes et les fonctionnalités récentes sans couverture ciblée
+- [x] Ajouter des cas unitaires pour le quiz et ses états limites
+- [x] Ajouter des cas de non-régression pour le contrat de navigation et le catalogue
+- [x] Exécuter la suite complète, TypeScript et le build
+- [ ] Sauvegarder la version publiée
