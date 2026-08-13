@@ -6149,4 +6149,4 @@
 - [x] Ajouter une couverture unitaire des règles de domaine extraites
 - [x] Documenter les frontières architecturales et conventions de code
 - [x] Vérifier les parcours, les tests, TypeScript et le build
-- [ ] Sauvegarder la version publiée
+- [x] Sauvegarder la version publiée
