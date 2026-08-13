@@ -6141,3 +6141,12 @@
 - [x] Ajouter la couverture de non-régression des stratégies de chargement
 - [x] Vérifier les parcours, les tests, TypeScript et le build
 - [x] Sauvegarder la version publiée
+
+## Clean code et clean architecture — demande courante
+- [x] Auditer les responsabilités métier, application, interface et infrastructure
+- [x] Extraire les règles métier de panier prioritaires dans un module de domaine
+- [x] Isoler les routes serveur par capacités et clarifier leurs dépendances
+- [x] Ajouter une couverture unitaire des règles de domaine extraites
+- [x] Documenter les frontières architecturales et conventions de code
+- [x] Vérifier les parcours, les tests, TypeScript et le build
+- [ ] Sauvegarder la version publiée
