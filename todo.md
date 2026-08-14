@@ -6196,3 +6196,15 @@
 - [x] Exécuter les validations complètes et le contrôle manuel : 150 tests, TypeScript et build réussis
 - [x] Contrôler visuellement le catalogue et la fiche : 10 parfums, filtres 2 ml/50 ml, prix à partir de 10,00 €, boutons de format et bascule 2 ml/50 ml sans rechargement
 - [x] Publier la version conforme et remettre le rapport demandé
+
+## Ticket 02 — Frais de port et emails transactionnels client
+- [x] Vérifier la présence des variantes et les validations de départ du ticket 01 : TypeScript et 150 tests réussis
+- [ ] Confirmer les tarifs, zones, transporteurs et informations légales des emails
+- [ ] Ajouter le schéma, la migration et le seed idempotent des tarifs de livraison
+- [ ] Écrire et tester les règles partagées de calcul de livraison
+- [ ] Ajouter le service Resend et les trois templates transactionnels résilients
+- [ ] Adapter les procédures de devis, création de commande et changement de statut
+- [ ] Mettre à jour le panier, le checkout, le compte et l’administration
+- [ ] Couvrir les calculs, les emails, la concurrence et les parcours de commande
+- [ ] Valider TypeScript, tests, build et parcours essentiels
+- [ ] Publier la version et remettre le rapport de fin demandé
