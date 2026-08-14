@@ -38,6 +38,15 @@ describe("règles de variantes", () => {
     expect(isVariantAvailable(inactive)).toBe(false);
   });
 
+  it("n’expose que le 50 ml lorsque le 2 ml est temporairement désactivé", () => {
+    const twoMl = variant({ id: 2, sizeMl: 2, priceCents: 1_000, stock: 10, isActive: false });
+    const fiftyMl = variant({ id: 50, sizeMl: 50, priceCents: 12_000, stock: 10, isActive: true });
+
+    expect(getDefaultVariant([twoMl, fiftyMl])).toEqual(fiftyMl);
+    expect(getPriceRange([twoMl, fiftyMl])).toEqual({ minCents: 12_000, maxCents: 12_000 });
+    expect(isVariantAvailable(twoMl)).toBe(false);
+  });
+
   it("privilégie la plus petite variante active encore en stock", () => {
     const twoMl = variant({ id: 2, sizeMl: 2, stock: 0, sortOrder: 1 });
     const fiftyMl = variant({ id: 50, sizeMl: 50, stock: 4, sortOrder: 2, priceCents: 12_000 });

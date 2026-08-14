@@ -6251,3 +6251,10 @@
 - [x] Restreindre le catalogue, la recherche et les recommandations aux seules références Matière Première
 - [x] Ajouter un test de régression de la restriction de marque
 - [x] Valider TypeScript, tests et build de production
+
+## Restriction — Format 50 ml uniquement
+- [ ] Auditer les variantes actives de 2 ml et 50 ml
+- [ ] Désactiver temporairement les variantes 2 ml sans supprimer leur stock
+- [ ] Vérifier que catalogue, panier et checkout n’exposent que le 50 ml
+- [ ] Ajouter un test de régression de l’offre limitée au 50 ml
+- [ ] Valider TypeScript, tests et build de production
