@@ -75,20 +75,16 @@ async function startServer() {
       if (isNaN(id)) {
         return res.redirect(301, "/products");
       }
-      const { getProductById, getDb } = await import("../db");
+      const { getProductById, getProductByBrandSlug, PUBLIC_BRAND_SLUG } = await import("../db");
       const prod = await getProductById(id);
       if (!prod) {
         return res.redirect(301, "/products");
       }
-      const db = await getDb();
-      let brandSlug = "matiere-premiere";
-      if (prod.brandId && db) {
-        const { brands } = await import("../../drizzle/schema");
-        const { eq } = await import("drizzle-orm");
-        const bRows = await db.select().from(brands).where(eq(brands.id, prod.brandId)).limit(1);
-        if (bRows[0]) brandSlug = bRows[0].slug;
+      const publicProduct = await getProductByBrandSlug(PUBLIC_BRAND_SLUG, prod.slug);
+      if (!publicProduct) {
+        return res.redirect(301, "/products");
       }
-      return res.redirect(301, `/parfum/${brandSlug}/${prod.slug}`);
+      return res.redirect(301, `/parfum/${PUBLIC_BRAND_SLUG}/${publicProduct.slug}`);
     } catch (err) {
       console.error("Legacy redirect error:", err);
       return res.redirect(301, "/products");

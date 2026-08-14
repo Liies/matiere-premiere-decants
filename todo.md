@@ -6237,3 +6237,17 @@
 - [x] Garantir la sélection d’une suggestion avant la fermeture au blur ou clic extérieur
 - [x] Ajouter un test de régression du clic sur suggestion et du clic extérieur
 - [x] Valider TypeScript, tests et parcours checkout
+
+## Correctif — Connexion et session
+- [ ] Reproduire l’échec du parcours de connexion et relever les erreurs
+- [ ] Vérifier les URL OAuth, le callback et la persistance de session
+- [ ] Corriger le flux de connexion défaillant
+- [ ] Ajouter ou mettre à jour les tests de régression d’authentification
+- [ ] Valider TypeScript, tests, build et parcours de connexion
+
+## Restriction — Catalogue Matière Première uniquement
+- [x] Auditer les marques et produits actuellement présents dans la base
+- [x] Archiver les produits hors Matière Première sans toucher à l’historique de commandes
+- [x] Restreindre le catalogue, la recherche et les recommandations aux seules références Matière Première
+- [x] Ajouter un test de régression de la restriction de marque
+- [x] Valider TypeScript, tests et build de production

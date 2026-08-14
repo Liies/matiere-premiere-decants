@@ -5,6 +5,8 @@ import { ENV } from './_core/env';
 import { buildCartSyncPlan } from "@shared/cart-sync";
 import { consolidateOrderLines, type RequestedOrderLine } from "@shared/inventory";
 
+export const PUBLIC_BRAND_SLUG = "matiere-premiere";
+
 let _db: ReturnType<typeof drizzle> | null = null;
 type DatabaseClient = NonNullable<Awaited<ReturnType<typeof getDb>>>;
 type DatabaseTransaction = Parameters<Parameters<DatabaseClient["transaction"]>[0]>[0];
@@ -102,7 +104,7 @@ export async function getAllProducts() {
   return db.select().from(products);
 }
 
-export async function getCatalogProducts(brandSlug?: string, search?: string) {
+export async function getCatalogProducts(brandSlug: string = PUBLIC_BRAND_SLUG, search?: string) {
   const db = await getDb();
   if (!db) return [];
   let query = db
@@ -126,7 +128,11 @@ export async function getCatalogProducts(brandSlug?: string, search?: string) {
 export async function getBrands() {
   const db = await getDb();
   if (!db) return [];
-  return db.select().from(brands).where(eq(brands.isActive, true)).orderBy(asc(brands.sortOrder));
+  return db
+    .select()
+    .from(brands)
+    .where(and(eq(brands.isActive, true), eq(brands.slug, PUBLIC_BRAND_SLUG)))
+    .orderBy(asc(brands.sortOrder));
 }
 
 export async function getProductVariants(productId: number) {
@@ -203,7 +209,12 @@ export async function getProductByBrandSlug(brandSlug: string, productSlug: stri
     .select({ product: products, brand: brands })
     .from(products)
     .innerJoin(brands, eq(products.brandId, brands.id))
-    .where(and(eq(brands.slug, brandSlug), eq(products.slug, productSlug)))
+    .where(and(
+      eq(brands.slug, brandSlug),
+      eq(brands.isActive, true),
+      eq(products.slug, productSlug),
+      eq(products.isArchived, false),
+    ))
     .limit(1);
   const row = rows[0];
   if (!row) return undefined;

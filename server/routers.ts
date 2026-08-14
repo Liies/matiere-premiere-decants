@@ -14,6 +14,7 @@ import {
   getProductById,
   getProductVariants,
   getVariantsByProductIds,
+  PUBLIC_BRAND_SLUG,
   recordSourceBottle,
   updateProductCatalog,
 } from "./db";
@@ -130,7 +131,8 @@ export const appRouter = router({
         }).optional()
       )
       .query(async ({ input }) => {
-        const raw = (await getCatalogProducts(input?.brandSlug, input?.search)) as any[];
+        if (input?.brandSlug && input.brandSlug !== PUBLIC_BRAND_SLUG) return [];
+        const raw = (await getCatalogProducts(PUBLIC_BRAND_SLUG, input?.search)) as any[];
         const productIds = raw.map((item: any) => (item.product ? (item.product as any).id : (item as any).id));
         const allVariants = productIds.length > 0 ? await getVariantsByProductIds(productIds) : [];
         const variantMap = new Map<number, typeof allVariants>();
@@ -156,7 +158,8 @@ export const appRouter = router({
     detail: publicProcedure
       .input(z.object({ brandSlug: z.string(), slug: z.string() }))
       .query(async ({ input }) => {
-        const product = await getProductByBrandSlug(input.brandSlug, input.slug);
+        if (input.brandSlug !== PUBLIC_BRAND_SLUG) return null;
+        const product = await getProductByBrandSlug(PUBLIC_BRAND_SLUG, input.slug);
         if (!product) return null;
         const variants = await getProductVariants(product.id);
         return { ...product, variants: variants.filter((v) => v.isActive) };
@@ -166,14 +169,16 @@ export const appRouter = router({
       .query(async ({ input }) => {
         const product = await getProductById(input.id);
         if (!product) return null;
-        const variants = await getProductVariants(product.id);
-        return { ...product, variants: variants.filter((v) => v.isActive) };
+        const publicProduct = await getProductByBrandSlug(PUBLIC_BRAND_SLUG, product.slug);
+        if (!publicProduct) return null;
+        const variants = await getProductVariants(publicProduct.id);
+        return { ...publicProduct, variants: variants.filter((v) => v.isActive) };
       }),
   }),
 
   products: router({
     list: publicProcedure.query(async () => {
-      const raw = (await getCatalogProducts()) as any[];
+      const raw = (await getCatalogProducts(PUBLIC_BRAND_SLUG)) as any[];
       const productIds = raw.map((item) => (item.product ? item.product.id : item.id));
       const allVariants = productIds.length > 0 ? await getVariantsByProductIds(productIds) : [];
       const variantMap = new Map<number, typeof allVariants>();
@@ -198,7 +203,9 @@ export const appRouter = router({
         const id = typeof input === "object" && input !== null && "id" in input ? (input as any).id : input;
         const found = await getProductById(id as number);
         if (!found) return undefined;
-        return { ...found, stock: 10 };
+        const publicProduct = await getProductByBrandSlug(PUBLIC_BRAND_SLUG, found.slug);
+        if (!publicProduct) return undefined;
+        return { ...publicProduct, stock: 10 };
       }),
     getByBrandSlug: publicProcedure
       .input(z.object({
@@ -208,15 +215,18 @@ export const appRouter = router({
       }))
       .query(async ({ input }) => {
         const bSlug = input.brand || input.brandSlug || "";
-        return getProductByBrandSlug(bSlug, input.slug);
+        if (bSlug !== PUBLIC_BRAND_SLUG) return undefined;
+        return getProductByBrandSlug(PUBLIC_BRAND_SLUG, input.slug);
       }),
     getBySlug: publicProcedure
       .input(z.object({ slug: z.string() }))
       .query(async ({ input }) => {
         const product = await getProductBySlug(input.slug);
         if (!product) return undefined;
-        const variants = await getProductVariants(product.id);
-        return { ...product, variants: variants.filter((v) => v.isActive) };
+        const publicProduct = await getProductByBrandSlug(PUBLIC_BRAND_SLUG, product.slug);
+        if (!publicProduct) return undefined;
+        const variants = await getProductVariants(publicProduct.id);
+        return { ...publicProduct, variants: variants.filter((v) => v.isActive) };
       }),
   }),
 
