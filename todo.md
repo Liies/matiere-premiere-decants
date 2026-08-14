@@ -6208,3 +6208,15 @@
 - [ ] Couvrir les calculs, les emails, la concurrence et les parcours de commande
 - [ ] Valider TypeScript, tests, build et parcours essentiels
 - [ ] Publier la version et remettre le rapport de fin demandé
+
+## Ticket 04 — SEO : métadonnées, slug, JSON-LD et sitemap
+- [ ] Vérifier la disponibilité des variantes et exécuter les contrôles de départ
+- [ ] Créer les utilitaires SEO partagés et leurs tests unitaires
+- [ ] Créer le hook useSEO pour gérer le head par page
+- [ ] Ajouter products.getBySlug et la route /parfum/:slug
+- [ ] Rediriger immédiatement les anciennes URL /product/:id vers le slug canonique
+- [ ] Mettre à jour les liens internes produits vers la forme /parfum/:slug
+- [ ] Appliquer les métadonnées uniques et les règles noindex à toutes les pages
+- [ ] Ajouter JSON-LD Product, Organization et BreadcrumbList fondés sur les données réelles
+- [ ] Servir un sitemap dynamique et mettre à jour robots.txt
+- [ ] Valider pnpm check, tests, build, liens et absence de domaines codés en dur

@@ -36,6 +36,65 @@ async function startServer() {
   app.use(express.urlencoded({ limit: "50mb", extended: true }));
   registerStorageProxy(app);
   registerOAuthRoutes(app);
+
+  // Dynamic Sitemap XML & Legacy Product Redirects
+  app.get("/sitemap.xml", async (req, res) => {
+    try {
+      const { getCatalogProducts, getDb } = await import("../db");
+      const catalog = (await getCatalogProducts()) as any[];
+      const domain = `${req.protocol}://${req.get("host") || "matiere50ml-okjlk7qk.manus.space"}`;
+
+      let xml = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n`;
+      
+      const staticPages = ["", "/products", "/about", "/faq", "/contact", "/terms", "/privacy"];
+      for (const p of staticPages) {
+        xml += `  <url>\n    <loc>${domain}${p}</loc>\n    <changefreq>weekly</changefreq>\n    <priority>${p === "" ? "1.0" : "0.8"}</priority>\n  </url>\n`;
+      }
+
+      for (const item of catalog) {
+        const prod = item.product ? item.product : item;
+        const brand = item.brand ? item.brand : null;
+        if (prod.isArchived) continue;
+        const brandSlug = brand?.slug || "matiere-premiere";
+        const lastMod = prod.updatedAt ? new Date(prod.updatedAt).toISOString().split("T")[0] : new Date().toISOString().split("T")[0];
+        xml += `  <url>\n    <loc>${domain}/parfum/${brandSlug}/${prod.slug}</loc>\n    <lastmod>${lastMod}</lastmod>\n    <changefreq>daily</changefreq>\n    <priority>0.9</priority>\n  </url>\n`;
+      }
+
+      xml += `</urlset>`;
+      res.header("Content-Type", "application/xml; charset=UTF-8");
+      res.send(xml);
+    } catch (err) {
+      console.error("Sitemap generation error:", err);
+      res.status(500).send("Error generating sitemap");
+    }
+  });
+
+  app.get("/product/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id, 10);
+      if (isNaN(id)) {
+        return res.redirect(301, "/products");
+      }
+      const { getProductById, getDb } = await import("../db");
+      const prod = await getProductById(id);
+      if (!prod) {
+        return res.redirect(301, "/products");
+      }
+      const db = await getDb();
+      let brandSlug = "matiere-premiere";
+      if (prod.brandId && db) {
+        const { brands } = await import("../../drizzle/schema");
+        const { eq } = await import("drizzle-orm");
+        const bRows = await db.select().from(brands).where(eq(brands.id, prod.brandId)).limit(1);
+        if (bRows[0]) brandSlug = bRows[0].slug;
+      }
+      return res.redirect(301, `/parfum/${brandSlug}/${prod.slug}`);
+    } catch (err) {
+      console.error("Legacy redirect error:", err);
+      return res.redirect(301, "/products");
+    }
+  });
+
   // tRPC API
   app.use(
     "/api/trpc",

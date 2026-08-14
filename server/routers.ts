@@ -87,7 +87,7 @@ export const appRouter = router({
       )
       .query(async ({ input }) => {
         const raw = (await getCatalogProducts(input?.brandSlug, input?.search)) as any[];
-        const productIds = raw.map((item) => (item.product ? item.product.id : item.id));
+        const productIds = raw.map((item: any) => (item.product ? (item.product as any).id : (item as any).id));
         const allVariants = productIds.length > 0 ? await getVariantsByProductIds(productIds) : [];
         const variantMap = new Map<number, typeof allVariants>();
         for (const v of allVariants) {
@@ -97,7 +97,7 @@ export const appRouter = router({
           variantMap.set(v.productId, list);
         }
         return raw
-          .map((item) => {
+          .map((item: any) => {
             const p = item.product ? item.product : item;
             if (p.isArchived) return null;
             const variants = (variantMap.get(p.id) || []).sort((a, b) => a.sizeMl - b.sizeMl);
@@ -165,6 +165,20 @@ export const appRouter = router({
       .query(async ({ input }) => {
         const bSlug = input.brand || input.brandSlug || "";
         return getProductByBrandSlug(bSlug, input.slug);
+      }),
+    getBySlug: publicProcedure
+      .input(z.object({ slug: z.string() }))
+      .query(async ({ input }) => {
+        const product = await getProductBySlug(input.slug);
+        if (!product) return undefined;
+        const variants = await getProductVariants(product.id);
+        const db = await getDb();
+        let brand = null;
+        if (product.brandId && db) {
+          const bRows = await db.select().from(brands).where(eq(brands.id, product.brandId)).limit(1);
+          if (bRows[0]) brand = bRows[0];
+        }
+        return { ...product, brand, variants: variants.filter((v) => v.isActive) };
       }),
   }),
 
