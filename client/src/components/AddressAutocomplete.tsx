@@ -32,7 +32,11 @@ export default function AddressAutocomplete({
   const listboxId = useId();
   const autocompleteService = useRef<google.maps.places.AutocompleteService | null>(null);
   const placesService = useRef<google.maps.places.PlacesService | null>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const selectionInProgressRef = useRef(false);
+  const suppressNextSearchRef = useRef(false);
   const [suggestions, setSuggestions] = useState<AddressSuggestion[]>([]);
+  const [isListOpen, setIsListOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isSelecting, setIsSelecting] = useState(false);
   const [isPlacesReady, setIsPlacesReady] = useState(false);
@@ -60,10 +64,18 @@ export default function AddressAutocomplete({
 
   useEffect(() => {
     const query = value.trim();
-    if (!isPlacesReady || !autocompleteService.current || query.length < 3 || isSelecting) {
+    if (suppressNextSearchRef.current) {
+      suppressNextSearchRef.current = false;
       setSuggestions([]);
+      setIsListOpen(false);
       return;
     }
+    if (!isPlacesReady || !autocompleteService.current || query.length < 3) {
+      setSuggestions([]);
+      setIsListOpen(false);
+      return;
+    }
+    if (isSelecting) return;
 
     setIsLoading(true);
     const timer = window.setTimeout(() => {
@@ -72,12 +84,14 @@ export default function AddressAutocomplete({
         (predictions, status) => {
           if (status !== window.google?.maps.places.PlacesServiceStatus.OK || !predictions) {
             setSuggestions([]);
+            setIsListOpen(false);
           } else {
             setSuggestions(predictions.slice(0, 5).map((prediction) => ({
               placeId: prediction.place_id,
               primaryText: prediction.structured_formatting?.main_text || prediction.description,
               secondaryText: prediction.structured_formatting?.secondary_text || "",
             })));
+            setIsListOpen(true);
           }
           setIsLoading(false);
         },
@@ -91,16 +105,21 @@ export default function AddressAutocomplete({
   }, [isPlacesReady, isSelecting, value]);
 
   const selectSuggestion = (suggestion: AddressSuggestion) => {
-    if (!placesService.current) return;
+    if (!placesService.current || selectionInProgressRef.current) return;
+    selectionInProgressRef.current = true;
+    suppressNextSearchRef.current = true;
     setIsSelecting(true);
-    setSuggestions([]);
     setIsLoading(true);
+    onValueChange(suggestion.primaryText);
 
     placesService.current.getDetails(
       { placeId: suggestion.placeId, fields: ["formatted_address", "address_components"] },
       (place, status) => {
         setIsLoading(false);
         setIsSelecting(false);
+        selectionInProgressRef.current = false;
+        setSuggestions([]);
+        setIsListOpen(false);
         if (status !== window.google?.maps.places.PlacesServiceStatus.OK || !place?.formatted_address || !place.address_components) return;
 
         const deliveryAddress = toDeliveryAddress(place.formatted_address, place.address_components);
@@ -110,8 +129,18 @@ export default function AddressAutocomplete({
     );
   };
 
+  const handleBlur: FocusEventHandler<HTMLInputElement> = (event) => {
+    onBlur?.(event);
+    window.setTimeout(() => {
+      if (selectionInProgressRef.current) return;
+      if (containerRef.current?.contains(document.activeElement)) return;
+      setSuggestions([]);
+      setIsListOpen(false);
+    }, 0);
+  };
+
   return (
-    <div className="relative">
+    <div ref={containerRef} className="relative">
       <label htmlFor="shippingAddress" className="mb-1 block text-sm text-gray-600">Adresse</label>
       <p className="mb-2 text-xs text-gray-500">Commencez à saisir votre adresse pour sélectionner une suggestion.</p>
       <div className="relative">
@@ -121,7 +150,7 @@ export default function AddressAutocomplete({
           name="shippingAddress"
           value={value}
           onChange={(event) => onValueChange(event.target.value)}
-          onBlur={onBlur}
+          onBlur={handleBlur}
           type="text"
           autoComplete="street-address"
           disabled={disabled}
@@ -132,7 +161,7 @@ export default function AddressAutocomplete({
         />
         {isLoading ? <LoaderCircle className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 animate-spin text-gray-500" aria-label="Recherche d’adresses" /> : null}
       </div>
-      {suggestions.length > 0 ? (
+      {isListOpen && suggestions.length > 0 ? (
         <ul id={listboxId} role="listbox" aria-label="Suggestions d’adresses" className="absolute z-20 mt-2 max-h-64 w-full overflow-y-auto rounded border border-gray-200 bg-white p-1 shadow-xl">
           {suggestions.map((suggestion) => (
             <li key={suggestion.placeId}>
@@ -142,6 +171,13 @@ export default function AddressAutocomplete({
                 aria-selected="false"
                 onMouseDown={(event) => event.preventDefault()}
                 onClick={() => selectSuggestion(suggestion)}
+                onKeyDown={(event) => {
+                  if (event.key === "Enter" || event.key === " ") {
+                    event.preventDefault();
+                    selectSuggestion(suggestion);
+                  }
+                }}
+                disabled={isSelecting}
                 className="flex min-h-12 w-full items-start gap-3 rounded px-3 py-2 text-left transition-colors hover:bg-stone-50 focus:bg-stone-50 focus:outline-none"
               >
                 <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-gray-500" aria-hidden="true" />

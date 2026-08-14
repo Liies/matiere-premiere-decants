@@ -6231,3 +6231,9 @@
 - [x] Afficher des cartes fondées sur le catalogue réel avec ajout direct au panier
 - [x] Ajouter l'accès Trouver mon parfum depuis le catalogue et gérer tous les états d'erreur
 - [x] Valider TypeScript, tests, build et parcours de conseil
+
+## Correctif — Suggestions d’adresse au checkout
+- [x] Reproduire la disparition prématurée de la liste de suggestions
+- [x] Garantir la sélection d’une suggestion avant la fermeture au blur ou clic extérieur
+- [x] Ajouter un test de régression du clic sur suggestion et du clic extérieur
+- [x] Valider TypeScript, tests et parcours checkout
