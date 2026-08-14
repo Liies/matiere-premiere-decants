@@ -6280,3 +6280,7 @@
 - [x] Afficher uniquement les avis approuvés et authentifiés sur la fiche produit
 - [x] Ajouter les tests de règles d’accès et de publication
 - [x] Valider TypeScript, tests et build de production
+
+## Avis clients — Non-régression administration
+- [x] Couvrir l’état de modération sans avis à traiter
+- [x] Exécuter les tests ciblés et la suite complète
