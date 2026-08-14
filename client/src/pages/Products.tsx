@@ -50,7 +50,7 @@ export default function Products() {
   const sizeMatchedProducts = useMemo<CatalogProduct[]>(
     () => selectedSizeFilter === null
       ? noteMatchedProducts
-      : noteMatchedProducts.filter((product) => product.variants?.some((variant) => variant.sizeMl === selectedSizeFilter)),
+      : noteMatchedProducts.filter((product) => product.variants?.some((variant: { sizeMl: number }) => variant.sizeMl === selectedSizeFilter)),
     [noteMatchedProducts, selectedSizeFilter],
   );
   const filteredProducts = useMemo<CatalogProduct[]>(
@@ -111,8 +111,8 @@ export default function Products() {
 
   const getSelectedVariant = (product: CatalogProduct) => {
     const variants = product.variants ?? [];
-    return variants.find((variant) => variant.id === selectedVariantIds[product.id])
-      ?? variants.find((variant) => variant.stock > 0)
+    return variants.find((variant: { id: number; sizeMl: number; priceCents: number; stock: number }) => variant.id === selectedVariantIds[product.id])
+      ?? variants.find((variant: { id: number; sizeMl: number; priceCents: number; stock: number }) => variant.stock > 0)
       ?? variants[0]
       ?? null;
   };
@@ -510,7 +510,7 @@ export default function Products() {
                               onChange={(event) => setSelectedVariantIds((current) => ({ ...current, [product.id]: Number(event.target.value) }))}
                               className="min-h-11 w-full rounded border border-gray-200 bg-white px-2 text-sm text-gray-900 sm:w-36"
                             >
-                              {product.variants.map((variant) => (
+                              {product.variants.map((variant: { id: number; sizeMl: number; priceCents: number; stock: number }) => (
                                 <option key={variant.id} value={variant.id} disabled={variant.stock <= 0}>
                                   {variant.sizeMl} ml — {formatPrice(variant.priceCents)}
                                 </option>

@@ -17,20 +17,17 @@ import { useWishlist } from '@/hooks/useWishlist';
 import { useAuth } from '@/_core/hooks/useAuth';
 
 function ProductImage({
-  productId,
   fallbackUrl,
   alt,
   className,
 }: {
-  productId: number;
+  productId?: number;
   fallbackUrl?: string | null;
   alt: string;
   className: string;
 }) {
   const [hasError, setHasError] = useState(false);
-  const mappedImage = getProductImage(productId);
-  const storageFallback = fallbackUrl?.startsWith('/manus-storage/') ? fallbackUrl : null;
-  const src = mappedImage?.compressed ?? storageFallback;
+  const src = fallbackUrl?.startsWith('/manus-storage/') ? fallbackUrl : null;
 
   if (!src || hasError) {
     return (
@@ -82,9 +79,9 @@ export default function ProductDetail() {
   );
   const product = stableProduct ?? legacyProduct;
   const productStory = getProductStory(product?.slug);
-  const productVariants = product?.variants ?? [];
+  const productVariants = (product as any)?.variants ?? [];
   const productBrandName = stableProduct?.brand.name ?? "Collection Matière Première";
-  const selectedVariant = productVariants.find((variant) => variant.id === selectedVariantId) ?? getDefaultVariant(productVariants) ?? null;
+  const selectedVariant = productVariants.find((variant: { id: number; sizeMl: number; priceCents: number; stock: number }) => variant.id === selectedVariantId) ?? getDefaultVariant(productVariants) ?? null;
   const isLoading = stableMatch ? isLoadingStable : isLoadingLegacy;
 
   // Get similar products
@@ -136,7 +133,7 @@ export default function ProductDetail() {
       setSelectedVariantId(null);
       return;
     }
-    setSelectedVariantId((current) => productVariants.some((variant) => variant.id === current)
+    setSelectedVariantId((current) => productVariants.some((variant: { id: number; sizeMl: number; priceCents: number; stock: number }) => variant.id === current)
       ? current
       : getDefaultVariant(productVariants)?.id ?? null);
   }, [productVariants]);
@@ -240,7 +237,6 @@ export default function ProductDetail() {
               }}
             >
               <ProductImage
-                productId={product.id}
                 fallbackUrl={product.imageUrl}
                 alt={product.name}
                 className="h-full w-full object-cover transition-transform duration-1000 group-hover:scale-[1.03]"

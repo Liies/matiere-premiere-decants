@@ -61,6 +61,7 @@ export const products = mysqlTable("products", {
   perfumer: varchar("perfumer", { length: 160 }),
   releaseYear: int("releaseYear"),
   status: mysqlEnum("status", ["available", "out_of_stock", "discontinued", "coming_soon"]).default("available").notNull(),
+  isArchived: boolean("isArchived").default(false).notNull(),
   legalNotice: text("legalNotice"),
   heroScore: int("heroScore").default(0).notNull(),
   description: text("description"),
@@ -78,6 +79,7 @@ export const products = mysqlTable("products", {
   index("products_brand_id_idx").on(table.brandId),
   index("products_brand_slug_idx").on(table.brandId, table.slug),
   index("products_status_idx").on(table.status),
+  index("products_is_archived_idx").on(table.isArchived),
 ]);
 
 export type Product = typeof products.$inferSelect;
@@ -200,3 +202,21 @@ export const orderItems = mysqlTable("orderItems", {
 
 export type OrderItem = typeof orderItems.$inferSelect;
 export type InsertOrderItem = typeof orderItems.$inferInsert;
+
+/** Journal des mouvements de stock. */
+export const stockMovements = mysqlTable("stockMovements", {
+  id: int("id").autoincrement().primaryKey(),
+  variantId: int("variantId").notNull().references(() => variants.id, { onDelete: "restrict", onUpdate: "cascade" }),
+  delta: int("delta").notNull(),
+  reason: mysqlEnum("reason", ["order", "restock", "adjustment", "loss", "return", "import"]).notNull(),
+  orderId: int("orderId"),
+  userId: int("userId"),
+  note: text("note"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+}, (table) => [
+  index("stock_movements_variant_id_idx").on(table.variantId),
+  index("stock_movements_created_at_idx").on(table.createdAt),
+]);
+
+export type StockMovement = typeof stockMovements.$inferSelect;
+export type InsertStockMovement = typeof stockMovements.$inferInsert;

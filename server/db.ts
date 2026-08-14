@@ -1,4 +1,4 @@
-import { and, asc, eq, gt, gte, inArray, sql } from "drizzle-orm";
+import { and, asc, eq, gt, gte, inArray, sql, or, like, desc } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
 import { InsertUser, users, brands, products, cartItems, cartSyncReceipts, orders, orderItems, InsertOrder, InsertOrderItem, sourceBottles, variants, savedDeliveryAddresses } from "../drizzle/schema";
 import { ENV } from './_core/env';
@@ -102,13 +102,25 @@ export async function getAllProducts() {
   return db.select().from(products);
 }
 
-export async function getCatalogProducts() {
+export async function getCatalogProducts(brandSlug?: string, search?: string) {
   const db = await getDb();
   if (!db) return [];
-  return db
+  let query = db
     .select({ product: products, brand: brands })
     .from(products)
-    .leftJoin(brands, eq(products.brandId, brands.id));
+    .leftJoin(brands, eq(products.brandId, brands.id))
+    .$dynamic();
+
+  const conditions = [eq(products.isArchived, false)];
+  if (brandSlug) {
+    conditions.push(eq(brands.slug, brandSlug));
+  }
+  if (search && search.trim()) {
+    const term = `%${search.trim()}%`;
+    conditions.push(or(like(products.name, term), like(products.description, term), like(brands.name, term))!);
+  }
+
+  return query.where(and(...conditions));
 }
 
 export async function getBrands() {

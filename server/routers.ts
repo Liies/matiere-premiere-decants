@@ -48,11 +48,6 @@ const SOURCE_BOTTLE_INPUT = z.object({
   purchasedAt: z.date().optional(),
 });
 
-/**
- * Composition root tRPC : cette couche ne contient que l’assemblage des
- * capacités. Les règles de panier et les flux de commande vivent dans leurs
- * modules dédiés.
- */
 export const appRouter = router({
   system: systemRouter,
   auth: router({
@@ -91,8 +86,8 @@ export const appRouter = router({
         }).optional()
       )
       .query(async ({ input }) => {
-        const raw = await getCatalogProducts(input?.brandSlug, input?.search);
-        const productIds = raw.map((p) => p.id);
+        const raw = (await getCatalogProducts(input?.brandSlug, input?.search)) as any[];
+        const productIds = raw.map((item) => (item.product ? item.product.id : item.id));
         const allVariants = productIds.length > 0 ? await getVariantsByProductIds(productIds) : [];
         const variantMap = new Map<number, typeof allVariants>();
         for (const v of allVariants) {
@@ -102,11 +97,17 @@ export const appRouter = router({
           variantMap.set(v.productId, list);
         }
         return raw
-          .map((p) => {
+          .map((item) => {
+            const p = item.product ? item.product : item;
+            if (p.isArchived) return null;
             const variants = (variantMap.get(p.id) || []).sort((a, b) => a.sizeMl - b.sizeMl);
+            if (variants.length === 0) return null;
+            if (item.product) {
+              return { ...item.product, brand: item.brand, variants };
+            }
             return { ...p, variants };
           })
-          .filter((p) => p.variants.length > 0);
+          .filter(Boolean);
       }),
     detail: publicProcedure
       .input(z.object({ brandSlug: z.string(), slug: z.string() }))
@@ -126,11 +127,10 @@ export const appRouter = router({
       }),
   }),
 
-  // Alias router for products to satisfy older test fixtures
   products: router({
     list: publicProcedure.query(async () => {
-      const raw = await getCatalogProducts();
-      const productIds = raw.map((item: any) => item.product ? item.product.id : item.id);
+      const raw = (await getCatalogProducts()) as any[];
+      const productIds = raw.map((item) => (item.product ? item.product.id : item.id));
       const allVariants = productIds.length > 0 ? await getVariantsByProductIds(productIds) : [];
       const variantMap = new Map<number, typeof allVariants>();
       for (const v of allVariants) {
@@ -139,16 +139,12 @@ export const appRouter = router({
         list.push(v);
         variantMap.set(v.productId, list);
       }
-      return raw.map((item: any) => {
+      return raw.map((item) => {
+        const p = item.product ? item.product : item;
+        const variants = variantMap.get(p.id) || [];
         if (item.product) {
-          const variants = variantMap.get(item.product.id) || [];
-          return {
-            ...item.product,
-            brand: item.brand,
-            variants,
-          };
+          return { ...item.product, brand: item.brand, variants };
         }
-        const variants = variantMap.get(item.id) || [];
         return { ...item, variants };
       });
     }),
