@@ -6220,3 +6220,14 @@
 - [ ] Ajouter JSON-LD Product, Organization et BreadcrumbList fondés sur les données réelles
 - [ ] Servir un sitemap dynamique et mettre à jour robots.txt
 - [ ] Valider pnpm check, tests, build, liens et absence de domaines codés en dur
+
+## Ticket 05 — Conseiller olfactif conversationnel
+- [x] Vérifier les briques LLM et AIChatBox ainsi que les contrôles de départ
+- [x] Construire le contexte catalogue compact mis en cache et la validation des recommandations
+- [x] Tester les règles du conseiller sans appeler le modèle
+- [x] Créer advisor.ask avec sortie structurée, garde-fous et second essai unique
+- [x] Ajouter la limitation en mémoire à 30 requêtes par heure et la journalisation des coûts
+- [x] Créer la page /conseil en réutilisant AIChatBox sans le modifier
+- [x] Afficher des cartes fondées sur le catalogue réel avec ajout direct au panier
+- [x] Ajouter l'accès Trouver mon parfum depuis le catalogue et gérer tous les états d'erreur
+- [x] Valider TypeScript, tests, build et parcours de conseil

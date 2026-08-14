@@ -17,6 +17,7 @@ import {
 import { sendOrderCreatedEmails, sendOrderStatusEmail } from "../transactionalEmail";
 import { requireAdmin } from "./authorization";
 import { getDeliveryEligibility } from "../../shared/delivery-zones";
+import { invalidateAdvisorCatalogCache } from "../advisorCatalog";
 
 const ORDER_STATUS = z.enum(["awaiting_payment", "pending", "paid", "processing", "shipped", "delivered", "cancelled"]);
 const ORDER_INPUT = z.object({
@@ -82,6 +83,7 @@ export const ordersRouter = router({
       }
       throw error;
     }
+    invalidateAdvisorCatalogCache();
 
     try {
       await notifyOwner({

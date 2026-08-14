@@ -26,6 +26,7 @@ const Terms = lazy(() => import("./pages/Terms"));
 const Privacy = lazy(() => import("./pages/Privacy"));
 const ProductDetail = lazy(() => import("./pages/ProductDetail"));
 const Wishlist = lazy(() => import("./pages/Wishlist"));
+const Advisor = lazy(() => import("./pages/Advisor"));
 
 function PageLoading() {
   return (
@@ -113,6 +114,7 @@ function RouteTransitionSwitch() {
       <Route path={"/terms"} component={Terms} />
       <Route path={"/privacy"} component={Privacy} />
       <Route path={"/wishlist"} component={Wishlist} />
+      <Route path={"/conseil"} component={Advisor} />
       <Route path={"/parfum/:brand/:slug"} component={ProductDetail} />
       <Route path={"/product/:id"} component={ProductDetail} />
       <Route path={"/404"} component={NotFound} />

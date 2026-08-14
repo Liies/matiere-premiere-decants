@@ -9,6 +9,7 @@ import {
   getAllProducts,
   getBrands,
   getCatalogProducts,
+  getProductBySlug,
   getProductByBrandSlug,
   getProductById,
   getProductVariants,
@@ -23,6 +24,10 @@ import { ordersRouter } from "./routers/ordersRouter";
 import { profileRouter } from "./routers/profileRouter";
 import { shippingRouter } from "./routers/shippingRouter";
 import { TRPCError } from "@trpc/server";
+import { MAX_ADVISOR_MESSAGES, MAX_ADVISOR_MESSAGE_LENGTH, isAdvisorConversationAllowed } from "@shared/advisor";
+import { advisorRateLimiter } from "./advisorRateLimit";
+import { askAdvisor } from "./advisorService";
+import { invalidateAdvisorCatalogCache } from "./advisorCatalog";
 
 const PRODUCT_CATALOG_UPDATE = z.object({
   id: z.number().int().positive(),
@@ -74,6 +79,45 @@ export const appRouter = router({
       if (!notificationSent) throw new Error("Le message n’a pas pu être transmis. Veuillez réessayer.");
       return { success: true } as const;
     }),
+  }),
+
+  advisor: router({
+    ask: publicProcedure
+      .input(z.object({
+        messages: z.array(z.object({
+          role: z.enum(["user", "assistant"]),
+          content: z.string().trim().min(1).max(MAX_ADVISOR_MESSAGE_LENGTH),
+        })).min(1).max(MAX_ADVISOR_MESSAGES),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        if (!isAdvisorConversationAllowed(input.messages.length)) {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: "Cette conversation est arrivée à sa limite. Vous pouvez démarrer une nouvelle demande.",
+          });
+        }
+
+        const forwardedFor = ctx.req.headers["x-forwarded-for"];
+        const forwardedIp = typeof forwardedFor === "string" ? forwardedFor.split(",")[0]?.trim() : undefined;
+        const ipAddress = forwardedIp || ctx.req.ip || "unknown";
+        const rateLimit = advisorRateLimiter.consume(ipAddress);
+        if (!rateLimit.allowed) {
+          throw new TRPCError({
+            code: "TOO_MANY_REQUESTS",
+            message: `Vous avez atteint la limite de demandes. Réessayez dans ${rateLimit.retryAfterSeconds} secondes.`,
+          });
+        }
+
+        try {
+          return await askAdvisor(input.messages);
+        } catch (error) {
+          console.error("[Advisor] Service unavailable", error);
+          throw new TRPCError({
+            code: "SERVICE_UNAVAILABLE",
+            message: "Le conseiller est momentanément indisponible. Vous pouvez parcourir le catalogue pendant ce temps.",
+          });
+        }
+      }),
   }),
 
   catalog: router({
@@ -172,13 +216,7 @@ export const appRouter = router({
         const product = await getProductBySlug(input.slug);
         if (!product) return undefined;
         const variants = await getProductVariants(product.id);
-        const db = await getDb();
-        let brand = null;
-        if (product.brandId && db) {
-          const bRows = await db.select().from(brands).where(eq(brands.id, product.brandId)).limit(1);
-          if (bRows[0]) brand = bRows[0];
-        }
-        return { ...product, brand, variants: variants.filter((v) => v.isActive) };
+        return { ...product, variants: variants.filter((v) => v.isActive) };
       }),
   }),
 
@@ -197,6 +235,7 @@ export const appRouter = router({
         price: input.price,
         volumeMl: input.volumeMl,
       });
+      invalidateAdvisorCatalogCache();
       return { success: true } as const;
     }),
   }),
@@ -213,6 +252,7 @@ export const appRouter = router({
       const product = await getProductById(input.productId);
       if (!product) throw new TRPCError({ code: "NOT_FOUND", message: "Parfum introuvable" });
       await createCatalogVariant(input);
+      invalidateAdvisorCatalogCache();
       return { success: true } as const;
     }),
     recordSourceBottle: protectedProcedure.input(SOURCE_BOTTLE_INPUT).mutation(async ({ input, ctx }) => {
