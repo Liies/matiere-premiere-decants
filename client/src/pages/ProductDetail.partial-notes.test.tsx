@@ -71,5 +71,7 @@ describe("fiche de parfum à pyramide partielle", () => {
     expect(screen.getByText("Le contraste noir et blanc")).toBeTruthy();
     expect(screen.getByText("Absolue de vanille · Madagascar")).toBeTruthy();
     expect(screen.getByRole("link", { name: /source : matière première/i })).toBeTruthy();
+    expect(screen.getByRole("heading", { name: /avis clients/i })).toBeTruthy();
+    expect(screen.getByText(/uniquement après un achat vérifié/i)).toBeTruthy();
   });
 });

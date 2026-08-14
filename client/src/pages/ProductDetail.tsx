@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { Link, useRoute } from 'wouter';
-import { ArrowLeft, ShoppingCart, Heart, Leaf, BookOpen, MapPin, Sparkles, ExternalLink } from 'lucide-react';
+import { ArrowLeft, ShoppingCart, Heart, Leaf, BookOpen, MapPin, Sparkles, ExternalLink, CircleCheck } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
@@ -420,14 +420,23 @@ export default function ProductDetail() {
                   onClick={handleAddToCart}
                   disabled={isAddingToCart || addVariantToCart.isPending || !selectedVariant || !isVariantAvailable(selectedVariant) || selectedVariant.stock < quantity}
                   aria-live="polite"
-                  className={`relative min-h-12 w-full flex-1 overflow-hidden rounded-xl bg-gray-900 py-3 text-white font-light tracking-wide transition-all hover:bg-gray-800 hover:shadow-lg sm:w-auto ${
-                    isAddingToCart ? "scale-[0.98] bg-gray-800" : ""
+                  aria-atomic="true"
+                  className={`relative min-h-12 w-full flex-1 overflow-hidden rounded-xl bg-gray-900 py-3 text-white font-light tracking-wide transition-all duration-300 hover:bg-gray-800 hover:shadow-lg sm:w-auto ${
+                    showAddedFeedback ? "cart-success-state bg-emerald-700 hover:bg-emerald-700" : ""
                   }`}
                 >
                   {showAddedFeedback && <span className="cart-added-ripple" aria-hidden="true" />}
-                  <ShoppingCart className={`relative z-10 w-5 h-5 ${isAddingToCart ? "cart-icon-bounce" : ""}`} />
-                  <span className="relative z-10">{!selectedVariant || !isVariantAvailable(selectedVariant) || selectedVariant.stock < quantity ? "Indisponible" : getCartConfirmationLabel(isAddingToCart)}</span>
-                  {showAddedFeedback && <span className="cart-added-check" aria-hidden="true">✓</span>}
+                  {showAddedFeedback ? (
+                    <span className="cart-success-content relative z-10 inline-flex items-center gap-2">
+                      <CircleCheck className="h-5 w-5" aria-hidden="true" />
+                      Ajouté au panier
+                    </span>
+                  ) : (
+                    <>
+                      <ShoppingCart className={`relative z-10 w-5 h-5 ${isAddingToCart ? "cart-icon-bounce" : ""}`} />
+                      <span className="relative z-10">{!selectedVariant || !isVariantAvailable(selectedVariant) || selectedVariant.stock < quantity ? "Indisponible" : getCartConfirmationLabel(isAddingToCart)}</span>
+                    </>
+                  )}
                 </Button>
                 <button
                   type="button"
@@ -445,6 +454,22 @@ export default function ProductDetail() {
             </div>
           </div>
         </div>
+
+        <section
+          aria-labelledby="product-reviews-title"
+          className="mt-16 rounded-2xl border border-gray-200 bg-stone-50/60 px-6 py-10 text-center sm:mt-20 sm:px-10"
+        >
+          <p className="text-xs font-medium uppercase tracking-[0.2em] text-gray-500">Votre expérience compte</p>
+          <h2 id="product-reviews-title" className="mt-3 text-2xl font-light tracking-tight text-gray-900 sm:text-3xl">
+            Avis clients
+          </h2>
+          <p className="mx-auto mt-4 max-w-2xl text-sm leading-6 text-gray-600 sm:text-base">
+            Les retours sur ce parfum seront publiés uniquement après un achat vérifié. Aucun avis, note ou témoignage n’est affiché tant qu’il ne provient pas d’un client réel.
+          </p>
+          <p className="mt-5 text-xs font-medium uppercase tracking-[0.16em] text-gray-500">
+            Avis authentiques · Commandes vérifiées
+          </p>
+        </section>
 
         {/* Similar Products */}
         {similarProducts && similarProducts.length > 0 && (
@@ -506,6 +531,27 @@ export default function ProductDetail() {
           background: rgba(255, 255, 255, 0.25);
           border-radius: inherit;
           animation: cartRipple 0.6s ease-out;
+        }
+        @keyframes cartSuccessPulse {
+          0% { transform: scale(1); }
+          35% { transform: scale(1.025); }
+          100% { transform: scale(1); }
+        }
+        .cart-success-state {
+          animation: cartSuccessPulse 480ms cubic-bezier(0.23, 1, 0.32, 1);
+        }
+        @keyframes cartSuccessContent {
+          from { opacity: 0; transform: translateY(4px) scale(0.96); }
+          to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        .cart-success-content {
+          animation: cartSuccessContent 260ms cubic-bezier(0.23, 1, 0.32, 1) both;
+        }
+        @media (prefers-reduced-motion: reduce) {
+          .cart-success-state,
+          .cart-success-content {
+            animation: none;
+          }
         }
         @keyframes wishlistPop {
           0%, 100% { transform: scale(1); }

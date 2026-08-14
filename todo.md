@@ -6258,3 +6258,10 @@
 - [ ] Vérifier que catalogue, panier et checkout n’exposent que le 50 ml
 - [ ] Ajouter un test de régression de l’offre limitée au 50 ml
 - [ ] Valider TypeScript, tests et build de production
+
+## Fiche produit — Confirmation panier et avis authentiques
+- [x] Auditer l’animation actuelle du bouton d’ajout au panier
+- [x] Renforcer le retour visuel de confirmation après ajout réussi
+- [x] Ajouter une section de confiance transparente pour les futurs avis clients réels
+- [x] Ajouter les tests de régression de la fiche produit
+- [x] Valider TypeScript, tests et build de production
