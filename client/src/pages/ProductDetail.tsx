@@ -354,10 +354,10 @@ export default function ProductDetail() {
               </section>
             )}
 
-            {/* Olfactory Notes */}
+            {/* Olfactory Notes with interactive hover micro-animation */}
             <div ref={olfactoryNotesRef} className="mb-8 rounded-2xl border border-gray-200 p-6 sm:p-8 bg-gray-50/50">
               <h3 className="text-xs uppercase tracking-[0.2em] text-gray-500 font-medium mb-6">Pyramide Olfactive</h3>
-              <div className="space-y-6">
+              <div className="space-y-4">
                 {[
                   { label: "Notes de tête", notes: product.topNotes, number: "01" },
                   { label: "Notes de cœur", notes: product.heartNotes, number: "02" },
@@ -365,14 +365,15 @@ export default function ProductDetail() {
                 ].filter((note) => (note.notes ?? "").trim().length > 0).map((note, index) => (
                   <div
                     key={note.label}
-                    className={`group/note flex gap-4 border-l-2 pl-4 transition-all duration-700 ease-out motion-reduce:translate-y-0 motion-reduce:transition-none ${
+                    tabIndex={0}
+                    className={`group/note relative flex gap-4 rounded-xl border-l-2 bg-white/60 p-4 transition-all duration-300 ease-out hover:translate-x-1.5 hover:bg-white hover:shadow-md hover:border-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-900/10 motion-reduce:translate-x-0 motion-reduce:transition-none ${
                       areOlfactoryNotesRevealed
                         ? "translate-y-0 border-gray-900 opacity-100"
                         : "translate-y-3 border-gray-200 opacity-0"
                     }`}
                     style={{ transitionDelay: `${getOlfactoryRevealDelay(index)}ms` }}
                   >
-                    <span className="pt-0.5 text-xs font-semibold tracking-[0.18em] text-gray-400" aria-hidden="true">
+                    <span className="pt-0.5 text-xs font-semibold tracking-[0.18em] text-gray-400 transition-colors group-hover/note:text-gray-900" aria-hidden="true">
                       {note.number}
                     </span>
                     <div>
