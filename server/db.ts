@@ -1,9 +1,10 @@
 import { and, asc, eq, gt, gte, inArray, sql, or, like, desc } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import { InsertUser, users, brands, products, cartItems, cartSyncReceipts, orders, orderItems, InsertOrder, InsertOrderItem, sourceBottles, variants, savedDeliveryAddresses } from "../drizzle/schema";
+import { InsertUser, users, brands, products, cartItems, cartSyncReceipts, orders, orderItems, InsertOrder, InsertOrderItem, sourceBottles, variants, savedDeliveryAddresses, productReviews } from "../drizzle/schema";
 import { ENV } from './_core/env';
 import { buildCartSyncPlan } from "@shared/cart-sync";
 import { consolidateOrderLines, type RequestedOrderLine } from "@shared/inventory";
+import { REVIEW_ELIGIBLE_ORDER_STATUSES } from "@shared/reviews";
 
 export const PUBLIC_BRAND_SLUG = "matiere-premiere";
 
@@ -584,4 +585,113 @@ export async function getOrderItemsByOrderIds(orderIds: number[]) {
   const db = await getDb();
   if (!db || orderIds.length === 0) return [];
   return db.select().from(orderItems).where(inArray(orderItems.orderId, orderIds));
+}
+
+export async function getPublishedProductReviews(productId: number) {
+  const db = await getDb();
+  if (!db) return [];
+
+  const rows = await db
+    .select({
+      id: productReviews.id,
+      rating: productReviews.rating,
+      title: productReviews.title,
+      body: productReviews.body,
+      publishedAt: productReviews.publishedAt,
+      createdAt: productReviews.createdAt,
+      authorName: users.name,
+    })
+    .from(productReviews)
+    .innerJoin(users, eq(productReviews.userId, users.id))
+    .where(and(eq(productReviews.productId, productId), eq(productReviews.status, "published")))
+    .orderBy(desc(productReviews.publishedAt), desc(productReviews.createdAt));
+
+  return rows.map((review) => ({
+    ...review,
+    authorName: review.authorName?.trim().split(/\s+/)[0] || "Client vérifié",
+  }));
+}
+
+export type ReviewEligibility = {
+  eligibleOrderId: number | null;
+  existingReview: { id: number; status: "pending" | "published" | "rejected" } | null;
+};
+
+export async function getReviewEligibility(userId: number, productId: number): Promise<ReviewEligibility> {
+  const db = await getDb();
+  if (!db) return { eligibleOrderId: null, existingReview: null };
+
+  const [existingReview] = await db
+    .select({ id: productReviews.id, status: productReviews.status })
+    .from(productReviews)
+    .where(and(eq(productReviews.userId, userId), eq(productReviews.productId, productId)))
+    .limit(1);
+
+  const [eligibleOrder] = await db
+    .select({ id: orders.id })
+    .from(orders)
+    .innerJoin(orderItems, eq(orderItems.orderId, orders.id))
+    .where(and(
+      eq(orders.userId, userId),
+      eq(orderItems.productId, productId),
+      inArray(orders.status, REVIEW_ELIGIBLE_ORDER_STATUSES),
+    ))
+    .orderBy(desc(orders.createdAt))
+    .limit(1);
+
+  return {
+    eligibleOrderId: eligibleOrder?.id ?? null,
+    existingReview: existingReview
+      ? { id: existingReview.id, status: existingReview.status }
+      : null,
+  };
+}
+
+export async function createVerifiedProductReview(input: {
+  userId: number;
+  productId: number;
+  rating: number;
+  title?: string;
+  body: string;
+}) {
+  const db = await getDb();
+  if (!db) throw new Error("Le dépôt d’avis est momentanément indisponible");
+
+  const eligibility = await getReviewEligibility(input.userId, input.productId);
+  if (eligibility.existingReview) throw new Error("Vous avez déjà déposé un avis pour ce parfum");
+  const verifiedOrderId = eligibility.eligibleOrderId;
+  if (!verifiedOrderId) throw new Error("Seuls les clients ayant acheté ce parfum peuvent déposer un avis");
+
+  const result = await db.insert(productReviews).values({
+    userId: input.userId,
+    productId: input.productId,
+    orderId: verifiedOrderId,
+    rating: input.rating,
+    title: input.title || null,
+    body: input.body,
+    status: "pending",
+  });
+
+  return Number((result as unknown as [{ insertId?: number }])[0]?.insertId);
+}
+
+export async function getPendingProductReviews() {
+  const db = await getDb();
+  if (!db) return [];
+  return db
+    .select({ review: productReviews, productName: products.name, authorName: users.name })
+    .from(productReviews)
+    .innerJoin(products, eq(productReviews.productId, products.id))
+    .innerJoin(users, eq(productReviews.userId, users.id))
+    .where(eq(productReviews.status, "pending"))
+    .orderBy(asc(productReviews.createdAt));
+}
+
+export async function moderateProductReview(id: number, status: "published" | "rejected") {
+  const db = await getDb();
+  if (!db) throw new Error("La modération des avis est momentanément indisponible");
+  await db
+    .update(productReviews)
+    .set({ status, publishedAt: status === "published" ? new Date() : null })
+    .where(eq(productReviews.id, id));
 }

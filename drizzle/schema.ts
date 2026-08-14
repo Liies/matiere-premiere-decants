@@ -203,6 +203,28 @@ export const orderItems = mysqlTable("orderItems", {
 export type OrderItem = typeof orderItems.$inferSelect;
 export type InsertOrderItem = typeof orderItems.$inferInsert;
 
+/** Avis déposés par les clients après un achat vérifié ; seuls les avis publiés sont exposés publiquement. */
+export const productReviews = mysqlTable("productReviews", {
+  id: int("id").autoincrement().primaryKey(),
+  productId: int("productId").notNull().references(() => products.id, { onDelete: "restrict", onUpdate: "cascade" }),
+  orderId: int("orderId").notNull().references(() => orders.id, { onDelete: "restrict", onUpdate: "cascade" }),
+  userId: int("userId").notNull().references(() => users.id, { onDelete: "restrict", onUpdate: "cascade" }),
+  rating: int("rating").notNull(),
+  title: varchar("title", { length: 140 }),
+  body: text("body").notNull(),
+  status: mysqlEnum("status", ["pending", "published", "rejected"]).default("pending").notNull(),
+  publishedAt: timestamp("publishedAt"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+}, (table) => [
+  uniqueIndex("product_reviews_user_product_unique").on(table.userId, table.productId),
+  index("product_reviews_product_status_idx").on(table.productId, table.status),
+  index("product_reviews_order_id_idx").on(table.orderId),
+]);
+
+export type ProductReview = typeof productReviews.$inferSelect;
+export type InsertProductReview = typeof productReviews.$inferInsert;
+
 /** Journal des mouvements de stock. */
 export const stockMovements = mysqlTable("stockMovements", {
   id: int("id").autoincrement().primaryKey(),

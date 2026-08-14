@@ -56,6 +56,9 @@ export default function ProductDetail() {
   const [scrollY, setScrollY] = useState(0);
   const [isAddingToCart, setIsAddingToCart] = useState(false);
   const [showAddedFeedback, setShowAddedFeedback] = useState(false);
+  const [reviewRating, setReviewRating] = useState("5");
+  const [reviewTitle, setReviewTitle] = useState("");
+  const [reviewBody, setReviewBody] = useState("");
   const addFeedbackTimer = useRef<number | null>(null);
   const wishlistAnimationTimer = useRef<number | null>(null);
   const [isWishlistAnimating, setIsWishlistAnimating] = useState(false);
@@ -83,6 +86,15 @@ export default function ProductDetail() {
   const isLoading = stableMatch ? isLoadingStable : isLoadingLegacy;
 
   const { data: allProducts } = trpc.products.list.useQuery();
+  const { data: publishedReviews, isLoading: areReviewsLoading } = trpc.reviews.listPublished.useQuery(
+    { productId: product?.id ?? 0 },
+    { enabled: Boolean(product?.id) },
+  );
+  const { data: reviewEligibility } = trpc.reviews.eligibility.useQuery(
+    { productId: product?.id ?? 0 },
+    { enabled: isAuthenticated && Boolean(product?.id) },
+  );
+  const createReview = trpc.reviews.create.useMutation();
   const similarProducts = allProducts?.filter(
     (p: any) => p.id !== product?.id && p.brandId === product?.brandId
   ).slice(0, 3);
@@ -179,6 +191,30 @@ export default function ProductDetail() {
     setIsWishlistAnimating(true);
     if (wishlistAnimationTimer.current) window.clearTimeout(wishlistAnimationTimer.current);
     wishlistAnimationTimer.current = window.setTimeout(() => setIsWishlistAnimating(false), 520);
+  };
+
+  const handleReviewSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (!product || !reviewEligibility?.canSubmit || createReview.isPending) return;
+
+    createReview.mutate(
+      {
+        productId: product.id,
+        rating: Number(reviewRating),
+        title: reviewTitle.trim() || undefined,
+        body: reviewBody.trim(),
+      },
+      {
+        onSuccess: async () => {
+          setReviewRating("5");
+          setReviewTitle("");
+          setReviewBody("");
+          await trpcUtils.reviews.eligibility.invalidate({ productId: product.id });
+          toast.success("Merci. Votre avis sera publié après modération.");
+        },
+        onError: (error) => toast.error(error.message || "Impossible d’envoyer votre avis."),
+      },
+    );
   };
 
   if (isLoading) {
@@ -457,18 +493,96 @@ export default function ProductDetail() {
 
         <section
           aria-labelledby="product-reviews-title"
-          className="mt-16 rounded-2xl border border-gray-200 bg-stone-50/60 px-6 py-10 text-center sm:mt-20 sm:px-10"
+          className="mt-16 rounded-2xl border border-gray-200 bg-stone-50/60 px-6 py-10 sm:mt-20 sm:px-10"
         >
-          <p className="text-xs font-medium uppercase tracking-[0.2em] text-gray-500">Votre expérience compte</p>
-          <h2 id="product-reviews-title" className="mt-3 text-2xl font-light tracking-tight text-gray-900 sm:text-3xl">
+          <p className="text-center text-xs font-medium uppercase tracking-[0.2em] text-gray-500">Votre expérience compte</p>
+          <h2 id="product-reviews-title" className="mt-3 text-center text-2xl font-light tracking-tight text-gray-900 sm:text-3xl">
             Avis clients
           </h2>
-          <p className="mx-auto mt-4 max-w-2xl text-sm leading-6 text-gray-600 sm:text-base">
-            Les retours sur ce parfum seront publiés uniquement après un achat vérifié. Aucun avis, note ou témoignage n’est affiché tant qu’il ne provient pas d’un client réel.
+          <p className="mx-auto mt-4 max-w-2xl text-center text-sm leading-6 text-gray-600 sm:text-base">
+            Les avis sont publiés uniquement après un achat vérifié et une modération. Aucune note ni aucun témoignage n’est créé ou affiché sans provenir d’un client réel.
           </p>
-          <p className="mt-5 text-xs font-medium uppercase tracking-[0.16em] text-gray-500">
+          <p className="mt-5 text-center text-xs font-medium uppercase tracking-[0.16em] text-gray-500">
             Avis authentiques · Commandes vérifiées
           </p>
+
+          {areReviewsLoading ? (
+            <p className="mt-8 text-center text-sm text-gray-500">Chargement des avis authentifiés…</p>
+          ) : publishedReviews && publishedReviews.length > 0 ? (
+            <div className="mx-auto mt-8 grid max-w-4xl gap-4 text-left sm:grid-cols-2">
+              {publishedReviews.map((review) => (
+                <article key={review.id} className="rounded-xl border border-stone-200 bg-white p-5 shadow-sm">
+                  <div className="flex items-start justify-between gap-4">
+                    <div>
+                      <p className="text-sm font-medium text-gray-900">{review.authorName}</p>
+                      <p className="mt-1 text-xs font-medium uppercase tracking-[0.14em] text-emerald-700">Achat vérifié</p>
+                    </div>
+                    <p className="text-sm tracking-[0.08em] text-amber-700" aria-label={`${review.rating} étoiles sur 5`}>
+                      {"★".repeat(review.rating)}<span className="text-stone-300">{"★".repeat(5 - review.rating)}</span>
+                    </p>
+                  </div>
+                  {review.title && <h3 className="mt-5 text-base font-medium text-gray-900">{review.title}</h3>}
+                  <p className="mt-3 text-sm leading-6 text-gray-600">{review.body}</p>
+                </article>
+              ))}
+            </div>
+          ) : (
+            <p className="mx-auto mt-8 max-w-xl text-center text-sm leading-6 text-gray-600">
+              Aucun avis approuvé n’est encore disponible pour ce parfum. Les premiers retours apparaîtront ici après achat vérifié et modération.
+            </p>
+          )}
+
+          {isAuthenticated && reviewEligibility?.canSubmit && (
+            <form onSubmit={handleReviewSubmit} className="mx-auto mt-10 max-w-2xl border-t border-stone-200 pt-8 text-left">
+              <h3 className="text-lg font-medium text-gray-900">Partager votre expérience</h3>
+              <p className="mt-2 text-sm leading-6 text-gray-600">Votre commande a été vérifiée. Votre avis sera soumis à modération avant publication.</p>
+              <div className="mt-5 grid gap-4 sm:grid-cols-[9rem_1fr]">
+                <label className="text-sm font-medium text-gray-700" htmlFor="review-rating">Votre note</label>
+                <select
+                  id="review-rating"
+                  value={reviewRating}
+                  onChange={(event) => setReviewRating(event.target.value)}
+                  className="min-h-11 rounded-lg border border-gray-300 bg-white px-3 text-sm text-gray-900"
+                >
+                  {[5, 4, 3, 2, 1].map((rating) => <option key={rating} value={rating}>{rating} étoile{rating > 1 ? "s" : ""} sur 5</option>)}
+                </select>
+                <label className="text-sm font-medium text-gray-700" htmlFor="review-title">Titre <span className="font-normal text-gray-500">(facultatif)</span></label>
+                <input
+                  id="review-title"
+                  value={reviewTitle}
+                  onChange={(event) => setReviewTitle(event.target.value)}
+                  maxLength={140}
+                  className="min-h-11 rounded-lg border border-gray-300 bg-white px-3 text-sm text-gray-900"
+                />
+                <label className="text-sm font-medium text-gray-700" htmlFor="review-body">Votre avis</label>
+                <textarea
+                  id="review-body"
+                  value={reviewBody}
+                  onChange={(event) => setReviewBody(event.target.value)}
+                  minLength={20}
+                  maxLength={2000}
+                  required
+                  rows={5}
+                  className="rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm leading-6 text-gray-900"
+                />
+              </div>
+              <Button type="submit" disabled={createReview.isPending} className="mt-6 min-h-11 bg-gray-900 text-white hover:bg-gray-800">
+                {createReview.isPending ? "Envoi…" : "Soumettre mon avis"}
+              </Button>
+            </form>
+          )}
+
+          {isAuthenticated && reviewEligibility?.existingStatus === "pending" && (
+            <p className="mx-auto mt-8 max-w-xl text-center text-sm leading-6 text-gray-600">Votre avis a bien été reçu et attend sa modération.</p>
+          )}
+
+          {isAuthenticated && !reviewEligibility?.canSubmit && !reviewEligibility?.existingStatus && (
+            <p className="mx-auto mt-8 max-w-xl text-center text-sm leading-6 text-gray-600">Vous pourrez partager votre expérience après l’achat vérifié de ce parfum.</p>
+          )}
+
+          {!isAuthenticated && (
+            <p className="mx-auto mt-8 max-w-xl text-center text-sm leading-6 text-gray-600">Après votre achat, connectez-vous au compte utilisé lors de la commande pour déposer un avis vérifié.</p>
+          )}
         </section>
 
         {/* Similar Products */}

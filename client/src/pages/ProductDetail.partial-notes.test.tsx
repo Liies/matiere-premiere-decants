@@ -31,7 +31,15 @@ vi.mock("@/lib/trpc", () => ({
       getByBrandSlug: { useQuery: () => ({ data: stableProduct, isLoading: false }) },
       list: { useQuery: () => ({ data: [] }) },
     },
-    useUtils: () => ({ cart: { getItems: { invalidate: vi.fn() } } }),
+    reviews: {
+      listPublished: { useQuery: () => ({ data: [], isLoading: false }) },
+      eligibility: { useQuery: () => ({ data: { canSubmit: false, existingStatus: null } }) },
+      create: { useMutation: () => ({ mutate: vi.fn(), isPending: false }) },
+    },
+    useUtils: () => ({
+      cart: { getItems: { invalidate: vi.fn() } },
+      reviews: { eligibility: { invalidate: vi.fn() } },
+    }),
   },
 }));
 
@@ -40,7 +48,7 @@ vi.mock("@/components/Footer", () => ({ default: () => <footer>Pied de page</foo
 vi.mock("@/hooks/useLocalCart", () => ({ useLocalCart: () => ({ addToCart: vi.fn() }) }));
 vi.mock("@/_core/hooks/useAuth", () => ({ useAuth: () => ({ isAuthenticated: true }) }));
 vi.mock("@/hooks/useWishlist", () => ({ useWishlist: () => ({ isWishlisted: () => false, toggleWishlist: vi.fn() }) }));
-vi.mock("sonner", () => ({ toast: { info: vi.fn(), error: vi.fn() } }));
+vi.mock("sonner", () => ({ toast: { info: vi.fn(), success: vi.fn(), error: vi.fn() } }));
 vi.mock("wouter", () => ({
   Link: ({ children }: { children: React.ReactNode }) => <>{children}</>,
   useRoute: (route: string) => route === "/parfum/:brand/:slug"
@@ -73,5 +81,6 @@ describe("fiche de parfum à pyramide partielle", () => {
     expect(screen.getByRole("link", { name: /source : matière première/i })).toBeTruthy();
     expect(screen.getByRole("heading", { name: /avis clients/i })).toBeTruthy();
     expect(screen.getByText(/uniquement après un achat vérifié/i)).toBeTruthy();
+    expect(screen.getByText(/aucun avis approuvé n’est encore disponible/i)).toBeTruthy();
   });
 });

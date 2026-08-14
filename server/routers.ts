@@ -24,6 +24,7 @@ import { cartRouter } from "./routers/cartRouter";
 import { ordersRouter } from "./routers/ordersRouter";
 import { profileRouter } from "./routers/profileRouter";
 import { shippingRouter } from "./routers/shippingRouter";
+import { reviewsRouter } from "./routers/reviewsRouter";
 import { TRPCError } from "@trpc/server";
 import { MAX_ADVISOR_MESSAGES, MAX_ADVISOR_MESSAGE_LENGTH, isAdvisorConversationAllowed } from "@shared/advisor";
 import { advisorRateLimiter } from "./advisorRateLimit";
@@ -278,6 +279,7 @@ export const appRouter = router({
   orders: ordersRouter,
   profile: profileRouter,
   shipping: shippingRouter,
+  reviews: reviewsRouter,
 });
 
 export type AppRouter = typeof appRouter;

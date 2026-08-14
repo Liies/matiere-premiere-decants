@@ -6272,3 +6272,11 @@
 - [x] Corriger les mentions 2 ml des pages d’accueil et éditoriales
 - [x] Adapter les tests de contenu au format 50 ml uniquement
 - [x] Valider TypeScript, tests et build de production
+
+## Avis clients — Achats vérifiés uniquement
+- [x] Définir une table d’avis liée aux produits, commandes et clients
+- [x] Vérifier côté serveur qu’un auteur a acheté le parfum concerné
+- [x] Ajouter le dépôt d’avis connecté avec statut de modération
+- [x] Afficher uniquement les avis approuvés et authentifiés sur la fiche produit
+- [x] Ajouter les tests de règles d’accès et de publication
+- [x] Valider TypeScript, tests et build de production

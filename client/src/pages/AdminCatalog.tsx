@@ -28,6 +28,10 @@ export default function AdminCatalog() {
     enabled: isAuthenticated && user?.role === "admin",
   });
   const updateProduct = trpc.adminCatalog.update.useMutation();
+  const { data: pendingReviews, isLoading: areReviewsLoading } = trpc.reviews.pending.useQuery(undefined, {
+    enabled: isAuthenticated && user?.role === "admin",
+  });
+  const moderateReview = trpc.reviews.moderate.useMutation();
   const [selectedId, setSelectedId] = useState<number | null>(null);
   const [draft, setDraft] = useState<CatalogDraft>(EMPTY_DRAFT);
 
@@ -81,6 +85,19 @@ export default function AdminCatalog() {
           toast.success("Produit mis à jour");
         },
         onError: (error) => toast.error(error.message || "La mise à jour a échoué"),
+      },
+    );
+  };
+
+  const handleModeration = (id: number, status: "published" | "rejected") => {
+    moderateReview.mutate(
+      { id, status },
+      {
+        onSuccess: async () => {
+          await utils.reviews.pending.invalidate();
+          toast.success(status === "published" ? "Avis publié" : "Avis refusé");
+        },
+        onError: (error) => toast.error(error.message || "La modération a échoué"),
       },
     );
   };
@@ -186,6 +203,41 @@ export default function AdminCatalog() {
             </Card>
           </div>
         )}
+
+        <Card className="p-5 sm:p-6">
+          <div className="flex flex-col gap-2 border-b border-gray-200 pb-5 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+              <p className="text-xs font-medium uppercase tracking-[0.18em] text-gray-500">Confiance client</p>
+              <h2 className="mt-2 text-2xl font-light text-gray-900">Avis à modérer</h2>
+            </div>
+            <p className="text-xs text-gray-500">Seuls les avis liés à une commande vérifiée sont proposés ici.</p>
+          </div>
+
+          {areReviewsLoading ? (
+            <p className="py-6 text-sm text-gray-600">Chargement des avis…</p>
+          ) : !pendingReviews || pendingReviews.length === 0 ? (
+            <p className="py-6 text-sm text-gray-600">Aucun avis en attente de modération.</p>
+          ) : (
+            <div className="divide-y divide-gray-200">
+              {pendingReviews.map(({ review, productName, authorName }) => (
+                <article key={review.id} className="py-6 first:pt-6 last:pb-0">
+                  <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                    <div className="min-w-0">
+                      <p className="text-sm font-medium text-gray-900">{productName} · {review.rating}/5</p>
+                      <p className="mt-1 text-xs font-medium uppercase tracking-[0.14em] text-emerald-700">Achat vérifié · {authorName || "Client"}</p>
+                      {review.title && <h3 className="mt-4 text-base font-medium text-gray-900">{review.title}</h3>}
+                      <p className="mt-2 max-w-2xl text-sm leading-6 text-gray-600">{review.body}</p>
+                    </div>
+                    <div className="flex shrink-0 gap-2">
+                      <Button type="button" size="sm" onClick={() => handleModeration(review.id, "published")} disabled={moderateReview.isPending} className="bg-gray-900 text-white hover:bg-gray-800">Publier</Button>
+                      <Button type="button" size="sm" variant="outline" onClick={() => handleModeration(review.id, "rejected")} disabled={moderateReview.isPending}>Refuser</Button>
+                    </div>
+                  </div>
+                </article>
+              ))}
+            </div>
+          )}
+        </Card>
       </section>
     </DashboardLayout>
   );
