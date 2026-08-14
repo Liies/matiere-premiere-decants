@@ -77,7 +77,8 @@ describe("déclencheurs d’emails de commande", () => {
     expect(mocks.createReservedOrder).toHaveBeenCalledWith(expect.objectContaining({
       userId: customer.id,
       shippingCountry: "France",
-      lines: [{ productId: 1, variantId: 101, quantity: 1, unitPrice: 8500 }],
+      lines: [{ variantId: 101, quantity: 1, unitPrice: 8500 }],
+      requestedTotalAmount: 8500,
     }));
     expect(mocks.sendOrderCreatedEmails).toHaveBeenCalledWith(expect.objectContaining({
       customerEmail: "camille@example.com",
@@ -141,7 +142,7 @@ describe("déclencheurs d’emails de commande", () => {
       totalAmount: 1,
     })).resolves.toMatchObject({ success: true });
     expect(mocks.createReservedOrder).toHaveBeenCalledWith(expect.objectContaining({
-      lines: [{ productId: 1, variantId: 101, quantity: 1, unitPrice: 1 }],
+      lines: [{ variantId: 101, quantity: 1, unitPrice: 1 }],
     }));
 
     mocks.createReservedOrder.mockRejectedValueOnce(new Error("Produit 1 non trouvé"));

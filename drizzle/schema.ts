@@ -116,7 +116,9 @@ export const variants = mysqlTable("variants", {
   sizeMl: int("sizeMl").notNull(),
   sku: varchar("sku", { length: 64 }).notNull(),
   priceCents: int("priceCents").notNull(),
+  stock: int("stock").notNull().default(0),
   isActive: boolean("isActive").default(true).notNull(),
+  sortOrder: int("sortOrder").notNull().default(0),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 }, (table) => [
@@ -190,6 +192,7 @@ export const orderItems = mysqlTable("orderItems", {
   productId: int("productId").notNull().references(() => products.id, { onDelete: "restrict", onUpdate: "cascade" }),
   variantId: int("variantId").references(() => variants.id, { onDelete: "set null", onUpdate: "cascade" }),
   productName: varchar("productName", { length: 255 }).notNull(),
+  sizeMl: int("sizeMl"),
   quantity: int("quantity").notNull(),
   unitPrice: int("unitPrice").notNull(),
   createdAt: timestamp("createdAt").defaultNow().notNull(),

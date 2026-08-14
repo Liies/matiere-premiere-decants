@@ -11,36 +11,10 @@ export type CartQuantityLine = {
   variantId?: number | null;
 };
 
-export function getProductQuantityInCart(lines: readonly CartQuantityLine[], productId: number) {
-  return lines
-    .filter((line) => line.productId === productId)
-    .reduce((total, line) => total + line.quantity, 0);
-}
-
 export function getVariantQuantityInCart(lines: readonly CartQuantityLine[], variantId: number) {
   return lines
     .filter((line) => line.variantId === variantId)
     .reduce((total, line) => total + line.quantity, 0);
-}
-
-/** Retourne le volume total demandé pour un parfum à partir de ses formats présents au panier. */
-export function getProductVolumeInCart(
-  lines: readonly (CartQuantityLine & { id?: number })[],
-  variants: readonly { id: number; productId: number; sizeMl: number }[],
-  productId: number,
-  quantityOverride?: { cartItemId: number; quantity: number },
-) {
-  const variantsById = new Map(variants.map((variant) => [variant.id, variant]));
-  return lines
-    .filter((line) => line.productId === productId && line.variantId)
-    .reduce((total, line) => {
-      const variant = variantsById.get(line.variantId!);
-      if (!variant || variant.productId !== productId) return total;
-      const quantity = quantityOverride && line.id === quantityOverride.cartItemId
-        ? quantityOverride.quantity
-        : line.quantity;
-      return total + variant.sizeMl * quantity;
-    }, 0);
 }
 
 export function hasSufficientStock(availableQuantity: number, requestedQuantity: number) {

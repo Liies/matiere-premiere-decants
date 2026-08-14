@@ -124,7 +124,7 @@ describe("intégration checkout", () => {
     expect(createOrderMutate).toHaveBeenCalledWith(expect.objectContaining({
       customerName: "Camille Martin",
       customerEmail: "camille@example.com",
-      items: [{ productId: 1, variantId: 101, quantity: 2 }],
+      items: [{ variantId: 101, quantity: 2 }],
       totalAmount: 17_000,
     }), expect.any(Object));
     expect(screen.getByText("Commande confirmée !")).toBeTruthy();

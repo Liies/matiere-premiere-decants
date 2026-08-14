@@ -132,7 +132,6 @@ export default function Checkout() {
       return;
     }
     const items = cartItems.map((item) => ({
-      productId: item.productId,
       variantId: item.variantId!,
       quantity: item.quantity,
     }));

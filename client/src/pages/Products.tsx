@@ -16,6 +16,7 @@ import { CART_CONFIRMATION_DURATION_MS, getCartFeedbackKey } from "@shared/cart-
 import { getOlfactoryFilterIdFromHash } from "@shared/catalog-category-route";
 import { useWishlist } from "@/hooks/useWishlist";
 import { formatPrice } from "@shared/price";
+import { getPriceRange } from "@shared/variants";
 
 export default function Products() {
   const { data: products, isLoading } = trpc.products.list.useQuery();
@@ -26,6 +27,7 @@ export default function Products() {
   const [selectedQuantity, setSelectedQuantity] = useState<Record<number, number>>({});
   const [selectedVariantIds, setSelectedVariantIds] = useState<Record<number, number>>({});
   const [selectedFilters, setSelectedFilters] = useState<string[]>([]);
+  const [selectedSizeFilter, setSelectedSizeFilter] = useState<number | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const [activeSuggestionIndex, setActiveSuggestionIndex] = useState(-1);
@@ -45,14 +47,20 @@ export default function Products() {
     () => (products ? filterProductsByNotes<CatalogProduct>(products, selectedFilters) : []),
     [products, selectedFilters],
   );
+  const sizeMatchedProducts = useMemo<CatalogProduct[]>(
+    () => selectedSizeFilter === null
+      ? noteMatchedProducts
+      : noteMatchedProducts.filter((product) => product.variants?.some((variant) => variant.sizeMl === selectedSizeFilter)),
+    [noteMatchedProducts, selectedSizeFilter],
+  );
   const filteredProducts = useMemo<CatalogProduct[]>(
-    () => searchProductsByName(noteMatchedProducts, searchQuery),
-    [noteMatchedProducts, searchQuery],
+    () => searchProductsByName(sizeMatchedProducts, searchQuery),
+    [sizeMatchedProducts, searchQuery],
   );
   const searchSuggestions = useMemo<CatalogProduct[]>(() => {
     if (!searchQuery.trim()) return [];
-    return getCatalogSuggestions(noteMatchedProducts, searchQuery, 6);
-  }, [noteMatchedProducts, searchQuery]);
+    return getCatalogSuggestions(sizeMatchedProducts, searchQuery, 6);
+  }, [sizeMatchedProducts, searchQuery]);
 
   useEffect(() => {
     return () => {
@@ -104,7 +112,7 @@ export default function Products() {
   const getSelectedVariant = (product: CatalogProduct) => {
     const variants = product.variants ?? [];
     return variants.find((variant) => variant.id === selectedVariantIds[product.id])
-      ?? variants.find((variant) => variant.availableQuantity > 0)
+      ?? variants.find((variant) => variant.stock > 0)
       ?? variants[0]
       ?? null;
   };
@@ -168,7 +176,7 @@ export default function Products() {
   const handleAddToCart = (product: CatalogProduct) => {
     const quantity = selectedQuantity[product.id] || 1;
     const variant = getSelectedVariant(product);
-    if (!variant || variant.availableQuantity < quantity) {
+    if (!variant || variant.stock < quantity) {
       toast.error("Le format choisi n’est pas disponible dans cette quantité.");
       return;
     }
@@ -179,7 +187,7 @@ export default function Products() {
 
     if (isAuthenticated && user) {
       addToCart.mutate(
-        { productId: product.id, variantId: variant.id, quantity },
+        { variantId: variant.id, quantity },
         {
           onSuccess: () => {
             handleSuccessfulAddition();
@@ -309,11 +317,14 @@ export default function Products() {
                   Sélectionnez une ou plusieurs familles olfactives pour affiner la collection.
                 </p>
               </div>
-              {selectedFilters.length > 0 && (
+              {(selectedFilters.length > 0 || selectedSizeFilter !== null) && (
                 <Button
                   type="button"
                   variant="ghost"
-                  onClick={() => setSelectedFilters([])}
+                  onClick={() => {
+                    setSelectedFilters([]);
+                    setSelectedSizeFilter(null);
+                  }}
                   className="min-h-11 self-start text-gray-600 hover:text-gray-900 md:self-auto"
                 >
                   <X className="h-4 w-4 mr-2" aria-hidden="true" />
@@ -342,8 +353,30 @@ export default function Products() {
               ))}
             </ToggleGroup>
 
+            <div className="mt-5 border-t border-gray-200 pt-5">
+              <p className="mb-3 text-xs font-medium uppercase tracking-[0.16em] text-gray-600">Contenance</p>
+              <ToggleGroup
+                type="single"
+                value={selectedSizeFilter?.toString() ?? ""}
+                onValueChange={(value) => setSelectedSizeFilter(value ? Number(value) : null)}
+                variant="outline"
+                aria-label="Filtrer les parfums par contenance"
+                className="flex justify-start gap-2"
+              >
+                {[2, 50].map((sizeMl) => (
+                  <ToggleGroupItem
+                    key={sizeMl}
+                    value={String(sizeMl)}
+                    className="min-h-11 rounded-full border-gray-300 bg-white px-4 text-sm font-normal data-[state=on]:border-gray-900 data-[state=on]:bg-gray-900 data-[state=on]:text-white"
+                  >
+                    {sizeMl} ml
+                  </ToggleGroupItem>
+                ))}
+              </ToggleGroup>
+            </div>
+
             <p className="mt-4 text-xs text-gray-500" aria-live="polite">
-              {searchQuery || selectedFilters.length > 0
+              {searchQuery || selectedFilters.length > 0 || selectedSizeFilter !== null
                 ? `${filteredProducts.length} parfum${filteredProducts.length > 1 ? "s" : ""} correspondant${filteredProducts.length > 1 ? "s" : ""}`
                 : `${products?.length ?? 0} parfums affichés`}
             </p>
@@ -367,6 +400,7 @@ export default function Products() {
                 variant="outline"
                 onClick={() => {
                   setSelectedFilters([]);
+                  setSelectedSizeFilter(null);
                   setSearchQuery("");
                 }}
               >
@@ -456,9 +490,14 @@ export default function Products() {
 
                     <div data-testid={`catalog-card-actions-${product.id}`} className="mt-auto flex flex-col gap-3 border-t border-gray-200 pt-4 sm:flex-row sm:items-end sm:justify-between sm:gap-4">
                       <div className="shrink-0">
-                        <p data-testid={`catalog-price-${product.id}`} className="text-2xl font-light text-gray-900">{formatPrice(getSelectedVariant(product)?.priceCents ?? product.price)}</p>
+                        <p data-testid={`catalog-price-${product.id}`} className="text-2xl font-light text-gray-900">
+                          {(() => {
+                            const range = getPriceRange(product.variants ?? []);
+                            return range ? `À partir de ${formatPrice(range.minCents)}` : formatPrice(product.price);
+                          })()}
+                        </p>
                         <p className="text-xs text-gray-500 font-medium">
-                          {getSelectedVariant(product)?.availableQuantity ? "✓ En stock" : "Rupture"}
+                          {getSelectedVariant(product)?.stock ? "✓ En stock" : "Rupture"}
                         </p>
                       </div>
 
@@ -472,7 +511,7 @@ export default function Products() {
                               className="min-h-11 w-full rounded border border-gray-200 bg-white px-2 text-sm text-gray-900 sm:w-36"
                             >
                               {product.variants.map((variant) => (
-                                <option key={variant.id} value={variant.id} disabled={variant.availableQuantity <= 0}>
+                                <option key={variant.id} value={variant.id} disabled={variant.stock <= 0}>
                                   {variant.sizeMl} ml — {formatPrice(variant.priceCents)}
                                 </option>
                               ))}
@@ -487,7 +526,7 @@ export default function Products() {
                           id={`quantity-${product.id}`}
                           type="number"
                           min="1"
-                          max={getSelectedVariant(product)?.availableQuantity ?? 0}
+                          max={getSelectedVariant(product)?.stock ?? 0}
                           value={selectedQuantity[product.id] || 1}
                           onChange={(event) =>
                             setSelectedQuantity((prev) => ({
@@ -496,12 +535,12 @@ export default function Products() {
                             }))
                           }
                           className="h-11 w-14 rounded border border-gray-200 px-2 text-center text-sm"
-                          disabled={!getSelectedVariant(product)?.availableQuantity}
+                          disabled={!getSelectedVariant(product)?.stock}
                         />
                         <Button
                           type="button"
                           onClick={() => handleAddToCart(product)}
-                          disabled={addToCart.isPending || !getSelectedVariant(product)?.availableQuantity}
+                          disabled={addToCart.isPending || !getSelectedVariant(product)?.stock}
                           aria-live="polite"
                           className={`relative min-h-11 min-w-0 flex-1 overflow-hidden bg-gray-900 text-white font-light whitespace-nowrap transition-all duration-500 touch-manipulation hover:-translate-y-0.5 hover:bg-gray-800 hover:shadow-lg lg:w-36 lg:flex-none lg:translate-y-1 lg:opacity-0 lg:group-hover/product-card:translate-y-0 lg:group-hover/product-card:opacity-100 lg:group-focus-within/product-card:translate-y-0 lg:group-focus-within/product-card:opacity-100 motion-reduce:transform-none motion-reduce:transition-none ${
                             isProductRecentlyAdded(product) ? "scale-[0.97] bg-gray-800" : ""

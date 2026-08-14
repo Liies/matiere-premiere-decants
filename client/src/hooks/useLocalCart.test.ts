@@ -2,7 +2,7 @@
 
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { act, renderHook } from "@testing-library/react";
-import { CART_STORAGE_KEY, useLocalCart } from "./useLocalCart";
+import { CART_STORAGE_KEY, CART_STORAGE_VERSION, useLocalCart } from "./useLocalCart";
 
 vi.mock("sonner", () => ({ toast: { success: vi.fn() } }));
 
@@ -85,15 +85,22 @@ describe("useLocalCart", () => {
     expect(result.current.getTotalPrice()).toBe(5_000);
   });
 
-  it("persiste les métadonnées de variante et écarte les lignes historiques non convertibles", () => {
+  it("persiste les métadonnées de variante dans une enveloppe versionnée", () => {
     const { result } = renderHook(() => useLocalCart());
     act(() => result.current.addToCart(vanilla, vanilla2ml, 1));
-    expect(JSON.parse(localStorage.getItem(CART_STORAGE_KEY)!)).toEqual([
-      expect.objectContaining({ productId: 1, variantId: 101, sizeMl: 2, price: 1_000, quantity: 1 }),
-    ]);
+    expect(JSON.parse(localStorage.getItem(CART_STORAGE_KEY)!)).toEqual({
+      version: CART_STORAGE_VERSION,
+      items: [expect.objectContaining({ productId: 1, variantId: 101, sizeMl: 2, price: 1_000, quantity: 1 })],
+    });
+  });
 
+  it("écarte un panier d’ancien format ou illisible sans exposer d’erreur", () => {
     localStorage.setItem(CART_STORAGE_KEY, JSON.stringify([{ productId: 1, quantity: 2, name: "Vanilla Powder", price: 12_000 }]));
     const { result: reloaded } = renderHook(() => useLocalCart());
     expect(reloaded.current.cartItems).toEqual([]);
+
+    localStorage.setItem(CART_STORAGE_KEY, "{invalide");
+    const { result: malformed } = renderHook(() => useLocalCart());
+    expect(malformed.current.cartItems).toEqual([]);
   });
 });

@@ -12,6 +12,35 @@ export interface LocalCartItem {
 
 export const CART_STORAGE_KEY = "matiere-premiere-cart";
 export const CART_SYNC_KEY_STORAGE_KEY = "matiere-premiere-cart-sync-key";
+export const CART_STORAGE_VERSION = 1;
+
+type StoredCart = {
+  version: typeof CART_STORAGE_VERSION;
+  items: LocalCartItem[];
+};
+
+function isValidLocalCartItem(item: unknown): item is LocalCartItem {
+  return typeof item === "object"
+    && item !== null
+    && Number.isInteger((item as LocalCartItem).productId)
+    && Number.isInteger((item as LocalCartItem).variantId)
+    && Number.isInteger((item as LocalCartItem).sizeMl)
+    && Number.isInteger((item as LocalCartItem).quantity)
+    && (item as LocalCartItem).quantity > 0
+    && typeof (item as LocalCartItem).name === "string"
+    && Number.isInteger((item as LocalCartItem).price);
+}
+
+function readStoredCart(value: string | null): LocalCartItem[] {
+  if (!value) return [];
+  const parsed: unknown = JSON.parse(value);
+  if (typeof parsed !== "object" || parsed === null || Array.isArray(parsed)) return [];
+  const stored = parsed as Partial<StoredCart>;
+  if (stored.version !== CART_STORAGE_VERSION || !Array.isArray(stored.items) || !stored.items.every(isValidLocalCartItem)) {
+    return [];
+  }
+  return stored.items;
+}
 
 export function useLocalCart() {
   const [cartItems, setCartItems] = useState<LocalCartItem[]>([]);
@@ -21,23 +50,11 @@ export function useLocalCart() {
   useEffect(() => {
     try {
       const stored = localStorage.getItem(CART_STORAGE_KEY);
-      if (stored) {
-        const parsed: unknown = JSON.parse(stored);
-        const validLines = Array.isArray(parsed)
-          ? parsed.filter((item): item is LocalCartItem => (
-            Number.isInteger(item?.productId)
-            && Number.isInteger(item?.variantId)
-            && Number.isInteger(item?.sizeMl)
-            && Number.isInteger(item?.quantity)
-            && item.quantity > 0
-            && typeof item?.name === "string"
-            && Number.isInteger(item?.price)
-          ))
-          : [];
-        setCartItems(validLines);
-      }
+      const validLines = readStoredCart(stored);
+      setCartItems(validLines);
+      if (stored && validLines.length === 0) localStorage.removeItem(CART_STORAGE_KEY);
     } catch (error) {
-      console.error("Failed to load cart from localStorage:", error);
+      localStorage.removeItem(CART_STORAGE_KEY);
     }
     setIsLoaded(true);
   }, []);
@@ -46,7 +63,8 @@ export function useLocalCart() {
   useEffect(() => {
     if (isLoaded) {
       try {
-        localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(cartItems));
+        const storedCart: StoredCart = { version: CART_STORAGE_VERSION, items: cartItems };
+        localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(storedCart));
       } catch (error) {
         console.error("Failed to save cart to localStorage:", error);
       }

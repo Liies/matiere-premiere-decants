@@ -7,12 +7,8 @@ export type CartVariantQuantity = {
 export type StockedVariant = {
   id: number;
   productId: number;
-  sizeMl: number;
-};
-
-export type AvailableProductVolume = {
-  productId: number;
-  availableMl: number;
+  stock: number;
+  isActive: boolean;
 };
 
 export class CartSyncValidationError extends Error {}
@@ -33,27 +29,24 @@ function toQuantityMap(items: CartVariantQuantity[]) {
 
 /**
  * Fusionne un panier invité avec un panier de compte, sans jamais mélanger deux
- * contenances et en vérifiant le volume total consommé par parfum.
+ * contenances et en vérifiant le stock propre à chaque variante.
  */
 export function buildCartSyncPlan({
   accountItems,
   guestItems,
   variants,
-  productVolumes,
 }: {
   accountItems: CartVariantQuantity[];
   guestItems: CartVariantQuantity[];
   variants: StockedVariant[];
-  productVolumes: AvailableProductVolume[];
 }): CartVariantQuantity[] {
   const lines = toQuantityMap(accountItems);
   const guestLines = toQuantityMap(guestItems);
   const variantsById = new Map(variants.map((variant) => [variant.id, variant]));
-  const availableVolumeByProduct = new Map(productVolumes.map((volume) => [volume.productId, volume.availableMl]));
 
   for (const guestLine of Array.from(guestLines.values())) {
     const variant = variantsById.get(guestLine.variantId);
-    if (!variant || variant.productId !== guestLine.productId) {
+    if (!variant || !variant.isActive || variant.productId !== guestLine.productId) {
       throw new CartSyncValidationError(`Le format du produit ${guestLine.productId} n’existe plus`);
     }
     const accountLine = lines.get(guestLine.variantId);
@@ -64,22 +57,13 @@ export function buildCartSyncPlan({
     });
   }
 
-  const requestedMlByProduct = new Map<number, number>();
   for (const line of Array.from(lines.values())) {
     const variant = variantsById.get(line.variantId);
-    if (!variant || variant.productId !== line.productId) {
+    if (!variant || !variant.isActive || variant.productId !== line.productId) {
       throw new CartSyncValidationError(`Le format du produit ${line.productId} n’existe plus`);
     }
-    requestedMlByProduct.set(line.productId, (requestedMlByProduct.get(line.productId) ?? 0) + variant.sizeMl * line.quantity);
-  }
-
-  for (const [productId, requestedMl] of Array.from(requestedMlByProduct.entries())) {
-    const availableMl = availableVolumeByProduct.get(productId);
-    if (availableMl === undefined) {
-      throw new CartSyncValidationError(`Le stock du produit ${productId} est indisponible`);
-    }
-    if (requestedMl > availableMl) {
-      throw new CartSyncValidationError(`Stock insuffisant pour le produit ${productId}`);
+    if (line.quantity > variant.stock) {
+      throw new CartSyncValidationError(`Stock insuffisant pour le format du produit ${line.productId}`);
     }
   }
 

@@ -22,8 +22,8 @@ vi.mock("@/lib/trpc", () => ({
               price: 19500,
               stock: 5,
               variants: [
-                { id: 101, sizeMl: 2, priceCents: 1000, availableQuantity: 25 },
-                { id: 102, sizeMl: 50, priceCents: 12000, availableQuantity: 1 },
+                { id: 101, productId: 1, sizeMl: 2, sku: "MP-VANPOW-02", priceCents: 1000, stock: 10, isActive: true, sortOrder: 1, createdAt: new Date(), updatedAt: new Date() },
+                { id: 102, productId: 1, sizeMl: 50, sku: "MP-VANPOW-50", priceCents: 12000, stock: 10, isActive: true, sortOrder: 2, createdAt: new Date(), updatedAt: new Date() },
               ],
             },
             {
@@ -36,8 +36,8 @@ vi.mock("@/lib/trpc", () => ({
               price: 19500,
               stock: 5,
               variants: [
-                { id: 201, sizeMl: 2, priceCents: 1000, availableQuantity: 25 },
-                { id: 202, sizeMl: 50, priceCents: 12000, availableQuantity: 1 },
+                { id: 201, productId: 2, sizeMl: 2, sku: "MP-CRYSAF-02", priceCents: 1000, stock: 10, isActive: true, sortOrder: 1, createdAt: new Date(), updatedAt: new Date() },
+                { id: 202, productId: 2, sizeMl: 50, sku: "MP-CRYSAF-50", priceCents: 12000, stock: 10, isActive: true, sortOrder: 2, createdAt: new Date(), updatedAt: new Date() },
               ],
             },
           ],

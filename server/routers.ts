@@ -13,6 +13,7 @@ import {
   getProductByBrandSlug,
   getProductById,
   getProductVariants,
+  getVariantsByProductIds,
   recordSourceBottle,
   updateProductCatalog,
 } from "./db";
@@ -82,11 +83,18 @@ export const appRouter = router({
   products: router({
     list: publicProcedure.query(async () => {
       const catalog = await getCatalogProducts();
-      const catalogWithVariants = await Promise.all(catalog.map(async ({ product, brand }) => ({
+      const allVariants = await getVariantsByProductIds(catalog.map(({ product }) => product.id));
+      const variantsByProductId = new Map<number, typeof allVariants>();
+      allVariants.filter((variant) => variant.isActive).forEach((variant) => {
+        const rows = variantsByProductId.get(variant.productId) ?? [];
+        rows.push(variant);
+        variantsByProductId.set(variant.productId, rows);
+      });
+      const catalogWithVariants = catalog.map(({ product, brand }) => ({
         ...product,
         brand,
-        variants: await getProductVariants(product.id),
-      })));
+        variants: variantsByProductId.get(product.id) ?? [],
+      }));
       return catalogWithVariants.filter((product) => product.variants.length > 0);
     }),
     brands: publicProcedure.query(() => getBrands()),

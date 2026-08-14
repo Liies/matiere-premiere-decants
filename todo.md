@@ -6183,3 +6183,16 @@
 - [x] Couvrir les parcours de variantes, stock et transaction par des tests
 - [x] Valider la migration, TypeScript, le build et les parcours essentiels : 144 tests, vérification TypeScript et build réussis
 - [x] Publier la version et remettre le rapport de fin du ticket
+
+## Ticket 01 — Mise en conformité du cahier des charges détaillé
+- [x] Auditer les écarts fonctionnels, de schéma et de transaction avec la spécification jointe : stock en millilitres/flacons source hors périmètre, variants sans stock/sortOrder, sélecteurs et filtre incomplets
+- [x] Confirmer les contenances, tarifs et stocks unitaires : 2 ml à 10,00 €, 50 ml à 120,00 €, 10 unités de chaque format par parfum
+- [x] Préparer et exécuter une simulation de migration corrective idempotente : 20 variantes à initialiser, 200 unités configurées et 2 lignes historiques à compléter
+- [x] Obtenir la validation explicite avant l’application réelle de la migration corrective
+- [x] Appliquer et contrôler la migration corrective : 10 variantes 2 ml et 10 variantes 50 ml à 10 unités, aucun panier ni historique incomplet
+- [x] Mettre les variantes, le panier et la commande en conformité transactionnelle
+- [x] Mettre l’interface de formats, la fourchette de prix et le filtre de contenance en conformité
+- [x] Écrire les tests de variantes et de concurrence imposés par le cahier des charges
+- [x] Exécuter les validations complètes et le contrôle manuel : 150 tests, TypeScript et build réussis
+- [x] Contrôler visuellement le catalogue et la fiche : 10 parfums, filtres 2 ml/50 ml, prix à partir de 10,00 €, boutons de format et bascule 2 ml/50 ml sans rechargement
+- [ ] Publier la version conforme et remettre le rapport demandé

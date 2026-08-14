@@ -4,9 +4,9 @@ import {
   addCartVariant,
   clearUserCart,
   getCartItems,
-  getProductAvailableMl,
-  getProductById,
+  getCartItemsWithDetails,
   getProductVariants,
+  getVariantById,
   removeCartItem,
   syncGuestCartToUserCart,
   updateCartItemQuantity,
@@ -14,7 +14,6 @@ import {
 import { protectedProcedure, router } from "../_core/trpc";
 import {
   canAddToCart,
-  getProductVolumeInCart,
   getVariantQuantityInCart,
   hasSufficientStock,
 } from "../../shared/cart-domain";
@@ -23,30 +22,23 @@ const CART_ITEM_INPUT = z.object({
   productId: z.number().int().positive(),
   quantity: z.number().int().min(1).max(100),
 });
-const CART_VARIANT_INPUT = CART_ITEM_INPUT.extend({
+const CART_VARIANT_INPUT = z.object({
   variantId: z.number().int().positive(),
+  quantity: z.number().int().min(1).max(100),
+});
+const CART_SYNC_ITEM_INPUT = CART_VARIANT_INPUT.extend({
+  productId: z.number().int().positive(),
 });
 
 export const cartRouter = router({
   getItems: protectedProcedure.query(async ({ ctx }) => {
-    const items = await getCartItems(ctx.user.id);
-
-    return Promise.all(
-      (items || []).map(async (item) => {
-        const product = await getProductById(item.productId);
-        const variant = item.variantId && product
-          ? (await getProductVariants(product.id)).find((candidate) => candidate.id === item.variantId) ?? null
-          : null;
-
-        return { ...item, product, variant };
-      }),
-    );
+    return getCartItemsWithDetails(ctx.user.id);
   }),
 
   syncGuestCart: protectedProcedure
     .input(z.object({
       syncKey: z.string().min(12).max(128),
-      items: z.array(CART_VARIANT_INPUT).min(1).max(100),
+      items: z.array(CART_SYNC_ITEM_INPUT).min(1).max(100),
     }))
     .mutation(({ input, ctx }) => syncGuestCartToUserCart(ctx.user.id, input.syncKey, input.items)),
 
@@ -62,17 +54,17 @@ export const cartRouter = router({
   addVariant: protectedProcedure
     .input(CART_VARIANT_INPUT)
     .mutation(async ({ input, ctx }) => {
-      const variant = (await getProductVariants(input.productId)).find((item) => item.id === input.variantId);
+      const variant = await getVariantById(input.variantId);
       const currentItems = await getCartItems(ctx.user.id);
       const currentQuantity = getVariantQuantityInCart(currentItems || [], input.variantId);
-      const productVariants = await getProductVariants(input.productId);
-      const projectedVolumeMl = getProductVolumeInCart(currentItems || [], productVariants, input.productId) + (variant?.sizeMl ?? 0) * input.quantity;
-      const availableMl = await getProductAvailableMl(input.productId);
-      if (!variant || !canAddToCart(variant.availableQuantity, currentQuantity, input.quantity) || projectedVolumeMl > availableMl) {
+      if (!variant || !variant.isActive) {
+        throw new TRPCError({ code: "NOT_FOUND", message: "Format de décant introuvable" });
+      }
+      if (!canAddToCart(variant.stock, currentQuantity, input.quantity)) {
         throw new TRPCError({ code: "CONFLICT", message: "Stock insuffisant pour ce format" });
       }
 
-      await addCartVariant(ctx.user.id, input.productId, input.variantId, input.quantity);
+      await addCartVariant(ctx.user.id, variant.productId, input.variantId, input.quantity);
       return { success: true } as const;
     }),
 
@@ -81,24 +73,12 @@ export const cartRouter = router({
     .mutation(async ({ input, ctx }) => {
       const items = await getCartItems(ctx.user.id);
       const cartItem = items?.find((item) => item.id === input.cartItemId);
-      if (!cartItem) throw new Error("Article du panier non trouvé");
+      if (!cartItem) throw new TRPCError({ code: "NOT_FOUND", message: "Article du panier non trouvé" });
 
-      if (cartItem.variantId) {
-        const productVariants = await getProductVariants(cartItem.productId);
-        const variant = productVariants.find((candidate) => candidate.id === cartItem.variantId);
-        const projectedVolumeMl = getProductVolumeInCart(items || [], productVariants, cartItem.productId, {
-          cartItemId: cartItem.id,
-          quantity: input.quantity,
-        });
-        const availableMl = await getProductAvailableMl(cartItem.productId);
-        if (!variant || !hasSufficientStock(variant.availableQuantity, input.quantity) || projectedVolumeMl > availableMl) {
-          throw new TRPCError({ code: "CONFLICT", message: "Stock insuffisant pour ce format" });
-        }
-      } else {
-        const product = await getProductById(cartItem.productId);
-        if (!product || !hasSufficientStock(product.stock, input.quantity)) {
-          throw new Error("Stock insuffisant");
-        }
+      const productVariants = await getProductVariants(cartItem.productId);
+      const variant = productVariants.find((candidate) => candidate.id === cartItem.variantId);
+      if (!variant || !hasSufficientStock(variant.stock, input.quantity)) {
+        throw new TRPCError({ code: "CONFLICT", message: "Stock insuffisant pour ce format" });
       }
 
       await updateCartItemQuantity(input.cartItemId, input.quantity);
@@ -110,7 +90,7 @@ export const cartRouter = router({
     .mutation(async ({ input, ctx }) => {
       const items = await getCartItems(ctx.user.id);
       const cartItem = items?.find((item) => item.id === input.cartItemId);
-      if (!cartItem) throw new Error("Article du panier non trouvé");
+      if (!cartItem) throw new TRPCError({ code: "NOT_FOUND", message: "Article du panier non trouvé" });
 
       await removeCartItem(input.cartItemId);
       return { success: true } as const;

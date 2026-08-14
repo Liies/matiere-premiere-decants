@@ -5,6 +5,7 @@ const mocks = vi.hoisted(() => ({
   getBrands: vi.fn(),
   getProductByBrandSlug: vi.fn(),
   getProductVariants: vi.fn(),
+  getVariantsByProductIds: vi.fn(),
 }));
 
 vi.mock("./db", async (importOriginal) => ({
@@ -13,19 +14,32 @@ vi.mock("./db", async (importOriginal) => ({
   getBrands: mocks.getBrands,
   getProductByBrandSlug: mocks.getProductByBrandSlug,
   getProductVariants: mocks.getProductVariants,
+  getVariantsByProductIds: mocks.getVariantsByProductIds,
 }));
 
 import { appRouter } from "./routers";
 
 const publicContext = { user: null, req: {} as any, res: {} as any };
+const catalogVariant = {
+  id: 22,
+  productId: 12,
+  sizeMl: 5,
+  sku: "MFK-OUDSAT-05",
+  priceCents: 1800,
+  stock: 3,
+  isActive: true,
+  sortOrder: 1,
+  createdAt: new Date("2026-01-01"),
+  updatedAt: new Date("2026-01-01"),
+};
 
 describe("endpoints catalogue multi-maisons", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mocks.getProductVariants.mockResolvedValue([{ id: 22, sizeMl: 5, priceCents: 1800, availableQuantity: 3 }]);
+    mocks.getVariantsByProductIds.mockResolvedValue([catalogVariant]);
   });
 
-  it("aplatit le produit et sa maison pour la liste publique", async () => {
+  it("aplatit le produit, sa maison et ses variantes actives pour la liste publique", async () => {
     mocks.getCatalogProducts.mockResolvedValue([{
       product: { id: 12, name: "Oud Satin Mood", slug: "oud-satin-mood" },
       brand: { id: 4, name: "Maison Francis Kurkdjian", slug: "maison-francis-kurkdjian" },
@@ -37,8 +51,9 @@ describe("endpoints catalogue multi-maisons", () => {
       name: "Oud Satin Mood",
       slug: "oud-satin-mood",
       brand: { id: 4, name: "Maison Francis Kurkdjian", slug: "maison-francis-kurkdjian" },
-      variants: [{ id: 22, sizeMl: 5, priceCents: 1800, availableQuantity: 3 }],
+      variants: [catalogVariant],
     }]);
+    expect(mocks.getVariantsByProductIds).toHaveBeenCalledWith([12]);
   });
 
   it("résout une fiche publique via le couple maison/slug", async () => {

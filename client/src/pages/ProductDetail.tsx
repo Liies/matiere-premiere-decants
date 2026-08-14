@@ -12,6 +12,7 @@ import { formatPrice } from '@shared/price';
 import { CART_CONFIRMATION_DURATION_MS, getCartConfirmationLabel } from '@shared/cart-feedback';
 import { getOlfactoryRevealDelay } from '@shared/olfactory-reveal';
 import { getProductStory } from '@shared/product-stories';
+import { computePricePerMlCents, formatSize, getDefaultVariant, isVariantAvailable, sortVariants } from '@shared/variants';
 import { useWishlist } from '@/hooks/useWishlist';
 import { useAuth } from '@/_core/hooks/useAuth';
 
@@ -83,7 +84,7 @@ export default function ProductDetail() {
   const productStory = getProductStory(product?.slug);
   const productVariants = product?.variants ?? [];
   const productBrandName = stableProduct?.brand.name ?? "Collection Matière Première";
-  const selectedVariant = productVariants.find((variant) => variant.id === selectedVariantId) ?? productVariants.find((variant) => variant.availableQuantity > 0) ?? null;
+  const selectedVariant = productVariants.find((variant) => variant.id === selectedVariantId) ?? getDefaultVariant(productVariants) ?? null;
   const isLoading = stableMatch ? isLoadingStable : isLoadingLegacy;
 
   // Get similar products
@@ -137,19 +138,19 @@ export default function ProductDetail() {
     }
     setSelectedVariantId((current) => productVariants.some((variant) => variant.id === current)
       ? current
-      : (productVariants.find((variant) => variant.availableQuantity > 0)?.id ?? productVariants[0].id));
+      : getDefaultVariant(productVariants)?.id ?? null);
   }, [productVariants]);
 
   const handleAddToCart = () => {
     if (!product || isAddingToCart) return;
 
-    if (!selectedVariant || selectedVariant.availableQuantity < quantity) {
+    if (!selectedVariant || !isVariantAvailable(selectedVariant) || selectedVariant.stock < quantity) {
       toast.error("Le format choisi n’est pas disponible dans cette quantité.");
       return;
     }
     if (isAuthenticated) {
       addVariantToCart.mutate(
-        { productId: product.id, variantId: selectedVariant.id, quantity },
+        { variantId: selectedVariant.id, quantity },
         {
           onSuccess: async () => {
             await trpcUtils.cart.getItems.invalidate();
@@ -263,26 +264,38 @@ export default function ProductDetail() {
               ) : (
                 <>
                   <div className="text-3xl font-light text-gray-900">
-                    {productVariants.length ? `À partir de ${formatPrice(Math.min(...productVariants.map((variant) => variant.priceCents)))}` : formatPrice(product.price)}
+                    {selectedVariant ? formatPrice(selectedVariant.priceCents) : formatPrice(product.price)}
                   </div>
-                  <p className="mt-2 text-sm text-gray-500">{productVariants.length ? "Formats disponibles sous réserve du stock réel" : `Décant ${product.volumeMl ?? 50} ml`}</p>
+                  <p className="mt-2 text-sm text-gray-500">{selectedVariant ? `${formatSize(selectedVariant.sizeMl)} sélectionné` : "Formats disponibles sous réserve du stock réel"}</p>
                 </>
               )}
               {productVariants.length > 0 && (
-                <label className="mt-5 block max-w-xs text-sm text-gray-700">
-                  <span className="mb-2 block text-xs uppercase tracking-widest text-gray-500">Format</span>
-                  <select
-                    value={selectedVariantId ?? ""}
-                    onChange={(event) => setSelectedVariantId(Number(event.target.value))}
-                    className="min-h-11 w-full rounded-lg border border-gray-300 bg-white px-3 text-gray-900"
-                  >
-                    {productVariants.map((variant) => (
-                      <option key={variant.id} value={variant.id} disabled={variant.availableQuantity <= 0}>
-                        {variant.sizeMl} ml — {formatPrice(variant.priceCents)}{variant.availableQuantity > 0 ? "" : " — indisponible"}
-                      </option>
-                    ))}
-                  </select>
-                </label>
+                <fieldset className="mt-5 max-w-md">
+                  <legend className="mb-3 text-xs uppercase tracking-widest text-gray-500">Format</legend>
+                  <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                    {sortVariants(productVariants).map((variant) => {
+                      const available = isVariantAvailable(variant);
+                      const selected = selectedVariant?.id === variant.id;
+                      return (
+                        <button
+                          key={variant.id}
+                          type="button"
+                          onClick={() => setSelectedVariantId(variant.id)}
+                          disabled={!available}
+                          aria-pressed={selected}
+                          className={`min-h-20 rounded-lg border p-3 text-left transition-colors ${
+                            selected ? "border-gray-900 bg-gray-900 text-white" : "border-gray-300 bg-white text-gray-900 hover:border-gray-500"
+                          } ${!available ? "cursor-not-allowed opacity-45" : ""}`}
+                        >
+                          <span className="block text-base font-medium">{formatSize(variant.sizeMl)}</span>
+                          <span className={`mt-1 block text-sm ${selected ? "text-gray-200" : "text-gray-600"}`}>{formatPrice(variant.priceCents)}</span>
+                          <span className={`mt-1 block text-xs ${selected ? "text-gray-300" : "text-gray-500"}`}>{formatPrice(computePricePerMlCents(variant))} / ml</span>
+                          {!available && <span className="mt-1 block text-xs font-medium">Épuisé</span>}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </fieldset>
               )}
             </div>
 
@@ -361,8 +374,9 @@ export default function ProductDetail() {
                   <span className="flex h-11 min-w-12 items-center justify-center px-3">{quantity}</span>
                   <button
                     type="button"
-                    onClick={() => setQuantity(quantity + 1)}
+                    onClick={() => setQuantity(Math.min(selectedVariant?.stock ?? quantity, quantity + 1))}
                     aria-label="Augmenter la quantité"
+                    disabled={!selectedVariant || quantity >= selectedVariant.stock}
                     className="flex h-11 w-11 items-center justify-center text-gray-600 transition hover:bg-gray-50"
                   >
                     +
@@ -373,7 +387,7 @@ export default function ProductDetail() {
               <div className="flex flex-col gap-3 sm:flex-row sm:gap-4">
                 <Button
                   onClick={handleAddToCart}
-                  disabled={isAddingToCart || addVariantToCart.isPending || !selectedVariant || selectedVariant.availableQuantity < quantity}
+                  disabled={isAddingToCart || addVariantToCart.isPending || !selectedVariant || !isVariantAvailable(selectedVariant) || selectedVariant.stock < quantity}
                   aria-live="polite"
                   className={`relative min-h-12 w-full flex-1 overflow-hidden rounded-lg bg-gray-900 py-3 text-white transition-all hover:bg-gray-800 hover:shadow-lg sm:w-auto ${
                     isAddingToCart ? "scale-[0.98] bg-gray-800" : ""
@@ -381,7 +395,7 @@ export default function ProductDetail() {
                 >
                   {showAddedFeedback && <span className="cart-added-ripple" aria-hidden="true" />}
                   <ShoppingCart className={`relative z-10 w-5 h-5 ${isAddingToCart ? "cart-icon-bounce" : ""}`} />
-                  <span className="relative z-10">{!selectedVariant || selectedVariant.availableQuantity < quantity ? "Indisponible" : getCartConfirmationLabel(isAddingToCart)}</span>
+                  <span className="relative z-10">{!selectedVariant || !isVariantAvailable(selectedVariant) || selectedVariant.stock < quantity ? "Indisponible" : getCartConfirmationLabel(isAddingToCart)}</span>
                   {showAddedFeedback && <span className="cart-added-check" aria-hidden="true">✓</span>}
                 </Button>
                 <button

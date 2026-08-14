@@ -129,7 +129,7 @@ export default function Account() {
                       <ul className="space-y-1 text-sm">
                         {order.items?.map((item) => (
                           <li key={item.id} className="text-gray-900">
-                            {item.productName} x {item.quantity}
+                            {item.productName}{item.sizeMl ? ` — ${item.sizeMl} ml` : " — format historique"} x {item.quantity}
                           </li>
                         ))}
                       </ul>

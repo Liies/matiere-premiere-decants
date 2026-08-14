@@ -1,11 +1,13 @@
-import { and, asc, eq, gt, gte, sql } from "drizzle-orm";
+import { and, asc, eq, gt, gte, inArray, sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
 import { InsertUser, users, brands, products, cartItems, cartSyncReceipts, orders, orderItems, InsertOrder, InsertOrderItem, sourceBottles, variants, savedDeliveryAddresses } from "../drizzle/schema";
 import { ENV } from './_core/env';
 import { buildCartSyncPlan } from "@shared/cart-sync";
-import { consolidateOrderLines, requiredMilliliters, type RequestedOrderLine } from "@shared/inventory";
+import { consolidateOrderLines, type RequestedOrderLine } from "@shared/inventory";
 
 let _db: ReturnType<typeof drizzle> | null = null;
+type DatabaseClient = NonNullable<Awaited<ReturnType<typeof getDb>>>;
+type DatabaseTransaction = Parameters<Parameters<DatabaseClient["transaction"]>[0]>[0];
 
 // Lazily create the drizzle instance so local tooling can run without a DB.
 export async function getDb() {
@@ -119,12 +121,42 @@ export async function getProductVariants(productId: number) {
   const db = await getDb();
   if (!db) return [];
 
-  const [productVariants, bottles] = await Promise.all([
-    db.select().from(variants).where(and(eq(variants.productId, productId), eq(variants.isActive, true))).orderBy(asc(variants.sizeMl)),
-    db.select({ remainingMl: sourceBottles.remainingMl }).from(sourceBottles).where(and(eq(sourceBottles.productId, productId), gt(sourceBottles.remainingMl, "0"))),
-  ]);
-  const availableMl = bottles.reduce((sum, bottle) => sum + Number(bottle.remainingMl), 0);
-  return productVariants.map((variant) => ({ ...variant, availableQuantity: Math.floor(availableMl / variant.sizeMl) }));
+  const productVariants = await db
+    .select()
+    .from(variants)
+    .where(and(eq(variants.productId, productId), eq(variants.isActive, true)))
+    .orderBy(asc(variants.sortOrder), asc(variants.sizeMl));
+  return productVariants.map((variant) => ({ ...variant, availableQuantity: variant.stock }));
+}
+
+export async function getVariantsByProductIds(productIds: number[]) {
+  const db = await getDb();
+  if (!db || productIds.length === 0) return [];
+  return db
+    .select()
+    .from(variants)
+    .where(inArray(variants.productId, productIds))
+    .orderBy(asc(variants.sortOrder), asc(variants.sizeMl));
+}
+
+export async function getVariantById(id: number) {
+  const db = await getDb();
+  if (!db) return undefined;
+  const rows = await db.select().from(variants).where(eq(variants.id, id)).limit(1);
+  return rows[0];
+}
+
+export async function getVariantsByProductId(productId: number) {
+  return getVariantsByProductIds([productId]);
+}
+
+/** Décrémente le stock si et seulement si toutes les unités demandées sont encore disponibles. */
+export async function decrementVariantStock(tx: DatabaseTransaction, variantId: number, quantity: number) {
+  const updateResult = await tx
+    .update(variants)
+    .set({ stock: sql`${variants.stock} - ${quantity}` })
+    .where(and(eq(variants.id, variantId), gte(variants.stock, quantity)));
+  return Number((updateResult as unknown as [{ affectedRows?: number }])[0]?.affectedRows ?? 0) === 1;
 }
 
 export async function getProductAvailableMl(productId: number) {
@@ -212,6 +244,28 @@ export async function getCartItems(userId: number) {
   return db.select().from(cartItems).where(eq(cartItems.userId, userId));
 }
 
+export async function getCartItemsWithDetails(userId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  const items = await db.select().from(cartItems).where(eq(cartItems.userId, userId));
+  if (items.length === 0) return [];
+
+  const productIds = Array.from(new Set(items.map((item) => item.productId)));
+  const variantIds = Array.from(new Set(items.map((item) => item.variantId)));
+  const [productRows, variantRows] = await Promise.all([
+    db.select().from(products).where(inArray(products.id, productIds)),
+    db.select().from(variants).where(inArray(variants.id, variantIds)),
+  ]);
+  const productsById = new Map(productRows.map((product) => [product.id, product]));
+  const variantsById = new Map(variantRows.map((variant) => [variant.id, { ...variant, availableQuantity: variant.stock }]));
+
+  return items.map((item) => ({
+    ...item,
+    product: productsById.get(item.productId) ?? null,
+    variant: variantsById.get(item.variantId) ?? null,
+  }));
+}
+
 export async function addCartVariant(userId: number, productId: number, variantId: number, quantity: number) {
   const db = await getDb();
   if (!db) return;
@@ -278,21 +332,11 @@ export async function syncGuestCartToUserCart(
     await db.transaction(async (tx) => {
       const accountItems = await tx.select().from(cartItems).where(eq(cartItems.userId, userId));
 
-      const [activeVariants, availableBottles] = await Promise.all([
-        tx.select().from(variants).where(eq(variants.isActive, true)),
-        tx.select({ productId: sourceBottles.productId, remainingMl: sourceBottles.remainingMl })
-          .from(sourceBottles)
-          .where(gt(sourceBottles.remainingMl, "0")),
-      ]);
-      const volumesByProduct = new Map<number, number>();
-      availableBottles.forEach((bottle) => {
-        volumesByProduct.set(bottle.productId, (volumesByProduct.get(bottle.productId) ?? 0) + Number(bottle.remainingMl));
-      });
+      const activeVariants = await tx.select().from(variants).where(eq(variants.isActive, true));
       const plan = buildCartSyncPlan({
         accountItems: accountItems.map(({ productId, variantId, quantity }) => ({ productId, variantId, quantity })),
         guestItems,
         variants: activeVariants,
-        productVolumes: Array.from(volumesByProduct, ([productId, availableMl]) => ({ productId, availableMl })),
       });
       const existingByVariant = new Map<number, typeof accountItems>();
 
@@ -371,8 +415,16 @@ export class InventoryUnavailableError extends Error {
   }
 }
 
+export class OrderTotalMismatchError extends Error {
+  constructor() {
+    super("Le montant de la commande ne correspond plus aux prix en vigueur");
+    this.name = "OrderTotalMismatchError";
+  }
+}
+
 type CreateReservedOrderInput = Omit<InsertOrder, "status" | "totalAmount"> & {
   lines: RequestedOrderLine[];
+  requestedTotalAmount?: number;
 };
 
 export type ReservedOrderResult = {
@@ -383,89 +435,63 @@ export type ReservedOrderResult = {
 };
 
 /**
- * La commande, ses lignes et la décrémentation du stock sont réalisées dans une seule
- * transaction. Un format de décant consomme des millilitres de flacons source ; la voie
- * produit est conservée le temps de migrer les paniers historiques.
+ * La commande, ses lignes et la décrémentation du stock de variante sont réalisées dans
+ * une seule transaction. Les variantes sont verrouillées avant contrôle afin qu’un seul
+ * client puisse obtenir la dernière unité disponible.
  */
 export async function createReservedOrder(input: CreateReservedOrderInput): Promise<ReservedOrderResult> {
   const db = await getDb();
   if (!db) throw new Error("La création de commande est temporairement indisponible");
 
-  const { lines: rawLines, ...orderValues } = input;
+  const { lines: rawLines, requestedTotalAmount, ...orderValues } = input;
   const lines = consolidateOrderLines(rawLines);
   if (lines.length === 0) throw new InventoryUnavailableError("Aucun article dans la commande");
 
   return db.transaction(async (tx) => {
     let totalAmount = 0;
+    const variantIds = lines.map((line) => line.variantId);
+    const lockedVariants = await tx
+      .select()
+      .from(variants)
+      .where(inArray(variants.id, variantIds))
+      .for("update");
+    const variantsById = new Map(lockedVariants.map((variant) => [variant.id, variant]));
+    const productIds = Array.from(new Set(lockedVariants.map((variant) => variant.productId)));
+    const lockedProducts = productIds.length > 0
+      ? await tx.select().from(products).where(inArray(products.id, productIds)).for("update")
+      : [];
+    const productsById = new Map(lockedProducts.map((product) => [product.id, product]));
+
     const orderItemsToInsert: Array<{
       productId: number;
-      variantId?: number;
+      variantId: number;
       productName: string;
+      sizeMl: number;
       quantity: number;
       unitPrice: number;
     }> = [];
 
     for (const line of lines) {
-      if (line.variantId) {
-        const variantRows = await tx.select().from(variants).where(eq(variants.id, line.variantId)).limit(1);
-        const variant = variantRows[0];
-        if (!variant || !variant.isActive || variant.productId !== line.productId) {
-          throw new InventoryUnavailableError("Format de décant indisponible");
-        }
-
-        const productRows = await tx.select().from(products).where(eq(products.id, variant.productId)).limit(1);
-        const product = productRows[0];
-        if (!product || product.status !== "available") {
-          throw new InventoryUnavailableError("Parfum indisponible");
-        }
-
-        let remainingToReserve = requiredMilliliters(variant.sizeMl, line.quantity);
-        const bottles = await tx
-          .select()
-          .from(sourceBottles)
-          .where(and(eq(sourceBottles.productId, product.id), gt(sourceBottles.remainingMl, "0")))
-          .orderBy(asc(sourceBottles.purchasedAt));
-        const totalAvailableMl = bottles.reduce((sum, bottle) => sum + Number(bottle.remainingMl), 0);
-        if (totalAvailableMl < remainingToReserve) {
-          throw new InventoryUnavailableError(`Stock insuffisant pour ${product.name}`);
-        }
-
-        for (const bottle of bottles) {
-          if (remainingToReserve <= 0) break;
-          const volumeToReserve = Math.min(Number(bottle.remainingMl), remainingToReserve);
-          const updateResult = await tx
-            .update(sourceBottles)
-            .set({ remainingMl: sql`${sourceBottles.remainingMl} - ${volumeToReserve}` })
-            .where(and(eq(sourceBottles.id, bottle.id), gte(sourceBottles.remainingMl, String(volumeToReserve))));
-          const affectedRows = Number((updateResult as unknown as [{ affectedRows?: number }])[0]?.affectedRows ?? 0);
-          if (affectedRows !== 1) {
-            throw new InventoryUnavailableError(`Stock insuffisant pour ${product.name}`);
-          }
-          remainingToReserve -= volumeToReserve;
-        }
-
-        totalAmount += variant.priceCents * line.quantity;
-        orderItemsToInsert.push({ productId: product.id, variantId: variant.id, productName: product.name, quantity: line.quantity, unitPrice: variant.priceCents });
-        continue;
+      const variant = variantsById.get(line.variantId);
+      const product = variant ? productsById.get(variant.productId) : undefined;
+      if (!variant || !variant.isActive) {
+        throw new InventoryUnavailableError("Format de décant indisponible");
       }
-
-      const productRows = await tx.select().from(products).where(eq(products.id, line.productId)).limit(1);
-      const product = productRows[0];
       if (!product || product.status !== "available") {
         throw new InventoryUnavailableError("Parfum indisponible");
       }
 
-      const updateResult = await tx
-        .update(products)
-        .set({ stock: sql`${products.stock} - ${line.quantity}` })
-        .where(and(eq(products.id, product.id), gte(products.stock, line.quantity)));
-      const affectedRows = Number((updateResult as unknown as [{ affectedRows?: number }])[0]?.affectedRows ?? 0);
-      if (affectedRows !== 1) {
-        throw new InventoryUnavailableError(`Stock insuffisant pour ${product.name}`);
+      const decremented = await decrementVariantStock(tx, variant.id, line.quantity);
+      if (!decremented) {
+        throw new InventoryUnavailableError(`Stock insuffisant pour ${product.name} en ${variant.sizeMl} ml`);
       }
 
-      totalAmount += product.price * line.quantity;
-      orderItemsToInsert.push({ productId: product.id, productName: product.name, quantity: line.quantity, unitPrice: product.price });
+      totalAmount += variant.priceCents * line.quantity;
+      orderItemsToInsert.push({ productId: product.id, variantId: variant.id, productName: product.name, sizeMl: variant.sizeMl, quantity: line.quantity, unitPrice: variant.priceCents });
+    }
+
+    if (requestedTotalAmount !== undefined && requestedTotalAmount !== totalAmount) {
+      throw new OrderTotalMismatchError();
     }
 
     const orderResult = await tx.insert(orders).values({ ...orderValues, status: "awaiting_payment", totalAmount });
@@ -529,4 +555,10 @@ export async function getOrderItems(orderId: number) {
   const db = await getDb();
   if (!db) return [];
   return db.select().from(orderItems).where(eq(orderItems.orderId, orderId));
+}
+
+export async function getOrderItemsByOrderIds(orderIds: number[]) {
+  const db = await getDb();
+  if (!db || orderIds.length === 0) return [];
+  return db.select().from(orderItems).where(inArray(orderItems.orderId, orderIds));
 }

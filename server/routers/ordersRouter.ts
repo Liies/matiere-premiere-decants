@@ -8,8 +8,10 @@ import {
   getAllOrders,
   getOrderById,
   getOrderItems,
+  getOrderItemsByOrderIds,
   getUserOrders,
   InventoryUnavailableError,
+  OrderTotalMismatchError,
   updateOrderStatus,
 } from "../db";
 import { sendOrderCreatedEmails, sendOrderStatusEmail } from "../transactionalEmail";
@@ -25,7 +27,6 @@ const ORDER_INPUT = z.object({
   shippingPostalCode: z.string().min(1),
   shippingCountry: z.string().trim().min(1).max(120),
   items: z.array(z.object({
-    productId: z.number(),
     quantity: z.number().min(1),
     unitPrice: z.number().min(0).optional(),
     variantId: z.number().int().positive(),
@@ -34,7 +35,14 @@ const ORDER_INPUT = z.object({
 });
 
 async function getOrdersWithItems(orders: Awaited<ReturnType<typeof getUserOrders>>) {
-  return Promise.all((orders || []).map(async (order) => ({ ...order, items: await getOrderItems(order.id) })));
+  const orderItems = await getOrderItemsByOrderIds((orders || []).map((order) => order.id));
+  const itemsByOrderId = new Map<number, typeof orderItems>();
+  orderItems.forEach((item) => {
+    const rows = itemsByOrderId.get(item.orderId) ?? [];
+    rows.push(item);
+    itemsByOrderId.set(item.orderId, rows);
+  });
+  return (orders || []).map((order) => ({ ...order, items: itemsByOrderId.get(order.id) ?? [] }));
 }
 
 export const ordersRouter = router({
@@ -63,10 +71,14 @@ export const ordersRouter = router({
         shippingPostalCode: input.shippingPostalCode,
         shippingCountry: input.shippingCountry,
         lines: input.items,
+        requestedTotalAmount: input.totalAmount,
       });
     } catch (error) {
       if (error instanceof InventoryUnavailableError) {
         throw new TRPCError({ code: "CONFLICT", message: error.message });
+      }
+      if (error instanceof OrderTotalMismatchError) {
+        throw new TRPCError({ code: "BAD_REQUEST", message: error.message });
       }
       throw error;
     }
@@ -102,9 +114,11 @@ export const ordersRouter = router({
 
   getById: protectedProcedure
     .input(z.object({ orderId: z.number().int().positive() }))
-    .query(async ({ input, ctx }) => {
+      .query(async ({ input, ctx }) => {
       const order = await getOrderById(input.orderId);
-      if (!order || order.userId !== ctx.user.id) throw new Error("Commande non trouvée");
+      if (!order || order.userId !== ctx.user.id) {
+        throw new TRPCError({ code: "NOT_FOUND", message: "Commande non trouvée" });
+      }
       return { ...order, items: await getOrderItems(order.id) };
     }),
 
@@ -118,7 +132,7 @@ export const ordersRouter = router({
     .mutation(async ({ input, ctx }) => {
       requireAdmin(ctx.user);
       const order = await getOrderById(input.orderId);
-      if (!order) throw new Error("Commande non trouvée");
+      if (!order) throw new TRPCError({ code: "NOT_FOUND", message: "Commande non trouvée" });
 
       await updateOrderStatus(input.orderId, input.status);
 
