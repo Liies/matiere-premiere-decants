@@ -6195,4 +6195,4 @@
 - [x] Écrire les tests de variantes et de concurrence imposés par le cahier des charges
 - [x] Exécuter les validations complètes et le contrôle manuel : 150 tests, TypeScript et build réussis
 - [x] Contrôler visuellement le catalogue et la fiche : 10 parfums, filtres 2 ml/50 ml, prix à partir de 10,00 €, boutons de format et bascule 2 ml/50 ml sans rechargement
-- [ ] Publier la version conforme et remettre le rapport demandé
+- [x] Publier la version conforme et remettre le rapport demandé
