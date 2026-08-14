@@ -17,7 +17,7 @@ const catalog = [{
   imageUrl: null,
   price: 12000,
   brand: { slug: "matiere-premiere" },
-  variants: [{ id: 10, sizeMl: 2, priceCents: 1000, stock: 8 }],
+  variants: [{ id: 10, sizeMl: 50, priceCents: 12000, stock: 8 }],
 }];
 
 vi.mock("@/lib/trpc", () => ({
@@ -31,7 +31,7 @@ vi.mock("@/lib/trpc", () => ({
             state.mutationInput = input;
             options.onSuccess({
               reply: "Je vous propose une piste chaleureuse.",
-              recommendations: [{ productSlug: "vanilla-powder", reason: "Une matière enveloppante.", suggestedSizeMl: 2 }],
+              recommendations: [{ productSlug: "vanilla-powder", reason: "Une matière enveloppante.", suggestedSizeMl: 50 }],
             });
           },
         }),
@@ -67,7 +67,7 @@ describe("intégration conseiller olfactif", () => {
     expect(state.mutationInput?.messages[0]?.content).toBe("Une vanille pas trop sucrée");
     expect(screen.getByText("Vanilla Powder")).toBeTruthy();
     expect(screen.getByText("Une matière enveloppante.")).toBeTruthy();
-    expect(screen.getByText("Décant 2 ml · 10,00 €")).toBeTruthy();
+    expect(screen.getByText("Décant 50 ml · 120,00 €")).toBeTruthy();
 
     fireEvent.click(screen.getByRole("button", { name: "Ajouter" }));
     expect(state.addToCart).toHaveBeenCalledWith(catalog[0], catalog[0].variants[0], 1);

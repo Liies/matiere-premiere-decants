@@ -6284,3 +6284,7 @@
 ## Avis clients — Non-régression administration
 - [x] Couvrir l’état de modération sans avis à traiter
 - [x] Exécuter les tests ciblés et la suite complète
+
+## Cohérence 50 ml — Audit final
+- [x] Auditer les vues publiques pour détecter toute mention résiduelle du format 2 ml
+- [x] Corriger et valider toute incohérence publique identifiée
