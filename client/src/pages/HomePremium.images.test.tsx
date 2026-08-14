@@ -64,10 +64,10 @@ describe("accueil premium — visuels et quiz", () => {
     );
   });
 
-  it("annonce les formats 2 ml et 50 ml dans la promesse de collection", () => {
+  it("annonce le format 50 ml dans la promesse de collection", () => {
     render(<HomePremium />);
 
-    expect(screen.getAllByText(/décants 2 ml et 50 ml/i)).toHaveLength(2);
+    expect(screen.getAllByText(/décants 50 ml/i)).toHaveLength(2);
   });
 
   it("ouvre le quiz de recommandation depuis le CTA Commencer l’Exploration", async () => {

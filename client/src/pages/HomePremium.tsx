@@ -126,7 +126,7 @@ export default function HomePremium() {
 
           <div className="hero-copy-reveal pt-3 sm:pt-4" style={{ animationDelay: "420ms" }}>
             <p className="mx-auto mb-6 max-w-2xl text-sm font-light leading-7 text-gray-600 sm:text-base">
-              Découvrez une collection exclusive de décants 2 ml et 50 ml, où chaque fragrance célèbre la pureté d'une seule matière première.
+              Découvrez une collection exclusive de décants 50 ml, où chaque fragrance célèbre la pureté d'une seule matière première.
             </p>
             <Button
               type="button"
@@ -239,7 +239,7 @@ export default function HomePremium() {
                 Chaque ingrédient est soigneusement sélectionné auprès des meilleures sources mondiales. De la vanille de Madagascar au safran de Grasse, nous ne travaillons qu'avec les matières premières les plus pures et les plus rares.
               </p>
               <p className="text-lg text-gray-600 font-light leading-relaxed">
-                C'est cette obsession pour la qualité qui fait la différence. Du format découverte 2 ml au 50 ml, chaque décant est une promesse de pureté absolue.
+                C'est cette obsession pour la qualité qui fait la différence. Chaque décant 50 ml est une promesse de pureté absolue.
               </p>
             </div>
           </div>
@@ -381,7 +381,7 @@ export default function HomePremium() {
             10 Fragrances Exceptionnelles
           </h2>
           <p className="mx-auto mb-10 max-w-2xl text-base font-light leading-7 text-gray-600 sm:mb-12 sm:text-xl">
-            Chaque parfum Matière Première est une célébration de pureté. Découvrez notre sélection complète de décants 2 ml et 50 ml, chacun racontant l'histoire d'une matière première unique.
+            Chaque parfum Matière Première est une célébration de pureté. Découvrez notre sélection complète de décants 50 ml, chacun racontant l'histoire d'une matière première unique.
           </p>
 
           <Link href="/products">

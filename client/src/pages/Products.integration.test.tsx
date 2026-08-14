@@ -1,7 +1,7 @@
 /** @vitest-environment jsdom */
 
 import React from "react";
-import { act, cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { act, cleanup, fireEvent, render, screen, within } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import Products from "./Products";
 import { WISHLIST_STORAGE_KEY } from "@shared/wishlist";
@@ -22,7 +22,7 @@ vi.mock("@/lib/trpc", () => ({
               price: 19500,
               stock: 5,
               variants: [
-                { id: 101, productId: 1, sizeMl: 2, sku: "MP-VANPOW-02", priceCents: 1000, stock: 10, isActive: true, sortOrder: 1, createdAt: new Date(), updatedAt: new Date() },
+                { id: 101, productId: 1, sizeMl: 2, sku: "MP-VANPOW-02", priceCents: 1000, stock: 10, isActive: false, sortOrder: 1, createdAt: new Date(), updatedAt: new Date() },
                 { id: 102, productId: 1, sizeMl: 50, sku: "MP-VANPOW-50", priceCents: 12000, stock: 10, isActive: true, sortOrder: 2, createdAt: new Date(), updatedAt: new Date() },
               ],
             },
@@ -36,7 +36,7 @@ vi.mock("@/lib/trpc", () => ({
               price: 19500,
               stock: 5,
               variants: [
-                { id: 201, productId: 2, sizeMl: 2, sku: "MP-CRYSAF-02", priceCents: 1000, stock: 10, isActive: true, sortOrder: 1, createdAt: new Date(), updatedAt: new Date() },
+                { id: 201, productId: 2, sizeMl: 2, sku: "MP-CRYSAF-02", priceCents: 1000, stock: 10, isActive: false, sortOrder: 1, createdAt: new Date(), updatedAt: new Date() },
                 { id: 202, productId: 2, sizeMl: 50, sku: "MP-CRYSAF-50", priceCents: 12000, stock: 10, isActive: true, sortOrder: 2, createdAt: new Date(), updatedAt: new Date() },
               ],
             },
@@ -151,8 +151,8 @@ describe("intégration catalogue — panier et souhaits", () => {
     render(<Products />);
 
     const vanillaPrice = screen.getByTestId("catalog-price-1");
-    expect(vanillaPrice.textContent).toContain("10,00");
-    expect(vanillaPrice.textContent?.indexOf("€")).toBeGreaterThan(vanillaPrice.textContent?.indexOf("10,00") ?? -1);
+    expect(vanillaPrice.textContent).toContain("120,00");
+    expect(vanillaPrice.textContent?.indexOf("€")).toBeGreaterThan(vanillaPrice.textContent?.indexOf("120,00") ?? -1);
 
     expect(screen.getByTestId("catalog-card-body-1").className).toContain("h-full");
     expect(screen.getByTestId("catalog-card-actions-1").className).toContain("mt-auto");
@@ -168,6 +168,14 @@ describe("intégration catalogue — panier et souhaits", () => {
     expect(actions.className).toContain("sm:items-end");
     expect(quantity.className).toContain("h-11");
     expect(addButton.className).toContain("min-h-11");
+  });
+
+  it("n’expose que le filtre de contenance 50 ml", () => {
+    render(<Products />);
+
+    const sizeFilters = screen.getByLabelText("Filtrer les parfums par contenance");
+    expect(within(sizeFilters).getByText("50 ml")).toBeTruthy();
+    expect(within(sizeFilters).queryByText("2 ml")).toBeNull();
   });
 
   it("filtre en temps réel, propose une suggestion, puis restaure la collection après une recherche vide", () => {

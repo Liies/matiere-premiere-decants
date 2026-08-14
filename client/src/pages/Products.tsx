@@ -212,7 +212,7 @@ export default function Products() {
           <div className="mb-10">
             <p className="text-xs uppercase tracking-[0.25em] text-gray-500 mb-3">La collection</p>
             <h2 className="text-3xl font-light text-gray-900 mb-2 sm:text-4xl">Catalogue Complet</h2>
-            <p className="max-w-xl text-sm leading-6 text-gray-600 sm:text-base">Découvrez nos parfums de niche en décants 2 ml et 50 ml.</p>
+            <p className="max-w-xl text-sm leading-6 text-gray-600 sm:text-base">Découvrez nos parfums de niche en décants 50 ml.</p>
           </div>
 
           <section aria-labelledby="catalog-search-title" className="mb-6 animate-slide-up">
@@ -374,7 +374,7 @@ export default function Products() {
                 aria-label="Filtrer les parfums par contenance"
                 className="flex justify-start gap-2"
               >
-                {[2, 50].map((sizeMl) => (
+                {[50].map((sizeMl) => (
                   <ToggleGroupItem
                     key={sizeMl}
                     value={String(sizeMl)}
@@ -483,7 +483,7 @@ export default function Products() {
                       </div>
                       <a href={productPath(product)} className="mt-5 block" aria-label={`Voir la fiche de ${product.name}`}>
                         <h3 className="text-lg font-light text-gray-900 hover:text-gray-600 transition-colors">{product.name}</h3>
-                        <p className="text-xs text-gray-500 font-medium mt-1">Décants 2 ml et 50 ml</p>
+                        <p className="text-xs text-gray-500 font-medium mt-1">Décant 50 ml</p>
                       </a>
                     </div>
 

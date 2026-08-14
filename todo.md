@@ -6265,3 +6265,10 @@
 - [x] Ajouter une section de confiance transparente pour les futurs avis clients réels
 - [x] Ajouter les tests de régression de la fiche produit
 - [x] Valider TypeScript, tests et build de production
+
+## Cohérence publique — Format 50 ml uniquement
+- [x] Retirer le filtre 2 ml du catalogue public
+- [x] Corriger les libellés et sous-titres du catalogue vers le seul format 50 ml
+- [x] Corriger les mentions 2 ml des pages d’accueil et éditoriales
+- [x] Adapter les tests de contenu au format 50 ml uniquement
+- [x] Valider TypeScript, tests et build de production

@@ -20,7 +20,7 @@ export default function FAQ() {
     {
       question: "Qu'est-ce qu'un décant ?",
       answer:
-        "Un décant est une portion de parfum présentée dans un flacon dédié. Nous proposons un format 2 ml pour découvrir une fragrance et un format 50 ml pour en profiter plus longtemps.",
+        "Un décant est une portion de parfum présentée dans un flacon dédié. Nous proposons actuellement un format 50 ml pour profiter durablement de chaque fragrance.",
     },
     {
       question: "Quelle est la différence entre une Eau de Parfum et une Eau de Toilette ?",
@@ -35,7 +35,7 @@ export default function FAQ() {
     {
       question: "Quels formats de décant sont disponibles ?",
       answer:
-        "Le format 2 ml est idéal pour explorer une création avant de s’engager, tandis que le format 50 ml convient à un usage régulier. La durée exacte dépend du nombre de pulvérisations et de vos habitudes.",
+        "Le format 50 ml convient à un usage régulier. Sa durée dépend du nombre de pulvérisations et de vos habitudes.",
     },
     {
       question: "Livrez-vous en dehors de l'Europe ?",

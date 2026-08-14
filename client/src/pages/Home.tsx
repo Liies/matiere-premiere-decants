@@ -27,7 +27,7 @@ export default function Home() {
               Décants de Luxe
             </h2>
             <p className="text-xl text-gray-600 font-light">
-              Explorez notre collection exclusive de parfums Matière Première en décants 2 ml et 50 ml.
+              Explorez notre collection exclusive de parfums Matière Première en décants 50 ml.
               Chaque fragrance célèbre la pureté d'une seule matière première.
             </p>
           </div>
@@ -54,8 +54,8 @@ export default function Home() {
               <p className="text-gray-900 font-light">Pureté et authenticité</p>
             </div>
             <div className="space-y-2">
-              <p className="text-sm uppercase tracking-widest text-gray-600">Décants 2 ml &amp; 50 ml</p>
-              <p className="text-gray-900 font-light">Découverte ou format signature</p>
+              <p className="text-sm uppercase tracking-widest text-gray-600">Décants 50 ml</p>
+              <p className="text-gray-900 font-light">Le format signature</p>
             </div>
             <div className="space-y-2">
               <p className="text-sm uppercase tracking-widest text-gray-600">Livraison</p>
@@ -145,7 +145,7 @@ export default function Home() {
               </div>
               <h4 className="text-xl font-light text-gray-900">Format Voyage</h4>
               <p className="text-gray-600 font-light">
-                Un format 2 ml pour découvrir, ou 50 ml pour profiter durablement de vos fragrances préférées.
+                Le format 50 ml pour profiter durablement de vos fragrances préférées.
               </p>
             </div>
 
