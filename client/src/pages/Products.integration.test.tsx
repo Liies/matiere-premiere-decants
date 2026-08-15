@@ -76,6 +76,7 @@ describe("intégration catalogue — panier et souhaits", () => {
 
   beforeEach(() => {
     window.localStorage.clear();
+    window.history.replaceState({}, "", "/products");
   });
 
   it("affiche la confirmation sur la carte achetable et remplace les contrôles de la carte en rupture", () => {
@@ -207,6 +208,17 @@ describe("intégration catalogue — panier et souhaits", () => {
     expect((search as HTMLInputElement).value).toBe("");
     expect(screen.getByText("2 parfums affichés")).toBeTruthy();
     expect(screen.getByText("Vanilla Powder")).toBeTruthy();
+  });
+
+  it("ouvre une suggestion avec la navigation applicative sans rechargement complet", () => {
+    render(<Products />);
+
+    const search = screen.getByRole("combobox", { name: "Rechercher un parfum par son nom" });
+    fireEvent.focus(search);
+    fireEvent.change(search, { target: { value: "Crystal" } });
+    fireEvent.click(screen.getByRole("option", { name: /Crystal Saffron/ }));
+
+    expect(window.location.pathname).toBe("/product/2");
   });
 
   it("attend 1,2 seconde de survol et annule le retournement si la souris quitte la carte", () => {

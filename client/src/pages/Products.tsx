@@ -16,9 +16,11 @@ import { CART_CONFIRMATION_DURATION_MS, getCartFeedbackKey } from "@shared/cart-
 import { getOlfactoryFilterIdFromHash } from "@shared/catalog-category-route";
 import { useWishlist } from "@/hooks/useWishlist";
 import { formatPrice } from "@shared/price";
+import { useLocation } from "wouter";
 
 export default function Products() {
   const { data: products, isLoading } = trpc.products.list.useQuery();
+  const [, setLocation] = useLocation();
   const { isAuthenticated, user } = useAuth();
   const { addToCart: addToLocalCart } = useLocalCart();
   const { isWishlisted, toggleWishlist } = useWishlist();
@@ -144,7 +146,7 @@ export default function Products() {
     setSearchQuery(product.name);
     setIsSearchFocused(false);
     setActiveSuggestionIndex(-1);
-    window.location.assign(productPath(product));
+    setLocation(productPath(product));
   };
 
   const handleSearchKeyDown = (event: ReactKeyboardEvent<HTMLInputElement>) => {

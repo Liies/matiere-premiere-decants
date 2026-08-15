@@ -6356,3 +6356,8 @@
 - [x] Retirer les libellés suggérant un prix de départ
 - [x] Afficher le prix public unique de 120 € sur les cartes
 - [x] Adapter les tests et valider le build
+
+## Catalogue — Navigation depuis la recherche
+- [x] Remplacer le rechargement complet après sélection de suggestion
+- [x] Préserver la fermeture de la recherche et l’accessibilité clavier
+- [x] Ajouter les tests de régression et valider le build
