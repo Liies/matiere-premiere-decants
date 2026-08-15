@@ -159,14 +159,18 @@ describe("intégration catalogue — panier et souhaits", () => {
     expect(screen.getByTestId("catalog-card-actions-1").className).toContain("mt-auto");
   });
 
-  it("conserve des contrôles d’achat tactiles et séparés du contenu descriptif", () => {
+  it("conserve des contrôles d’achat tactiles et compacts pour le format public unique", () => {
     render(<Products />);
 
+    const grid = screen.getByTestId("catalog-products-grid");
     const actions = screen.getByTestId("catalog-card-actions-1");
     const quantity = screen.getByLabelText("Quantité de Vanilla Powder");
     const addButton = screen.getAllByRole("button", { name: "Ajouter" })[0]!;
 
+    expect(grid.className).toContain("grid-cols-1");
+    expect(grid.className).toContain("md:grid-cols-2");
     expect(actions.className).toContain("sm:items-end");
+    expect(screen.queryByLabelText("Format de Vanilla Powder")).toBeNull();
     expect(quantity.className).toContain("h-11");
     expect(addButton.className).toContain("min-h-11");
   });

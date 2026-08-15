@@ -6361,3 +6361,8 @@
 - [x] Remplacer le rechargement complet après sélection de suggestion
 - [x] Préserver la fermeture de la recherche et l’accessibilité clavier
 - [x] Ajouter les tests de régression et valider le build
+
+## Catalogue — Expérience mobile
+- [x] Auditer les dimensions, espacements et zones tactiles des cartes sous 640 px
+- [x] Ajuster la disposition mobile sans dégrader le rendu bureau
+- [x] Couvrir le comportement mobile et valider la publication

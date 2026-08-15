@@ -26,7 +26,6 @@ export default function Products() {
   const { isWishlisted, toggleWishlist } = useWishlist();
   const addToCart = trpc.cart.addVariant.useMutation();
   const [selectedQuantity, setSelectedQuantity] = useState<Record<number, number>>({});
-  const [selectedVariantIds, setSelectedVariantIds] = useState<Record<number, number>>({});
   const [selectedFilters, setSelectedFilters] = useState<string[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [isSearchFocused, setIsSearchFocused] = useState(false);
@@ -109,8 +108,7 @@ export default function Products() {
 
   const getSelectedVariant = (product: CatalogProduct) => {
     const variants = getPublicVariants(product);
-    return variants.find((variant: { id: number; sizeMl: number; priceCents: number; stock: number }) => variant.id === selectedVariantIds[product.id])
-      ?? variants.find((variant: { id: number; sizeMl: number; priceCents: number; stock: number }) => variant.stock > 0)
+    return variants.find((variant: { stock: number }) => variant.stock > 0)
       ?? variants[0]
       ?? null;
   };
@@ -393,7 +391,7 @@ export default function Products() {
               </Button>
             </div>
           ) : (
-            <div className="grid grid-cols-1 gap-5 sm:gap-8 md:grid-cols-2 lg:grid-cols-3">
+            <div data-testid="catalog-products-grid" className="grid grid-cols-1 gap-5 sm:gap-8 md:grid-cols-2 lg:grid-cols-3">
               {filteredProducts.map((product, index) => (
                 <Card
                   key={getCartFeedbackKey(product)}
@@ -485,20 +483,6 @@ export default function Products() {
 
                       {isProductAvailable(product) ? (
                         <div className="flex w-full min-w-0 flex-col gap-2 sm:w-auto sm:items-end">
-                          <label className="w-full text-xs text-gray-600 sm:w-auto">
-                            <span className="sr-only">Format de {product.name}</span>
-                            <select
-                              value={getSelectedVariant(product)?.id ?? ""}
-                              onChange={(event) => setSelectedVariantIds((current) => ({ ...current, [product.id]: Number(event.target.value) }))}
-                              className="min-h-11 w-full rounded border border-gray-200 bg-white px-2 text-sm text-gray-900 sm:w-36"
-                            >
-                              {getPublicVariants(product).map((variant: { id: number; sizeMl: number; priceCents: number; stock: number }) => (
-                                <option key={variant.id} value={variant.id} disabled={variant.stock <= 0}>
-                                  {variant.sizeMl} ml — {formatPrice(variant.priceCents)}
-                                </option>
-                              ))}
-                            </select>
-                          </label>
                           <div className="flex w-full min-w-0 items-center gap-2 sm:justify-end">
                             <label htmlFor={`quantity-${product.id}`} className="sr-only">Quantité de {product.name}</label>
                             <input
