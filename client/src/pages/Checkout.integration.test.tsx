@@ -113,6 +113,8 @@ describe("intégration checkout", () => {
       success: true,
       orderNumber: "MP-TEST-CHECKOUT",
       orderId: 88,
+      totalAmount: 17_495,
+      shippingCost: 495,
     }));
     saveDeliveryAddressMutate.mockImplementation((_input, callbacks) => callbacks.onSuccess());
   });
@@ -137,6 +139,8 @@ describe("intégration checkout", () => {
     }), expect.any(Object));
     expect(screen.getByText("Commande confirmée !")).toBeTruthy();
     expect(screen.getByText("MP-TEST-CHECKOUT")).toBeTruthy();
+    expect(screen.getByText("Total de la commande")).toBeTruthy();
+    expect(screen.getAllByText(/174,95\s*€/).length).toBeGreaterThan(0);
   });
 
   it("affiche les frais de livraison et le total final avant la confirmation", () => {

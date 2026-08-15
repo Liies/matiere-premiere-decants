@@ -109,7 +109,13 @@ export const ordersRouter = router({
       console.error("Erreur lors de la préparation des emails de commande:", error);
     }
 
-    return { success: true as const, orderNumber, orderId: result.orderId };
+    return {
+      success: true as const,
+      orderNumber,
+      orderId: result.orderId,
+      totalAmount: result.totalAmount,
+      shippingCost: result.shippingCost,
+    };
   }),
 
   getMyOrders: protectedProcedure.query(async ({ ctx }) => getOrdersWithItems(await getUserOrders(ctx.user.id))),

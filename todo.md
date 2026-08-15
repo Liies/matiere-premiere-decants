@@ -6300,3 +6300,8 @@
 - [x] Ajouter les tests de régression et valider le build
 - [x] Enregistrer les frais de livraison calculés avec chaque commande
 - [x] Vérifier côté serveur le total final incluant les frais de livraison
+
+## Checkout — Confirmation de commande
+- [x] Renvoyer le total final et les frais de livraison après création
+- [x] Afficher le récapitulatif financier sur l’écran de confirmation
+- [x] Ajouter les tests de régression et valider le build

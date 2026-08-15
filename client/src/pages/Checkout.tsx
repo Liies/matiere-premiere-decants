@@ -37,7 +37,7 @@ export default function Checkout() {
     (sum, item) => sum + (item.variant?.priceCents ?? item.product?.price ?? 0) * item.quantity,
     0,
   );
-  const [orderCreated, setOrderCreated] = useState<{ orderNumber: string; orderId: number } | null>(null);
+  const [orderCreated, setOrderCreated] = useState<{ orderNumber: string; orderId: number; totalAmount: number; shippingCost: number } | null>(null);
   const [saveAddressForLater, setSaveAddressForLater] = useState(false);
 
   const {
@@ -116,6 +116,16 @@ export default function Checkout() {
             <p className="text-gray-600 mb-6">
               Un email de confirmation a été envoyé à votre adresse.
             </p>
+            <div className="mb-6 rounded-xl border border-stone-200 bg-stone-50 px-5 py-4 text-left" aria-label="Récapitulatif de la commande">
+              <div className="flex justify-between text-sm text-gray-600">
+                <span>Livraison</span>
+                <span>{orderCreated.shippingCost === 0 ? "Offerte" : formatPrice(orderCreated.shippingCost)}</span>
+              </div>
+              <div className="mt-3 flex justify-between border-t border-stone-200 pt-3 text-base text-gray-900">
+                <span className="font-medium">Total de la commande</span>
+                <span className="font-medium">{formatPrice(orderCreated.totalAmount)}</span>
+              </div>
+            </div>
             <Link href="/account">
               <Button className="bg-gray-900 hover:bg-gray-800 text-white">
                 Voir mes commandes
@@ -153,6 +163,8 @@ export default function Checkout() {
           setOrderCreated({
             orderNumber: result.orderNumber,
             orderId: result.orderId,
+            totalAmount: result.totalAmount,
+            shippingCost: result.shippingCost,
           });
           toast.success("Commande créée avec succès !");
         },
