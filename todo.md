@@ -6351,3 +6351,8 @@
 - [x] Auditer les imports de routes et les morceaux de build initiaux
 - [x] Charger les pages secondaires de manière différée avec un état de transition
 - [x] Mesurer le build, exécuter les tests et publier l’optimisation
+
+## Catalogue — Prix unique 50 ml
+- [x] Retirer les libellés suggérant un prix de départ
+- [x] Afficher le prix public unique de 120 € sur les cartes
+- [x] Adapter les tests et valider le build

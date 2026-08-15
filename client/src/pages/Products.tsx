@@ -16,7 +16,6 @@ import { CART_CONFIRMATION_DURATION_MS, getCartFeedbackKey } from "@shared/cart-
 import { getOlfactoryFilterIdFromHash } from "@shared/catalog-category-route";
 import { useWishlist } from "@/hooks/useWishlist";
 import { formatPrice } from "@shared/price";
-import { getPriceRange } from "@shared/variants";
 
 export default function Products() {
   const { data: products, isLoading } = trpc.products.list.useQuery();
@@ -475,10 +474,7 @@ export default function Products() {
                     <div data-testid={`catalog-card-actions-${product.id}`} className="mt-auto flex flex-col gap-3 border-t border-gray-200 pt-4 sm:flex-row sm:items-end sm:justify-between sm:gap-4">
                       <div className="shrink-0">
                         <p data-testid={`catalog-price-${product.id}`} className="text-2xl font-light text-gray-900">
-                          {(() => {
-                            const range = getPriceRange(getPublicVariants(product));
-                            return range ? `À partir de ${formatPrice(range.minCents)}` : formatPrice(product.price);
-                          })()}
+                          {formatPrice(getSelectedVariant(product)?.priceCents ?? product.price)}
                         </p>
                         <p className="text-xs text-gray-500 font-medium">
                           {isProductAvailable(product) ? "✓ En stock" : "Rupture"}

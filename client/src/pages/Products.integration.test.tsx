@@ -146,12 +146,13 @@ describe("intégration catalogue — panier et souhaits", () => {
     expect(screen.getByRole("button", { name: "Masquer les notes" }).getAttribute("aria-expanded")).toBe("true");
   });
 
-  it("affiche le prix avec le symbole euro après le montant et réserve une zone d’action distincte", () => {
+  it("affiche le prix unique du décant 50 ml avec le symbole euro après le montant", () => {
     render(<Products />);
 
     const vanillaPrice = screen.getByTestId("catalog-price-1");
     expect(vanillaPrice.textContent).toContain("120,00");
     expect(vanillaPrice.textContent?.indexOf("€")).toBeGreaterThan(vanillaPrice.textContent?.indexOf("120,00") ?? -1);
+    expect(vanillaPrice.textContent).not.toContain("À partir de");
 
     expect(screen.getByTestId("catalog-card-body-1").className).toContain("h-full");
     expect(screen.getByTestId("catalog-card-actions-1").className).toContain("mt-auto");
