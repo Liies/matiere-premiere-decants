@@ -27,7 +27,6 @@ export default function Products() {
   const [selectedQuantity, setSelectedQuantity] = useState<Record<number, number>>({});
   const [selectedVariantIds, setSelectedVariantIds] = useState<Record<number, number>>({});
   const [selectedFilters, setSelectedFilters] = useState<string[]>([]);
-  const [selectedSizeFilter, setSelectedSizeFilter] = useState<number | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const [activeSuggestionIndex, setActiveSuggestionIndex] = useState(-1);
@@ -47,20 +46,14 @@ export default function Products() {
     () => (products ? filterProductsByNotes<CatalogProduct>(products, selectedFilters) : []),
     [products, selectedFilters],
   );
-  const sizeMatchedProducts = useMemo<CatalogProduct[]>(
-    () => selectedSizeFilter === null
-      ? noteMatchedProducts
-      : noteMatchedProducts.filter((product) => product.variants?.some((variant: { sizeMl: number }) => variant.sizeMl === selectedSizeFilter)),
-    [noteMatchedProducts, selectedSizeFilter],
-  );
   const filteredProducts = useMemo<CatalogProduct[]>(
-    () => searchProductsByName(sizeMatchedProducts, searchQuery),
-    [sizeMatchedProducts, searchQuery],
+    () => searchProductsByName(noteMatchedProducts, searchQuery),
+    [noteMatchedProducts, searchQuery],
   );
   const searchSuggestions = useMemo<CatalogProduct[]>(() => {
     if (!searchQuery.trim()) return [];
-    return getCatalogSuggestions(sizeMatchedProducts, searchQuery, 6);
-  }, [sizeMatchedProducts, searchQuery]);
+    return getCatalogSuggestions(noteMatchedProducts, searchQuery, 6);
+  }, [noteMatchedProducts, searchQuery]);
 
   useEffect(() => {
     return () => {
@@ -109,8 +102,11 @@ export default function Products() {
   const isProductRecentlyAdded = (product: CatalogProduct) =>
     recentlyAddedProductKeys.has(getCartFeedbackKey(product));
 
+  const getPublicVariants = (product: CatalogProduct) =>
+    (product.variants ?? []).filter((variant: { isActive?: boolean }) => variant.isActive !== false);
+
   const getSelectedVariant = (product: CatalogProduct) => {
-    const variants = product.variants ?? [];
+    const variants = getPublicVariants(product);
     return variants.find((variant: { id: number; sizeMl: number; priceCents: number; stock: number }) => variant.id === selectedVariantIds[product.id])
       ?? variants.find((variant: { id: number; sizeMl: number; priceCents: number; stock: number }) => variant.stock > 0)
       ?? variants[0]
@@ -328,13 +324,12 @@ export default function Products() {
                   Sélectionnez une ou plusieurs familles olfactives pour affiner la collection.
                 </p>
               </div>
-              {(selectedFilters.length > 0 || selectedSizeFilter !== null) && (
+              {selectedFilters.length > 0 && (
                 <Button
                   type="button"
                   variant="ghost"
                   onClick={() => {
                     setSelectedFilters([]);
-                    setSelectedSizeFilter(null);
                   }}
                   className="min-h-11 self-start text-gray-600 hover:text-gray-900 md:self-auto"
                 >
@@ -364,30 +359,8 @@ export default function Products() {
               ))}
             </ToggleGroup>
 
-            <div className="mt-5 border-t border-gray-200 pt-5">
-              <p className="mb-3 text-xs font-medium uppercase tracking-[0.16em] text-gray-600">Contenance</p>
-              <ToggleGroup
-                type="single"
-                value={selectedSizeFilter?.toString() ?? ""}
-                onValueChange={(value) => setSelectedSizeFilter(value ? Number(value) : null)}
-                variant="outline"
-                aria-label="Filtrer les parfums par contenance"
-                className="flex justify-start gap-2"
-              >
-                {[50].map((sizeMl) => (
-                  <ToggleGroupItem
-                    key={sizeMl}
-                    value={String(sizeMl)}
-                    className="min-h-11 rounded-full border-gray-300 bg-white px-4 text-sm font-normal data-[state=on]:border-gray-900 data-[state=on]:bg-gray-900 data-[state=on]:text-white"
-                  >
-                    {sizeMl} ml
-                  </ToggleGroupItem>
-                ))}
-              </ToggleGroup>
-            </div>
-
             <p className="mt-4 text-xs text-gray-500" aria-live="polite">
-              {searchQuery || selectedFilters.length > 0 || selectedSizeFilter !== null
+              {searchQuery || selectedFilters.length > 0
                 ? `${filteredProducts.length} parfum${filteredProducts.length > 1 ? "s" : ""} correspondant${filteredProducts.length > 1 ? "s" : ""}`
                 : `${products?.length ?? 0} parfums affichés`}
             </p>
@@ -411,7 +384,6 @@ export default function Products() {
                 variant="outline"
                 onClick={() => {
                   setSelectedFilters([]);
-                  setSelectedSizeFilter(null);
                   setSearchQuery("");
                 }}
               >
@@ -503,7 +475,7 @@ export default function Products() {
                       <div className="shrink-0">
                         <p data-testid={`catalog-price-${product.id}`} className="text-2xl font-light text-gray-900">
                           {(() => {
-                            const range = getPriceRange(product.variants ?? []);
+                            const range = getPriceRange(getPublicVariants(product));
                             return range ? `À partir de ${formatPrice(range.minCents)}` : formatPrice(product.price);
                           })()}
                         </p>
@@ -513,7 +485,7 @@ export default function Products() {
                       </div>
 
                       <div className="flex w-full min-w-0 flex-col gap-2 sm:w-auto sm:items-end">
-                        {(product.variants?.length ?? 0) > 0 && (
+                        {getPublicVariants(product).length > 0 && (
                           <label className="w-full text-xs text-gray-600 sm:w-auto">
                             <span className="sr-only">Format de {product.name}</span>
                             <select
@@ -521,7 +493,7 @@ export default function Products() {
                               onChange={(event) => setSelectedVariantIds((current) => ({ ...current, [product.id]: Number(event.target.value) }))}
                               className="min-h-11 w-full rounded border border-gray-200 bg-white px-2 text-sm text-gray-900 sm:w-36"
                             >
-                              {product.variants.map((variant: { id: number; sizeMl: number; priceCents: number; stock: number }) => (
+                              {getPublicVariants(product).map((variant: { id: number; sizeMl: number; priceCents: number; stock: number }) => (
                                 <option key={variant.id} value={variant.id} disabled={variant.stock <= 0}>
                                   {variant.sizeMl} ml — {formatPrice(variant.priceCents)}
                                 </option>

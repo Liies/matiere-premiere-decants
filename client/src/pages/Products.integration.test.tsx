@@ -170,12 +170,13 @@ describe("intégration catalogue — panier et souhaits", () => {
     expect(addButton.className).toContain("min-h-11");
   });
 
-  it("n’expose que le filtre de contenance 50 ml", () => {
+  it("allège les filtres puisque le catalogue public est exclusivement proposé en 50 ml", () => {
     render(<Products />);
 
-    const sizeFilters = screen.getByLabelText("Filtrer les parfums par contenance");
-    expect(within(sizeFilters).getByText("50 ml")).toBeTruthy();
-    expect(within(sizeFilters).queryByText("2 ml")).toBeNull();
+    expect(screen.queryByLabelText("Filtrer les parfums par contenance")).toBeNull();
+    expect(screen.queryByText("Contenance")).toBeNull();
+    expect(screen.getAllByText("Décant 50 ml")).toHaveLength(2);
+    expect(screen.queryByRole("option", { name: /2 ml/ })).toBeNull();
   });
 
   it("filtre en temps réel, propose une suggestion, puis restaure la collection après une recherche vide", () => {

@@ -6330,3 +6330,8 @@
 - [x] Bloquer toute réapparition des suggestions après sélection
 - [x] Réautoriser la recherche uniquement lors d’une nouvelle frappe manuelle
 - [x] Ajouter un test de régression asynchrone et valider le build
+
+## Catalogue — Audit et amélioration de l’expérience
+- [x] Auditer la recherche, les filtres, les cartes et les états du catalogue
+- [x] Intégrer les améliorations de découverte prioritaires
+- [x] Ajouter les tests de régression et valider le build
