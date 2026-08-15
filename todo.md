@@ -6371,3 +6371,8 @@
 - [x] Auditer la hiérarchie de contenu et les états d’achat de la fiche
 - [x] Clarifier les informations utiles avant l’ajout au panier
 - [x] Ajouter une protection de régression et valider la publication
+
+## Accueil — Découverte de la collection
+- [x] Auditer les repères et appels à l’action de l’accueil
+- [x] Rendre les prochaines étapes de découverte plus explicites
+- [x] Couvrir la navigation et valider la publication

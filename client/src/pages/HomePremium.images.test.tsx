@@ -70,6 +70,16 @@ describe("accueil premium — visuels et quiz", () => {
     expect(screen.getAllByText(/décants 50 ml/i)).toHaveLength(2);
   });
 
+  it("donne les repères d’offre et un accès direct à la collection depuis le hero", () => {
+    render(<HomePremium />);
+
+    const reassurance = screen.getByTestId("home-offer-reassurance");
+    expect(reassurance.textContent).toContain("Décant 50 ml");
+    expect(reassurance.textContent).toContain("120,00 €");
+    expect(reassurance.textContent).toContain("France & Europe");
+    expect(screen.getByRole("link", { name: "Voir les 10 parfums" }).getAttribute("href")).toBe("/products");
+  });
+
   it("ouvre le quiz de recommandation depuis le CTA Commencer l’Exploration", async () => {
     render(<HomePremium />);
 

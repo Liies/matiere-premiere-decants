@@ -136,6 +136,15 @@ export default function HomePremium() {
               Explorer la Collection
               <ArrowRight className="w-4 h-4" />
             </Button>
+            <div data-testid="home-offer-reassurance" className="mx-auto mt-5 grid max-w-xl grid-cols-1 divide-y divide-gray-200/80 rounded-2xl border border-white/80 bg-white/55 text-left shadow-sm backdrop-blur-sm sm:grid-cols-3 sm:divide-x sm:divide-y-0">
+              <p className="px-4 py-3 text-xs leading-5 text-gray-600"><span className="block font-medium uppercase tracking-[0.14em] text-gray-900">Format unique</span>Décant 50 ml</p>
+              <p className="px-4 py-3 text-xs leading-5 text-gray-600"><span className="block font-medium uppercase tracking-[0.14em] text-gray-900">Prix unique</span>120,00 €</p>
+              <p className="px-4 py-3 text-xs leading-5 text-gray-600"><span className="block font-medium uppercase tracking-[0.14em] text-gray-900">Expédition</span>France & Europe</p>
+            </div>
+            <Link href="/products" className="mt-5 inline-flex min-h-11 items-center gap-2 text-sm font-medium text-gray-800 underline decoration-gray-300 underline-offset-4 transition-colors hover:text-gray-500">
+              Voir les 10 parfums
+              <ArrowRight className="h-4 w-4" aria-hidden="true" />
+            </Link>
           </div>
           <div className="hero-copy-reveal mx-auto w-full max-w-[16rem] pt-0 sm:max-w-[22rem]" style={{ animationDelay: "560ms" }}>
             <div className="relative overflow-hidden rounded-[1.5rem] border border-white/70 bg-white/25 p-2 shadow-[0_20px_60px_rgba(104,80,54,0.12)] backdrop-blur-sm">
