@@ -24,6 +24,7 @@ const FAQ = lazy(() => import("./pages/FAQ"));
 const Contact = lazy(() => import("./pages/Contact"));
 const Terms = lazy(() => import("./pages/Terms"));
 const Privacy = lazy(() => import("./pages/Privacy"));
+const DeliveryReturns = lazy(() => import("./pages/DeliveryReturns"));
 const ProductDetail = lazy(() => import("./pages/ProductDetail"));
 const Wishlist = lazy(() => import("./pages/Wishlist"));
 const Advisor = lazy(() => import("./pages/Advisor"));
@@ -111,6 +112,7 @@ function RouteTransitionSwitch() {
       <Route path={"/about"} component={About} />
       <Route path={"/faq"} component={FAQ} />
       <Route path={"/contact"} component={Contact} />
+      <Route path={"/livraison-retours"} component={DeliveryReturns} />
       <Route path={"/terms"} component={Terms} />
       <Route path={"/privacy"} component={Privacy} />
       <Route path={"/wishlist"} component={Wishlist} />

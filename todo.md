@@ -6381,3 +6381,8 @@
 - [x] Auditer les états connectés, déconnectés et sans commande
 - [x] Clarifier les repères de suivi et les prochaines actions
 - [x] Couvrir la régression et valider la publication
+
+## Livraison et retours
+- [x] Vérifier les règles tarifaires et les liens de navigation existants
+- [x] Créer la page publique de livraison et retours
+- [x] Ajouter la route, les liens et les tests de régression

@@ -33,6 +33,11 @@ export default function Footer() {
                   Contact
                 </Link>
               </li>
+              <li>
+                <Link href="/livraison-retours" className="hover:text-gray-900 transition">
+                  Livraison et retours
+                </Link>
+              </li>
             </ul>
           </div>
           <div>
