@@ -35,6 +35,7 @@ export default function AddressAutocomplete({
   const containerRef = useRef<HTMLDivElement>(null);
   const selectionInProgressRef = useRef(false);
   const suppressNextSearchRef = useRef(false);
+  const suggestionRequestIdRef = useRef(0);
   const [suggestions, setSuggestions] = useState<AddressSuggestion[]>([]);
   const [isListOpen, setIsListOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -64,10 +65,10 @@ export default function AddressAutocomplete({
 
   useEffect(() => {
     const query = value.trim();
+    const requestId = ++suggestionRequestIdRef.current;
     if (suppressNextSearchRef.current) {
       suppressNextSearchRef.current = false;
-      setSuggestions([]);
-      setIsListOpen(false);
+      return;
       return;
     }
     if (!isPlacesReady || !autocompleteService.current || query.length < 3) {
@@ -82,6 +83,7 @@ export default function AddressAutocomplete({
       autocompleteService.current?.getPlacePredictions(
         { input: query, types: ["address"] },
         (predictions, status) => {
+          if (requestId !== suggestionRequestIdRef.current || selectionInProgressRef.current) return;
           if (status !== window.google?.maps.places.PlacesServiceStatus.OK || !predictions) {
             setSuggestions([]);
             setIsListOpen(false);
@@ -108,6 +110,7 @@ export default function AddressAutocomplete({
     if (!placesService.current || selectionInProgressRef.current) return;
     selectionInProgressRef.current = true;
     suppressNextSearchRef.current = true;
+    suggestionRequestIdRef.current += 1;
     setIsSelecting(true);
     setIsLoading(true);
     setSuggestions([]);
@@ -136,6 +139,7 @@ export default function AddressAutocomplete({
     window.setTimeout(() => {
       if (selectionInProgressRef.current) return;
       if (containerRef.current?.contains(document.activeElement)) return;
+      suggestionRequestIdRef.current += 1;
       setSuggestions([]);
       setIsListOpen(false);
     }, 0);
@@ -171,8 +175,14 @@ export default function AddressAutocomplete({
                 type="button"
                 role="option"
                 aria-selected="false"
-                onMouseDown={(event) => event.preventDefault()}
-                onClick={() => selectSuggestion(suggestion)}
+                onPointerDown={(event) => {
+                  event.preventDefault();
+                  selectSuggestion(suggestion);
+                }}
+                onClick={(event) => {
+                  event.preventDefault();
+                  selectSuggestion(suggestion);
+                }}
                 onKeyDown={(event) => {
                   if (event.key === "Enter" || event.key === " ") {
                     event.preventDefault();

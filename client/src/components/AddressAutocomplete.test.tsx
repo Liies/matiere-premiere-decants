@@ -95,7 +95,8 @@ describe("AddressAutocomplete", () => {
 
     const input = screen.getByLabelText("Adresse");
     const suggestion = await screen.findByRole("option", { name: /27 Rue du Maroc/ });
-    fireEvent.mouseDown(suggestion);
+    fireEvent.pointerDown(suggestion);
+    expect(screen.queryByRole("option", { name: /27 Rue du Maroc/ })).toBeNull();
     fireEvent.blur(input);
     fireEvent.click(suggestion);
 

@@ -6310,3 +6310,8 @@
 - [x] Fermer les suggestions immédiatement après sélection d’une adresse
 - [x] Préserver le remplissage automatique des champs de livraison
 - [x] Ajouter un test de régression et valider le build
+
+## Correctif checkout — Sélection réelle d’adresse
+- [x] Reproduire le comportement réel où la liste persiste après sélection
+- [x] Fermer la liste de manière déterministe dès le pointerdown
+- [x] Tester le scénario réel, valider et publier le correctif
