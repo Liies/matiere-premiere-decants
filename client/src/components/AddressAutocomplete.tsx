@@ -33,6 +33,7 @@ export default function AddressAutocomplete({
   const autocompleteService = useRef<google.maps.places.AutocompleteService | null>(null);
   const placesService = useRef<google.maps.places.PlacesService | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const addressInputRef = useRef<HTMLInputElement | null>(null);
   const selectionInProgressRef = useRef(false);
   const suppressNextSearchRef = useRef(false);
   const suggestionRequestIdRef = useRef(0);
@@ -68,7 +69,6 @@ export default function AddressAutocomplete({
     const requestId = ++suggestionRequestIdRef.current;
     if (suppressNextSearchRef.current) {
       suppressNextSearchRef.current = false;
-      return;
       return;
     }
     if (!isPlacesReady || !autocompleteService.current || query.length < 3) {
@@ -106,6 +106,15 @@ export default function AddressAutocomplete({
     };
   }, [isPlacesReady, isSelecting, value]);
 
+  const assignInputRef = (node: HTMLInputElement | null) => {
+    addressInputRef.current = node;
+    if (typeof inputRef === "function") {
+      inputRef(node);
+    } else if (inputRef) {
+      (inputRef as { current: HTMLInputElement | null }).current = node;
+    }
+  };
+
   const selectSuggestion = (suggestion: AddressSuggestion) => {
     if (!placesService.current || selectionInProgressRef.current) return;
     selectionInProgressRef.current = true;
@@ -115,6 +124,7 @@ export default function AddressAutocomplete({
     setIsLoading(true);
     setSuggestions([]);
     setIsListOpen(false);
+    addressInputRef.current?.blur();
     onValueChange(suggestion.primaryText);
 
     placesService.current.getDetails(
@@ -152,7 +162,7 @@ export default function AddressAutocomplete({
       <div className="relative">
         <input
           id="shippingAddress"
-          ref={inputRef}
+          ref={assignInputRef}
           name="shippingAddress"
           value={value}
           onChange={(event) => onValueChange(event.target.value)}

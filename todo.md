@@ -6315,3 +6315,8 @@
 - [x] Reproduire le comportement réel où la liste persiste après sélection
 - [x] Fermer la liste de manière déterministe dès le pointerdown
 - [x] Tester le scénario réel, valider et publier le correctif
+
+## Correctif checkout — Focus après sélection d’adresse
+- [x] Retirer le curseur du champ d’adresse après sélection
+- [x] Empêcher toute réouverture des suggestions sans nouvelle saisie
+- [x] Ajouter un test de régression et valider le build
