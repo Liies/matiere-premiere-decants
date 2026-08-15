@@ -6325,3 +6325,8 @@
 - [x] Reproduire le curseur persistant après sélection dans le checkout réel
 - [x] Transférer le focus vers un point neutre après la sélection
 - [x] Tester en conditions réelles, valider et publier le correctif
+
+## Correctif checkout — Verrouillage des suggestions après sélection
+- [x] Bloquer toute réapparition des suggestions après sélection
+- [x] Réautoriser la recherche uniquement lors d’une nouvelle frappe manuelle
+- [x] Ajouter un test de régression asynchrone et valider le build

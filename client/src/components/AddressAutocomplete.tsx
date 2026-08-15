@@ -35,6 +35,7 @@ export default function AddressAutocomplete({
   const containerRef = useRef<HTMLDivElement>(null);
   const addressInputRef = useRef<HTMLInputElement | null>(null);
   const selectionInProgressRef = useRef(false);
+  const selectionLockedRef = useRef(false);
   const suppressNextSearchRef = useRef(false);
   const suggestionRequestIdRef = useRef(0);
   const [suggestions, setSuggestions] = useState<AddressSuggestion[]>([]);
@@ -67,6 +68,12 @@ export default function AddressAutocomplete({
   useEffect(() => {
     const query = value.trim();
     const requestId = ++suggestionRequestIdRef.current;
+    if (selectionLockedRef.current) {
+      setSuggestions([]);
+      setIsListOpen(false);
+      setIsLoading(false);
+      return;
+    }
     if (suppressNextSearchRef.current) {
       suppressNextSearchRef.current = false;
       return;
@@ -118,6 +125,7 @@ export default function AddressAutocomplete({
   const selectSuggestion = (suggestion: AddressSuggestion) => {
     if (!placesService.current || selectionInProgressRef.current) return;
     selectionInProgressRef.current = true;
+    selectionLockedRef.current = true;
     suppressNextSearchRef.current = true;
     suggestionRequestIdRef.current += 1;
     setIsSelecting(true);
@@ -165,7 +173,10 @@ export default function AddressAutocomplete({
           ref={assignInputRef}
           name="shippingAddress"
           value={value}
-          onChange={(event) => onValueChange(event.target.value)}
+          onChange={(event) => {
+            selectionLockedRef.current = false;
+            onValueChange(event.target.value);
+          }}
           onBlur={handleBlur}
           type="text"
           autoComplete="street-address"

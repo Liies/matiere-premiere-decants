@@ -124,6 +124,8 @@ describe("AddressAutocomplete", () => {
       postalCode: "75019",
       country: "France",
     }));
+    await new Promise((resolve) => window.setTimeout(resolve, 220));
+    expect(screen.queryByRole("option", { name: /27 Rue du Maroc/ })).toBeNull();
   });
 
   it("ferme les suggestions après un clic extérieur sans sélection", async () => {
