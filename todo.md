@@ -6391,3 +6391,7 @@
 - [x] Vérifier les divergences de navigation et de pied de page
 - [x] Réutiliser le composant Footer commun
 - [x] Valider la régression et publier l’harmonisation
+
+## Routage — Alias du catalogue
+- [x] Rediriger /catalogue vers la route publique /products
+- [x] Couvrir la redirection sans rechargement et valider la publication

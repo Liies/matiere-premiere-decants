@@ -2,7 +2,7 @@ import { type ReactNode, lazy, Suspense, useCallback, useEffect, useState } from
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import NotFound from "@/pages/NotFound";
-import { Route, Switch, useLocation } from "wouter";
+import { Redirect, Route, Switch, useLocation } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import InitialLoader from "./components/InitialLoader";
@@ -103,6 +103,7 @@ function RouteTransitionSwitch() {
       <Switch>
       <Route path={"/"} component={HomePremium} />
       <Route path={"/home-classic"} component={Home} />
+      <Route path={"/catalogue"}><Redirect to="/products" /></Route>
       <Route path={"/products"} component={Products} />
       <Route path={"/cart"} component={Cart} />
       <Route path={"/checkout"} component={Checkout} />
