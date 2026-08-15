@@ -27,7 +27,6 @@ export default function Products() {
   const [selectedQuantity, setSelectedQuantity] = useState<Record<number, number>>({});
   const [selectedVariantIds, setSelectedVariantIds] = useState<Record<number, number>>({});
   const [selectedFilters, setSelectedFilters] = useState<string[]>([]);
-  const [showOnlyAvailable, setShowOnlyAvailable] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const [activeSuggestionIndex, setActiveSuggestionIndex] = useState(-1);
@@ -52,17 +51,13 @@ export default function Products() {
     [products, selectedFilters],
   );
   const filteredProducts = useMemo<CatalogProduct[]>(
-    () => searchProductsByName(
-      showOnlyAvailable ? noteMatchedProducts.filter(isProductAvailable) : noteMatchedProducts,
-      searchQuery,
-    ),
-    [noteMatchedProducts, searchQuery, showOnlyAvailable],
+    () => searchProductsByName(noteMatchedProducts, searchQuery),
+    [noteMatchedProducts, searchQuery],
   );
   const searchSuggestions = useMemo<CatalogProduct[]>(() => {
     if (!searchQuery.trim()) return [];
-    const searchableProducts = showOnlyAvailable ? noteMatchedProducts.filter(isProductAvailable) : noteMatchedProducts;
-    return getCatalogSuggestions(searchableProducts, searchQuery, 6);
-  }, [noteMatchedProducts, searchQuery, showOnlyAvailable]);
+    return getCatalogSuggestions(noteMatchedProducts, searchQuery, 6);
+  }, [noteMatchedProducts, searchQuery]);
 
   useEffect(() => {
     return () => {
@@ -330,13 +325,12 @@ export default function Products() {
                   Sélectionnez une ou plusieurs familles olfactives pour affiner la collection.
                 </p>
               </div>
-              {(selectedFilters.length > 0 || showOnlyAvailable) && (
+              {selectedFilters.length > 0 && (
                 <Button
                   type="button"
                   variant="ghost"
                   onClick={() => {
                     setSelectedFilters([]);
-                    setShowOnlyAvailable(false);
                   }}
                   className="min-h-11 self-start text-gray-600 hover:text-gray-900 md:self-auto"
                 >
@@ -366,24 +360,8 @@ export default function Products() {
               ))}
             </ToggleGroup>
 
-            <div className="mt-5 flex flex-col gap-3 border-t border-gray-200 pt-5 sm:flex-row sm:items-center sm:justify-between">
-              <div>
-                <p className="text-xs font-medium uppercase tracking-[0.16em] text-gray-600">Disponibilité</p>
-                <p className="mt-1 text-sm text-gray-500">Masquez les références temporairement indisponibles.</p>
-              </div>
-              <Button
-                type="button"
-                variant="outline"
-                aria-pressed={showOnlyAvailable}
-                onClick={() => setShowOnlyAvailable((current) => !current)}
-                className={`min-h-11 border-gray-300 bg-white ${showOnlyAvailable ? "border-gray-900 bg-gray-900 text-white hover:bg-gray-800 hover:text-white" : "text-gray-800"}`}
-              >
-                {showOnlyAvailable ? "Disponibles uniquement" : "Afficher les disponibles"}
-              </Button>
-            </div>
-
             <p className="mt-4 text-xs text-gray-500" aria-live="polite">
-              {searchQuery || selectedFilters.length > 0 || showOnlyAvailable
+              {searchQuery || selectedFilters.length > 0
                 ? `${filteredProducts.length} parfum${filteredProducts.length > 1 ? "s" : ""} correspondant${filteredProducts.length > 1 ? "s" : ""}`
                 : `${products?.length ?? 0} parfums affichés`}
             </p>
@@ -407,7 +385,6 @@ export default function Products() {
                 variant="outline"
                 onClick={() => {
                   setSelectedFilters([]);
-                  setShowOnlyAvailable(false);
                   setSearchQuery("");
                 }}
               >

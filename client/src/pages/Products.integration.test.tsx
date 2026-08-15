@@ -178,15 +178,12 @@ describe("intégration catalogue — panier et souhaits", () => {
     expect(screen.queryByRole("option", { name: /2 ml/ })).toBeNull();
   });
 
-  it("permet de masquer les parfums temporairement indisponibles", () => {
+  it("affiche une rupture claire sans contrôle d’achat pour un parfum temporairement indisponible", () => {
     render(<Products />);
 
-    fireEvent.click(screen.getByRole("button", { name: "Afficher les disponibles" }));
-
-    expect(screen.getByText("1 parfum correspondant")).toBeTruthy();
-    expect(screen.queryByText("Crystal Saffron")).toBeNull();
-
-    fireEvent.click(screen.getByRole("button", { name: "Disponibles uniquement" }));
+    expect(screen.queryByRole("button", { name: "Afficher les disponibles" })).toBeNull();
+    expect(screen.getByText("Rupture")).toBeTruthy();
+    expect(screen.getByRole("link", { name: "Voir le parfum" })).toBeTruthy();
     expect(screen.getByText("2 parfums affichés")).toBeTruthy();
   });
 

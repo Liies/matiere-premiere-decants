@@ -6341,3 +6341,8 @@
 - [x] Ajouter un filtre pour afficher uniquement les parfums disponibles
 - [x] Clarifier les cartes en rupture sans contrôles d’achat inutiles
 - [x] Ajouter les tests de régression et valider le build
+
+## Catalogue — Épuration du filtre de disponibilité
+- [x] Retirer le filtre de disponibilité jugé trop chargé
+- [x] Conserver les informations de rupture sans contrôles d’achat
+- [x] Adapter les tests et valider le build
