@@ -42,6 +42,14 @@ vi.mock("@/lib/trpc", () => ({
         useMutation: () => ({ mutate: saveDeliveryAddressMutate, isPending: false }),
       },
     },
+    shipping: {
+      calculate: {
+        useQuery: () => ({
+          data: { appliedCostCents: 495, isFree: false, carrier: "Colissimo", estimatedDeliveryDays: "2-3 jours ouvrés" },
+          isFetching: false,
+        }),
+      },
+    },
   },
 }));
 
@@ -125,10 +133,23 @@ describe("intégration checkout", () => {
       customerName: "Camille Martin",
       customerEmail: "camille@example.com",
       items: [{ variantId: 101, quantity: 2 }],
-      totalAmount: 17_000,
+      totalAmount: 17_495,
     }), expect.any(Object));
     expect(screen.getByText("Commande confirmée !")).toBeTruthy();
     expect(screen.getByText("MP-TEST-CHECKOUT")).toBeTruthy();
+  });
+
+  it("affiche les frais de livraison et le total final avant la confirmation", () => {
+    const { container } = render(<Checkout />);
+    setInput(container, "shippingAddress", "12 rue des Fleurs");
+    setInput(container, "shippingCity", "Paris");
+    setInput(container, "shippingPostalCode", "75001");
+    setInput(container, "shippingCountry", "France");
+
+    expect(screen.getByText("Livraison")).toBeTruthy();
+    expect(screen.getAllByText(/4,95\s*€/).length).toBeGreaterThan(0);
+    expect(screen.getByText("Total à régler")).toBeTruthy();
+    expect(screen.getAllByText(/174,95\s*€/).length).toBeGreaterThan(0);
   });
 
   it("renseigne ville, code postal et pays lorsqu’une adresse suggérée est sélectionnée", () => {

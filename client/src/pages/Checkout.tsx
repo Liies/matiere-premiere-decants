@@ -13,6 +13,7 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { getDeliveryEligibility } from "@shared/delivery-zones";
+import { formatPrice } from "@shared/price";
 
 const checkoutSchema = z.object({
   customerName: z.string().min(1, "Le nom est requis"),
@@ -32,6 +33,10 @@ export default function Checkout() {
   const createOrder = trpc.orders.create.useMutation();
   const { data: savedDeliveryAddress, isLoading: isSavedAddressLoading } = trpc.profile.getDeliveryAddress.useQuery();
   const saveDeliveryAddress = trpc.profile.saveDeliveryAddress.useMutation();
+  const totalAmount = (cartItems || []).reduce(
+    (sum, item) => sum + (item.variant?.priceCents ?? item.product?.price ?? 0) * item.quantity,
+    0,
+  );
   const [orderCreated, setOrderCreated] = useState<{ orderNumber: string; orderId: number } | null>(null);
   const [saveAddressForLater, setSaveAddressForLater] = useState(false);
 
@@ -57,6 +62,12 @@ export default function Checkout() {
   const deliveryEligibility = hasCompleteDeliveryAddress
     ? getDeliveryEligibility({ country: shippingCountry, postalCode: shippingPostalCode })
     : null;
+  const { data: shippingRate, isFetching: isShippingRateLoading } = trpc.shipping.calculate.useQuery(
+    { country: shippingCountry, subtotalCents: totalAmount },
+    { enabled: Boolean(deliveryEligibility?.eligible) },
+  );
+  const shippingCost = shippingRate?.appliedCostCents ?? 0;
+  const finalTotal = totalAmount + shippingCost;
 
   const applySuggestedAddress = (address: { address: string; city: string; postalCode: string; country: string }) => {
     setValue("shippingAddress", address.address, { shouldDirty: true, shouldValidate: true });
@@ -116,11 +127,6 @@ export default function Checkout() {
     );
   }
 
-  const totalAmount = (cartItems || []).reduce(
-    (sum, item) => sum + (item.variant?.priceCents ?? item.product?.price ?? 0) * item.quantity,
-    0
-  );
-
   const submitOrder = (data: CheckoutFormData) => {
     if (!cartItems || cartItems.length === 0) {
       toast.error("Votre panier est vide");
@@ -140,7 +146,7 @@ export default function Checkout() {
       {
         ...data,
         items,
-        totalAmount,
+        totalAmount: finalTotal,
       },
       {
         onSuccess: (result) => {
@@ -161,6 +167,10 @@ export default function Checkout() {
     const eligibility = getDeliveryEligibility({ country: data.shippingCountry, postalCode: data.shippingPostalCode });
     if (!eligibility.eligible) {
       toast.error(eligibility.reason || "Cette adresse est hors zone de livraison.");
+      return;
+    }
+    if (!shippingRate) {
+      toast.error("Le calcul des frais de livraison est en cours. Veuillez patienter un instant.");
       return;
     }
     if (!saveAddressForLater) {
@@ -311,10 +321,10 @@ export default function Checkout() {
 
                 <Button
                   type="submit"
-                  disabled={createOrder.isPending || saveDeliveryAddress.isPending || deliveryEligibility?.eligible === false}
+                  disabled={createOrder.isPending || saveDeliveryAddress.isPending || deliveryEligibility?.eligible === false || isShippingRateLoading || Boolean(deliveryEligibility?.eligible && !shippingRate)}
                   className="min-h-12 w-full bg-gray-900 py-3 text-white hover:bg-gray-800"
                 >
-                  {createOrder.isPending || saveDeliveryAddress.isPending ? "Traitement..." : "Confirmer la commande"}
+                  {createOrder.isPending || saveDeliveryAddress.isPending ? "Traitement..." : isShippingRateLoading ? "Calcul de la livraison…" : "Confirmer la commande"}
                 </Button>
               </form>
             </div>
@@ -335,11 +345,30 @@ export default function Checkout() {
                     </div>
                   ))}
                 </div>
-                <div className="border-t border-gray-200 pt-4">
-                  <div className="flex justify-between">
-                    <span className="font-light text-gray-900">Total</span>
+                <div className="space-y-3 border-t border-gray-200 pt-4" aria-live="polite">
+                  <div className="flex justify-between text-sm text-gray-600">
+                    <span>Sous-total</span>
+                    <span>{formatPrice(totalAmount)}</span>
+                  </div>
+                  <div className="flex justify-between text-sm text-gray-600">
+                    <span>Livraison</span>
+                    <span>
+                      {isShippingRateLoading ? "Calcul…" : shippingRate
+                        ? shippingRate.isFree ? "Offerte" : formatPrice(shippingCost)
+                        : "À calculer selon l’adresse"}
+                    </span>
+                  </div>
+                  {shippingRate && (
+                    <p className="text-xs leading-5 text-gray-500">
+                      {shippingRate.isFree
+                        ? `Livraison offerte · ${shippingRate.carrier}`
+                        : `${shippingRate.carrier} · Livraison estimée sous ${shippingRate.estimatedDeliveryDays}`}
+                    </p>
+                  )}
+                  <div className="flex justify-between border-t border-gray-200 pt-3">
+                    <span className="font-light text-gray-900">Total à régler</span>
                     <span className="text-xl font-light text-gray-900">
-                      €{(totalAmount / 100).toFixed(2)}
+                      {formatPrice(finalTotal)}
                     </span>
                   </div>
                 </div>

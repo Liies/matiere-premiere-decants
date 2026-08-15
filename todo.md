@@ -6293,3 +6293,10 @@
 - [x] Empêcher la procédure de profil de retourner une réponse indéfinie sans adresse
 - [x] Adapter le checkout à la réponse d’adresse explicite
 - [x] Ajouter un test de régression et valider le build
+
+## Checkout — Transparence des frais de livraison
+- [x] Afficher le montant de livraison estimé dans le récapitulatif
+- [x] Afficher le total final incluant les frais de port avant confirmation
+- [x] Ajouter les tests de régression et valider le build
+- [x] Enregistrer les frais de livraison calculés avec chaque commande
+- [x] Vérifier côté serveur le total final incluant les frais de livraison

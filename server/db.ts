@@ -5,6 +5,7 @@ import { ENV } from './_core/env';
 import { buildCartSyncPlan } from "@shared/cart-sync";
 import { consolidateOrderLines, type RequestedOrderLine } from "@shared/inventory";
 import { REVIEW_ELIGIBLE_ORDER_STATUSES } from "@shared/reviews";
+import { calculateShipping } from "@shared/shipping";
 
 export const PUBLIC_BRAND_SLUG = "matiere-premiere";
 
@@ -446,7 +447,7 @@ export class OrderTotalMismatchError extends Error {
   }
 }
 
-type CreateReservedOrderInput = Omit<InsertOrder, "status" | "totalAmount"> & {
+type CreateReservedOrderInput = Omit<InsertOrder, "status" | "totalAmount" | "shippingCost"> & {
   lines: RequestedOrderLine[];
   requestedTotalAmount?: number;
 };
@@ -455,6 +456,7 @@ export type ReservedOrderResult = {
   orderId: number;
   orderNumber: string;
   totalAmount: number;
+  shippingCost: number;
   items: Array<{ productName: string; quantity: number; unitPrice: number }>;
 };
 
@@ -472,7 +474,7 @@ export async function createReservedOrder(input: CreateReservedOrderInput): Prom
   if (lines.length === 0) throw new InventoryUnavailableError("Aucun article dans la commande");
 
   return db.transaction(async (tx) => {
-    let totalAmount = 0;
+    let subtotalAmount = 0;
     const variantIds = lines.map((line) => line.variantId);
     const lockedVariants = await tx
       .select()
@@ -510,15 +512,22 @@ export async function createReservedOrder(input: CreateReservedOrderInput): Prom
         throw new InventoryUnavailableError(`Stock insuffisant pour ${product.name} en ${variant.sizeMl} ml`);
       }
 
-      totalAmount += variant.priceCents * line.quantity;
+      subtotalAmount += variant.priceCents * line.quantity;
       orderItemsToInsert.push({ productId: product.id, variantId: variant.id, productName: product.name, sizeMl: variant.sizeMl, quantity: line.quantity, unitPrice: variant.priceCents });
     }
 
+    const shipping = calculateShipping(orderValues.shippingCountry, subtotalAmount);
+    const totalAmount = subtotalAmount + shipping.appliedCostCents;
     if (requestedTotalAmount !== undefined && requestedTotalAmount !== totalAmount) {
       throw new OrderTotalMismatchError();
     }
 
-    const orderResult = await tx.insert(orders).values({ ...orderValues, status: "awaiting_payment", totalAmount });
+    const orderResult = await tx.insert(orders).values({
+      ...orderValues,
+      status: "awaiting_payment",
+      totalAmount,
+      shippingCost: shipping.appliedCostCents,
+    });
     const orderId = Number((orderResult as unknown as [{ insertId?: number }])[0]?.insertId);
     if (!orderId) throw new Error("Impossible de créer la commande");
 
@@ -529,6 +538,7 @@ export async function createReservedOrder(input: CreateReservedOrderInput): Prom
       orderId,
       orderNumber: input.orderNumber,
       totalAmount,
+      shippingCost: shipping.appliedCostCents,
       items: orderItemsToInsert.map(({ productName, quantity, unitPrice }) => ({ productName, quantity, unitPrice })),
     };
   });
