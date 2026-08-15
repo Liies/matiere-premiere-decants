@@ -6376,3 +6376,8 @@
 - [x] Auditer les repères et appels à l’action de l’accueil
 - [x] Rendre les prochaines étapes de découverte plus explicites
 - [x] Couvrir la navigation et valider la publication
+
+## Espace client — Suivi des commandes
+- [x] Auditer les états connectés, déconnectés et sans commande
+- [x] Clarifier les repères de suivi et les prochaines actions
+- [x] Couvrir la régression et valider la publication

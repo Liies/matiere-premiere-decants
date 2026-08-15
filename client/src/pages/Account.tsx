@@ -6,6 +6,7 @@ import { Link, useLocation } from "wouter";
 import { LogOut } from "lucide-react";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { toast } from "sonner";
+import { formatPrice } from "@shared/price";
 
 export default function Account() {
   const { user, isAuthenticated, logout } = useAuth();
@@ -47,7 +48,7 @@ export default function Account() {
       cancelled: { label: "Annulée", color: "bg-red-100 text-red-800" },
     };
     const info = statusMap[status] || { label: status, color: "bg-gray-100 text-gray-800" };
-    return <span className={`px-3 py-1 rounded-full text-xs font-medium ${info.color}`}>{info.label}</span>;
+    return <span aria-label={`Statut de commande : ${info.label}`} className={`px-3 py-1 rounded-full text-xs font-medium ${info.color}`}>{info.label}</span>;
   };
 
   return (
@@ -57,7 +58,7 @@ export default function Account() {
       {/* Content */}
       <main className="flex-1 py-12 px-4">
         <div className="container max-w-4xl">
-          <div className="flex justify-between items-center mb-8">
+          <div className="mb-8 flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <h2 className="text-4xl font-light text-gray-900">Mon Compte</h2>
               <p className="text-gray-600 mt-2">{user?.email}</p>
@@ -65,7 +66,7 @@ export default function Account() {
             <button
               onClick={handleLogout}
               disabled={logoutMutation.isPending}
-              className="flex items-center gap-2 px-4 py-2 text-gray-600 hover:text-gray-900 transition"
+              className="flex min-h-11 items-center gap-2 self-start px-4 py-2 text-gray-600 transition hover:text-gray-900 sm:self-auto"
             >
               <LogOut className="w-4 h-4" />
               Déconnexion
@@ -95,19 +96,23 @@ export default function Account() {
             {isLoading ? (
               <p className="text-gray-600">Chargement des commandes...</p>
             ) : !orders || orders.length === 0 ? (
-              <Card className="p-8 text-center">
-                <p className="text-gray-600 mb-4">Vous n'avez pas encore de commandes</p>
-                <Link href="/products">
-                  <Button className="bg-gray-900 hover:bg-gray-800 text-white">
+              <Card className="p-8 text-center sm:p-10">
+                <p className="text-lg font-light text-gray-900">Votre historique apparaîtra ici</p>
+                <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-gray-600">Explorez les parfums de la collection ou laissez-vous guider par le conseiller olfactif avant votre première commande.</p>
+                <div className="mt-6 flex flex-col justify-center gap-3 sm:flex-row">
+                  <Link href="/products" className="inline-flex min-h-11 items-center justify-center rounded-md bg-gray-900 px-5 py-3 text-sm font-medium text-white transition hover:bg-gray-800">
                     Découvrir le catalogue
-                  </Button>
-                </Link>
+                  </Link>
+                  <Link href="/conseil" className="inline-flex min-h-11 items-center justify-center rounded-md border border-gray-300 px-5 py-3 text-sm font-medium text-gray-800 transition hover:border-gray-900 hover:text-gray-950">
+                    Trouver mon parfum
+                  </Link>
+                </div>
               </Card>
             ) : (
               <div className="space-y-4">
                 {orders.map((order) => (
                   <Card key={order.id} className="p-6">
-                    <div className="flex justify-between items-start mb-4">
+                    <div className="mb-4 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                       <div>
                         <h4 className="text-lg font-light text-gray-900">
                           Commande {order.orderNumber}
@@ -116,10 +121,10 @@ export default function Account() {
                           {new Date(order.createdAt).toLocaleDateString("fr-FR")}
                         </p>
                       </div>
-                      <div className="text-right">
+                      <div className="sm:text-right">
                         {getStatusBadge(order.status)}
                         <p className="text-lg font-light text-gray-900 mt-2">
-                          €{(order.totalAmount / 100).toFixed(2)}
+                          {formatPrice(order.totalAmount)}
                         </p>
                       </div>
                     </div>
