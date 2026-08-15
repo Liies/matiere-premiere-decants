@@ -44,6 +44,7 @@ export default function Checkout() {
     register,
     handleSubmit,
     setValue,
+    setFocus,
     watch,
     formState: { errors },
   } = useForm<CheckoutFormData>({
@@ -74,6 +75,7 @@ export default function Checkout() {
     setValue("shippingCity", address.city, { shouldDirty: true, shouldValidate: true });
     setValue("shippingPostalCode", address.postalCode, { shouldDirty: true, shouldValidate: true });
     setValue("shippingCountry", address.country, { shouldDirty: true, shouldValidate: true });
+    setFocus("shippingCity");
   };
 
   const applySavedAddress = () => {

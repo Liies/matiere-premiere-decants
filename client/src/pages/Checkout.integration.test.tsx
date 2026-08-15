@@ -165,6 +165,7 @@ describe("intégration checkout", () => {
     expect(container.querySelector<HTMLInputElement>('input[name="shippingCity"]')?.value).toBe("Paris");
     expect(container.querySelector<HTMLInputElement>('input[name="shippingPostalCode"]')?.value).toBe("75019");
     expect(container.querySelector<HTMLInputElement>('input[name="shippingCountry"]')?.value).toBe("France");
+    expect(document.activeElement).toBe(container.querySelector('input[name="shippingCity"]'));
 
     setInput(container, "shippingCity", "Pantin");
     expect(container.querySelector<HTMLInputElement>('input[name="shippingCity"]')?.value).toBe("Pantin");
