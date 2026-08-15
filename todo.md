@@ -6386,3 +6386,8 @@
 - [x] Vérifier les règles tarifaires et les liens de navigation existants
 - [x] Créer la page publique de livraison et retours
 - [x] Ajouter la route, les liens et les tests de régression
+
+## Espace client — Mise en page partagée
+- [x] Vérifier les divergences de navigation et de pied de page
+- [x] Réutiliser le composant Footer commun
+- [x] Valider la régression et publier l’harmonisation

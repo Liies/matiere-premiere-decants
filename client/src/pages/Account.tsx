@@ -2,6 +2,7 @@ import { trpc } from "@/lib/trpc";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import Header from "@/components/Header";
+import Footer from "@/components/Footer";
 import { Link, useLocation } from "wouter";
 import { LogOut } from "lucide-react";
 import { useAuth } from "@/_core/hooks/useAuth";
@@ -153,12 +154,7 @@ export default function Account() {
         </div>
       </main>
 
-      {/* Footer */}
-      <footer className="border-t border-gray-200 py-8 px-4 mt-12">
-        <div className="container text-center text-sm text-gray-600">
-          <p>© 2026 Matière Première. Tous droits réservés.</p>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 }

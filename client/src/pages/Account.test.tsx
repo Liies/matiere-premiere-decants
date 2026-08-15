@@ -23,6 +23,7 @@ vi.mock("@/_core/hooks/useAuth", () => ({
 }));
 
 vi.mock("@/components/Header", () => ({ default: () => <header>Navigation</header> }));
+vi.mock("@/components/Footer", () => ({ default: () => <footer>Pied de page partagé</footer> }));
 vi.mock("sonner", () => ({ toast: { success: vi.fn() } }));
 vi.mock("wouter", () => ({
   Link: ({ children, href, className }: { children: React.ReactNode; href: string; className?: string }) => <a href={href} className={className}>{children}</a>,
@@ -42,6 +43,7 @@ describe("espace client — suivi des commandes", () => {
     render(<Account />);
 
     expect(screen.getByText("Votre historique apparaîtra ici")).toBeTruthy();
+    expect(screen.getByText("Pied de page partagé")).toBeTruthy();
     expect(screen.getByRole("link", { name: "Découvrir le catalogue" }).getAttribute("href")).toBe("/products");
     expect(screen.getByRole("link", { name: "Trouver mon parfum" }).getAttribute("href")).toBe("/conseil");
   });
