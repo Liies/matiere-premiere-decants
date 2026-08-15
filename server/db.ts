@@ -404,9 +404,9 @@ export async function syncGuestCartToUserCart(
 /** Adresse de livraison par défaut du profil client. */
 export async function getSavedDeliveryAddress(userId: number) {
   const db = await getDb();
-  if (!db) return undefined;
+  if (!db) return null;
   const rows = await db.select().from(savedDeliveryAddresses).where(eq(savedDeliveryAddresses.userId, userId)).limit(1);
-  return rows[0];
+  return rows[0] ?? null;
 }
 
 export async function saveDeliveryAddress(userId: number, address: {

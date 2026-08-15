@@ -39,6 +39,13 @@ describe("profil — adresse de livraison", () => {
     expect(mocks.getSavedDeliveryAddress).toHaveBeenCalledWith(customer.id);
   });
 
+  it("retourne null sans adresse enregistrée afin de préserver le contrat tRPC", async () => {
+    mocks.getSavedDeliveryAddress.mockResolvedValue(undefined);
+    const caller = appRouter.createCaller({ user: customer, req: {} as any, res: {} as any });
+
+    await expect(caller.profile.getDeliveryAddress()).resolves.toBeNull();
+  });
+
   it("sauvegarde une adresse européenne éligible", async () => {
     const caller = appRouter.createCaller({ user: customer, req: {} as any, res: {} as any });
 

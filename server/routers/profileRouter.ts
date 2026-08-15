@@ -12,7 +12,10 @@ const DELIVERY_ADDRESS_INPUT = z.object({
 });
 
 export const profileRouter = router({
-  getDeliveryAddress: protectedProcedure.query(({ ctx }) => getSavedDeliveryAddress(ctx.user.id)),
+  getDeliveryAddress: protectedProcedure.query(async ({ ctx }) => {
+    const address = await getSavedDeliveryAddress(ctx.user.id);
+    return address ?? null;
+  }),
 
   saveDeliveryAddress: protectedProcedure.input(DELIVERY_ADDRESS_INPUT).mutation(async ({ input, ctx }) => {
     const eligibility = getDeliveryEligibility({ country: input.country, postalCode: input.postalCode });

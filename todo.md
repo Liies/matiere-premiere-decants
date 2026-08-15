@@ -6288,3 +6288,8 @@
 ## Cohérence 50 ml — Audit final
 - [x] Auditer les vues publiques pour détecter toute mention résiduelle du format 2 ml
 - [x] Corriger et valider toute incohérence publique identifiée
+
+## Correctif checkout — Adresse enregistrée absente
+- [x] Empêcher la procédure de profil de retourner une réponse indéfinie sans adresse
+- [x] Adapter le checkout à la réponse d’adresse explicite
+- [x] Ajouter un test de régression et valider le build
