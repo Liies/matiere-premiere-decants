@@ -37,7 +37,7 @@ vi.mock("@/lib/trpc", () => ({
               stock: 5,
               variants: [
                 { id: 201, productId: 2, sizeMl: 2, sku: "MP-CRYSAF-02", priceCents: 1000, stock: 10, isActive: false, sortOrder: 1, createdAt: new Date(), updatedAt: new Date() },
-                { id: 202, productId: 2, sizeMl: 50, sku: "MP-CRYSAF-50", priceCents: 12000, stock: 10, isActive: true, sortOrder: 2, createdAt: new Date(), updatedAt: new Date() },
+                { id: 202, productId: 2, sizeMl: 50, sku: "MP-CRYSAF-50", priceCents: 12000, stock: 0, isActive: true, sortOrder: 2, createdAt: new Date(), updatedAt: new Date() },
               ],
             },
           ],
@@ -78,19 +78,18 @@ describe("intégration catalogue — panier et souhaits", () => {
     window.localStorage.clear();
   });
 
-  it("affiche la confirmation d’ajout uniquement sur la carte actionnée", () => {
+  it("affiche la confirmation sur la carte achetable et remplace les contrôles de la carte en rupture", () => {
     render(<Products />);
 
-    const addButtons = screen.getAllByRole("button", { name: "Ajouter" });
-    const vanillaButton = addButtons[0]!;
-    const saffronButton = addButtons[1]!;
+    const vanillaButton = screen.getByRole("button", { name: "Ajouter" });
+    expect(screen.getByRole("link", { name: "Voir le parfum" })).toBeTruthy();
+    expect(screen.queryByLabelText("Quantité de Crystal Saffron")).toBeNull();
 
     fireEvent.click(vanillaButton);
 
     expect(screen.getAllByRole("button", { name: "Ajouté" })).toHaveLength(1);
-    expect(screen.getAllByRole("button", { name: "Ajouter" })).toHaveLength(1);
+    expect(screen.queryByRole("button", { name: "Ajouter" })).toBeNull();
     expect(vanillaButton.textContent).toContain("Ajouté");
-    expect(saffronButton.textContent).toContain("Ajouter");
   });
 
   it("renouvelle le délai de confirmation après deux ajouts rapprochés", () => {
@@ -113,7 +112,7 @@ describe("intégration catalogue — panier et souhaits", () => {
       vi.advanceTimersByTime(1000);
     });
 
-    expect(screen.getAllByRole("button", { name: "Ajouter" })).toHaveLength(2);
+    expect(screen.getAllByRole("button", { name: "Ajouter" })).toHaveLength(1);
   });
 
   it("bascule un cœur sans modifier le statut de souhait de l’autre carte", () => {
@@ -177,6 +176,18 @@ describe("intégration catalogue — panier et souhaits", () => {
     expect(screen.queryByText("Contenance")).toBeNull();
     expect(screen.getAllByText("Décant 50 ml")).toHaveLength(2);
     expect(screen.queryByRole("option", { name: /2 ml/ })).toBeNull();
+  });
+
+  it("permet de masquer les parfums temporairement indisponibles", () => {
+    render(<Products />);
+
+    fireEvent.click(screen.getByRole("button", { name: "Afficher les disponibles" }));
+
+    expect(screen.getByText("1 parfum correspondant")).toBeTruthy();
+    expect(screen.queryByText("Crystal Saffron")).toBeNull();
+
+    fireEvent.click(screen.getByRole("button", { name: "Disponibles uniquement" }));
+    expect(screen.getByText("2 parfums affichés")).toBeTruthy();
   });
 
   it("filtre en temps réel, propose une suggestion, puis restaure la collection après une recherche vide", () => {

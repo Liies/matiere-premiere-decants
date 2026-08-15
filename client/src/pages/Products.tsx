@@ -27,6 +27,7 @@ export default function Products() {
   const [selectedQuantity, setSelectedQuantity] = useState<Record<number, number>>({});
   const [selectedVariantIds, setSelectedVariantIds] = useState<Record<number, number>>({});
   const [selectedFilters, setSelectedFilters] = useState<string[]>([]);
+  const [showOnlyAvailable, setShowOnlyAvailable] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const [activeSuggestionIndex, setActiveSuggestionIndex] = useState(-1);
@@ -42,18 +43,26 @@ export default function Products() {
   const productPath = (product: CatalogProduct) => product.brand?.slug
     ? `/parfum/${product.brand.slug}/${product.slug}`
     : `/product/${product.id}`;
+  const getPublicVariants = (product: CatalogProduct) =>
+    (product.variants ?? []).filter((variant: { isActive?: boolean }) => variant.isActive !== false);
+  const isProductAvailable = (product: CatalogProduct) =>
+    getPublicVariants(product).some((variant: { stock: number }) => variant.stock > 0);
   const noteMatchedProducts = useMemo<CatalogProduct[]>(
     () => (products ? filterProductsByNotes<CatalogProduct>(products, selectedFilters) : []),
     [products, selectedFilters],
   );
   const filteredProducts = useMemo<CatalogProduct[]>(
-    () => searchProductsByName(noteMatchedProducts, searchQuery),
-    [noteMatchedProducts, searchQuery],
+    () => searchProductsByName(
+      showOnlyAvailable ? noteMatchedProducts.filter(isProductAvailable) : noteMatchedProducts,
+      searchQuery,
+    ),
+    [noteMatchedProducts, searchQuery, showOnlyAvailable],
   );
   const searchSuggestions = useMemo<CatalogProduct[]>(() => {
     if (!searchQuery.trim()) return [];
-    return getCatalogSuggestions(noteMatchedProducts, searchQuery, 6);
-  }, [noteMatchedProducts, searchQuery]);
+    const searchableProducts = showOnlyAvailable ? noteMatchedProducts.filter(isProductAvailable) : noteMatchedProducts;
+    return getCatalogSuggestions(searchableProducts, searchQuery, 6);
+  }, [noteMatchedProducts, searchQuery, showOnlyAvailable]);
 
   useEffect(() => {
     return () => {
@@ -101,9 +110,6 @@ export default function Products() {
 
   const isProductRecentlyAdded = (product: CatalogProduct) =>
     recentlyAddedProductKeys.has(getCartFeedbackKey(product));
-
-  const getPublicVariants = (product: CatalogProduct) =>
-    (product.variants ?? []).filter((variant: { isActive?: boolean }) => variant.isActive !== false);
 
   const getSelectedVariant = (product: CatalogProduct) => {
     const variants = getPublicVariants(product);
@@ -324,12 +330,13 @@ export default function Products() {
                   Sélectionnez une ou plusieurs familles olfactives pour affiner la collection.
                 </p>
               </div>
-              {selectedFilters.length > 0 && (
+              {(selectedFilters.length > 0 || showOnlyAvailable) && (
                 <Button
                   type="button"
                   variant="ghost"
                   onClick={() => {
                     setSelectedFilters([]);
+                    setShowOnlyAvailable(false);
                   }}
                   className="min-h-11 self-start text-gray-600 hover:text-gray-900 md:self-auto"
                 >
@@ -359,8 +366,24 @@ export default function Products() {
               ))}
             </ToggleGroup>
 
+            <div className="mt-5 flex flex-col gap-3 border-t border-gray-200 pt-5 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <p className="text-xs font-medium uppercase tracking-[0.16em] text-gray-600">Disponibilité</p>
+                <p className="mt-1 text-sm text-gray-500">Masquez les références temporairement indisponibles.</p>
+              </div>
+              <Button
+                type="button"
+                variant="outline"
+                aria-pressed={showOnlyAvailable}
+                onClick={() => setShowOnlyAvailable((current) => !current)}
+                className={`min-h-11 border-gray-300 bg-white ${showOnlyAvailable ? "border-gray-900 bg-gray-900 text-white hover:bg-gray-800 hover:text-white" : "text-gray-800"}`}
+              >
+                {showOnlyAvailable ? "Disponibles uniquement" : "Afficher les disponibles"}
+              </Button>
+            </div>
+
             <p className="mt-4 text-xs text-gray-500" aria-live="polite">
-              {searchQuery || selectedFilters.length > 0
+              {searchQuery || selectedFilters.length > 0 || showOnlyAvailable
                 ? `${filteredProducts.length} parfum${filteredProducts.length > 1 ? "s" : ""} correspondant${filteredProducts.length > 1 ? "s" : ""}`
                 : `${products?.length ?? 0} parfums affichés`}
             </p>
@@ -384,6 +407,7 @@ export default function Products() {
                 variant="outline"
                 onClick={() => {
                   setSelectedFilters([]);
+                  setShowOnlyAvailable(false);
                   setSearchQuery("");
                 }}
               >
@@ -480,12 +504,12 @@ export default function Products() {
                           })()}
                         </p>
                         <p className="text-xs text-gray-500 font-medium">
-                          {getSelectedVariant(product)?.stock ? "✓ En stock" : "Rupture"}
+                          {isProductAvailable(product) ? "✓ En stock" : "Rupture"}
                         </p>
                       </div>
 
-                      <div className="flex w-full min-w-0 flex-col gap-2 sm:w-auto sm:items-end">
-                        {getPublicVariants(product).length > 0 && (
+                      {isProductAvailable(product) ? (
+                        <div className="flex w-full min-w-0 flex-col gap-2 sm:w-auto sm:items-end">
                           <label className="w-full text-xs text-gray-600 sm:w-auto">
                             <span className="sr-only">Format de {product.name}</span>
                             <select
@@ -500,53 +524,41 @@ export default function Products() {
                               ))}
                             </select>
                           </label>
-                        )}
-                        <div className="flex w-full min-w-0 items-center gap-2 sm:justify-end">
-                        <label htmlFor={`quantity-${product.id}`} className="sr-only">
-                          Quantité de {product.name}
-                        </label>
-                        <input
-                          id={`quantity-${product.id}`}
-                          type="number"
-                          min="1"
-                          max={getSelectedVariant(product)?.stock ?? 0}
-                          value={selectedQuantity[product.id] || 1}
-                          onChange={(event) =>
-                            setSelectedQuantity((prev) => ({
-                              ...prev,
-                              [product.id]: Math.max(1, parseInt(event.target.value, 10) || 1),
-                            }))
-                          }
-                          className="h-11 w-14 rounded border border-gray-200 px-2 text-center text-sm"
-                          disabled={!getSelectedVariant(product)?.stock}
-                        />
-                        <Button
-                          type="button"
-                          onClick={() => handleAddToCart(product)}
-                          disabled={addToCart.isPending || !getSelectedVariant(product)?.stock}
-                          aria-live="polite"
-                          className={`relative min-h-11 min-w-0 flex-1 overflow-hidden bg-gray-900 text-white font-light whitespace-nowrap transition-all duration-500 touch-manipulation hover:-translate-y-0.5 hover:bg-gray-800 hover:shadow-lg lg:w-36 lg:flex-none lg:translate-y-1 lg:opacity-0 lg:group-hover/product-card:translate-y-0 lg:group-hover/product-card:opacity-100 lg:group-focus-within/product-card:translate-y-0 lg:group-focus-within/product-card:opacity-100 motion-reduce:transform-none motion-reduce:transition-none ${
-                            isProductRecentlyAdded(product) ? "scale-[0.97] bg-gray-800" : ""
-                          }`}
-                        >
-                          {isProductRecentlyAdded(product) && (
-                            <span className="cart-added-ripple" aria-hidden="true" />
-                          )}
-                          <ShoppingCart
-                            className={`relative z-10 mr-2 h-4 w-4 ${
-                              isProductRecentlyAdded(product) ? "cart-icon-bounce" : ""
-                            }`}
-                            aria-hidden="true"
-                          />
-                          <span className="relative z-10">
-                            {isProductRecentlyAdded(product) ? "Ajouté" : "Ajouter"}
-                          </span>
-                          {isProductRecentlyAdded(product) && (
-                            <span className="cart-added-check" aria-hidden="true">✓</span>
-                          )}
-                        </Button>
+                          <div className="flex w-full min-w-0 items-center gap-2 sm:justify-end">
+                            <label htmlFor={`quantity-${product.id}`} className="sr-only">Quantité de {product.name}</label>
+                            <input
+                              id={`quantity-${product.id}`}
+                              type="number"
+                              min="1"
+                              max={getSelectedVariant(product)?.stock ?? 0}
+                              value={selectedQuantity[product.id] || 1}
+                              onChange={(event) => setSelectedQuantity((prev) => ({
+                                ...prev,
+                                [product.id]: Math.max(1, parseInt(event.target.value, 10) || 1),
+                              }))}
+                              className="h-11 w-14 rounded border border-gray-200 px-2 text-center text-sm"
+                            />
+                            <Button
+                              type="button"
+                              onClick={() => handleAddToCart(product)}
+                              disabled={addToCart.isPending}
+                              aria-live="polite"
+                              className={`relative min-h-11 min-w-0 flex-1 overflow-hidden bg-gray-900 text-white font-light whitespace-nowrap transition-all duration-500 touch-manipulation hover:-translate-y-0.5 hover:bg-gray-800 hover:shadow-lg lg:w-36 lg:flex-none lg:translate-y-1 lg:opacity-0 lg:group-hover/product-card:translate-y-0 lg:group-hover/product-card:opacity-100 lg:group-focus-within/product-card:translate-y-0 lg:group-focus-within/product-card:opacity-100 motion-reduce:transform-none motion-reduce:transition-none ${
+                                isProductRecentlyAdded(product) ? "scale-[0.97] bg-gray-800" : ""
+                              }`}
+                            >
+                              {isProductRecentlyAdded(product) && <span className="cart-added-ripple" aria-hidden="true" />}
+                              <ShoppingCart className={`relative z-10 mr-2 h-4 w-4 ${isProductRecentlyAdded(product) ? "cart-icon-bounce" : ""}`} aria-hidden="true" />
+                              <span className="relative z-10">{isProductRecentlyAdded(product) ? "Ajouté" : "Ajouter"}</span>
+                              {isProductRecentlyAdded(product) && <span className="cart-added-check" aria-hidden="true">✓</span>}
+                            </Button>
+                          </div>
                         </div>
-                      </div>
+                      ) : (
+                        <a href={productPath(product)} className="inline-flex min-h-11 items-center justify-center rounded border border-gray-300 bg-white px-4 text-sm text-gray-800 transition hover:border-gray-900 hover:text-gray-950">
+                          Voir le parfum
+                        </a>
+                      )}
                     </div>
                   </div>
                 </Card>

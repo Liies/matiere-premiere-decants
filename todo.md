@@ -6335,3 +6335,9 @@
 - [x] Auditer la recherche, les filtres, les cartes et les états du catalogue
 - [x] Intégrer les améliorations de découverte prioritaires
 - [x] Ajouter les tests de régression et valider le build
+
+## Catalogue — Disponibilité et achat immédiat
+- [x] Définir l’état d’achat disponible à partir des variantes publiques actives
+- [x] Ajouter un filtre pour afficher uniquement les parfums disponibles
+- [x] Clarifier les cartes en rupture sans contrôles d’achat inutiles
+- [x] Ajouter les tests de régression et valider le build
