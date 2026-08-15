@@ -179,13 +179,18 @@ export default defineConfig({
           if (id.includes("@radix-ui") || id.includes("lucide-react") || id.includes("sonner")) {
             return "ui-vendor";
           }
-          if (id.includes("react") || id.includes("scheduler") || id.includes("wouter")) {
+          if (
+            id.includes("node_modules/react/")
+            || id.includes("node_modules/react-dom/")
+            || id.includes("node_modules/scheduler/")
+            || id.includes("node_modules/wouter/")
+          ) {
             return "react-vendor";
           }
           if (id.includes("@tanstack") || id.includes("@trpc") || id.includes("superjson")) {
             return "data-vendor";
           }
-          return "vendor";
+          return undefined;
         },
       },
     },

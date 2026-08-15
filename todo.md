@@ -6346,3 +6346,8 @@
 - [x] Retirer le filtre de disponibilité jugé trop chargé
 - [x] Conserver les informations de rupture sans contrôles d’achat
 - [x] Adapter les tests et valider le build
+
+## Performance — Chargement différé des pages
+- [x] Auditer les imports de routes et les morceaux de build initiaux
+- [x] Charger les pages secondaires de manière différée avec un état de transition
+- [x] Mesurer le build, exécuter les tests et publier l’optimisation
