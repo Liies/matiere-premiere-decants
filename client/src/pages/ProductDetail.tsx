@@ -11,7 +11,7 @@ import { formatPrice } from '@shared/price';
 import { CART_CONFIRMATION_DURATION_MS, getCartConfirmationLabel } from '@shared/cart-feedback';
 import { getOlfactoryRevealDelay } from '@shared/olfactory-reveal';
 import { getProductStory } from '@shared/product-stories';
-import { computePricePerMlCents, formatSize, getDefaultVariant, isVariantAvailable, sortVariants } from '@shared/variants';
+import { formatSize, getDefaultVariant, isVariantAvailable } from '@shared/variants';
 import { useWishlist } from '@/hooks/useWishlist';
 import { useAuth } from '@/_core/hooks/useAuth';
 
@@ -52,7 +52,6 @@ export default function ProductDetail() {
   const [stableMatch, stableParams] = useRoute('/parfum/:brand/:slug');
   const { isWishlisted, toggleWishlist } = useWishlist();
   const [quantity, setQuantity] = useState(1);
-  const [selectedVariantId, setSelectedVariantId] = useState<number | null>(null);
   const [scrollY, setScrollY] = useState(0);
   const [isAddingToCart, setIsAddingToCart] = useState(false);
   const [showAddedFeedback, setShowAddedFeedback] = useState(false);
@@ -81,8 +80,9 @@ export default function ProductDetail() {
   const product = stableProduct ?? legacyProduct;
   const productStory = getProductStory(product?.slug);
   const productVariants = (product as any)?.variants ?? [];
+  const publicProductVariants = productVariants.filter((variant: { isActive?: boolean }) => variant.isActive !== false);
   const productBrandName = stableProduct?.brand.name ?? "Collection Matière Première";
-  const selectedVariant = productVariants.find((variant: { id: number; sizeMl: number; priceCents: number; stock: number }) => variant.id === selectedVariantId) ?? getDefaultVariant(productVariants) ?? null;
+  const selectedVariant = getDefaultVariant(publicProductVariants) ?? null;
   const isLoading = stableMatch ? isLoadingStable : isLoadingLegacy;
 
   const { data: allProducts } = trpc.products.list.useQuery();
@@ -137,21 +137,11 @@ export default function ProductDetail() {
     return () => observer.disconnect();
   }, [product?.id]);
 
-  useEffect(() => {
-    if (productVariants.length === 0) {
-      setSelectedVariantId(null);
-      return;
-    }
-    setSelectedVariantId((current) => productVariants.some((variant: { id: number; sizeMl: number; priceCents: number; stock: number }) => variant.id === current)
-      ? current
-      : getDefaultVariant(productVariants)?.id ?? null);
-  }, [productVariants]);
-
   const handleAddToCart = () => {
     if (!product || isAddingToCart) return;
 
     if (!selectedVariant || !isVariantAvailable(selectedVariant) || selectedVariant.stock < quantity) {
-      toast.error("Le format choisi n’est pas disponible dans cette quantité.");
+      toast.error("Le décant 50 ml n’est pas disponible dans cette quantité.");
       return;
     }
     if (isAuthenticated) {
@@ -289,50 +279,29 @@ export default function ProductDetail() {
               </h1>
               <p className="mb-6 text-base leading-7 text-gray-600 sm:text-lg">{product.description}</p>
               
-              {productVariants.length === 0 ? (
+              {publicProductVariants.length === 0 ? (
                 <p className="text-base leading-7 text-gray-600">Référence en préparation : les formats et tarifs seront affichés prochainement.</p>
               ) : (
-                <div className="flex items-baseline justify-between gap-4 py-2">
+                <div data-testid="product-purchase-summary" className="flex items-baseline justify-between gap-4 py-2">
                   <div>
                     <div className="text-3xl font-light text-gray-900">
                       {selectedVariant ? formatPrice(selectedVariant.priceCents) : formatPrice(product.price)}
                     </div>
                     <p className="mt-1 text-xs text-gray-500 font-medium">
-                      {selectedVariant ? `${formatSize(selectedVariant.sizeMl)} sélectionné` : "Format 50 ml"} · Décant de luxe
+                      {selectedVariant ? `${formatSize(selectedVariant.sizeMl)} · Format unique` : "Format 50 ml"} · Décant de luxe
                     </p>
                   </div>
-                  <span className="inline-flex items-center rounded-full bg-emerald-50 px-3 py-1 text-xs font-medium text-emerald-800">
-                    ✓ En stock (120,00 €)
+                  <span className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-medium ${selectedVariant && isVariantAvailable(selectedVariant) ? "bg-emerald-50 text-emerald-800" : "bg-stone-100 text-stone-600"}`}>
+                    {selectedVariant && isVariantAvailable(selectedVariant) ? "✓ En stock" : "Rupture"}
                   </span>
                 </div>
               )}
 
-              {productVariants.length > 0 && (
-                <fieldset className="mt-6">
-                  <legend className="mb-3 text-xs uppercase tracking-[0.18em] text-gray-500 font-medium">Contenance disponible</legend>
-                  <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                    {sortVariants(productVariants).map((variant) => {
-                      const available = isVariantAvailable(variant);
-                      const selected = selectedVariant?.id === variant.id;
-                      return (
-                        <button
-                          key={variant.id}
-                          type="button"
-                          onClick={() => setSelectedVariantId(variant.id)}
-                          disabled={!available}
-                          aria-pressed={selected}
-                          className={`min-h-16 rounded-xl border p-3.5 text-left transition-all duration-300 ${
-                            selected ? "border-gray-900 bg-gray-900 text-white shadow-md" : "border-gray-200 bg-white text-gray-900 hover:border-gray-400"
-                          } ${!available ? "cursor-not-allowed opacity-45" : ""}`}
-                        >
-                          <span className="block text-sm font-medium">{formatSize(variant.sizeMl)}</span>
-                          <span className={`mt-0.5 block text-xs ${selected ? "text-gray-300" : "text-gray-500"}`}>{formatPrice(variant.priceCents)} ({formatPrice(computePricePerMlCents(variant))}/ml)</span>
-                          {!available && <span className="mt-1 block text-[11px] font-medium text-amber-600">Épuisé</span>}
-                        </button>
-                      );
-                    })}
-                  </div>
-                </fieldset>
+              {publicProductVariants.length > 0 && (
+                <div className="mt-6 grid gap-3 border-t border-gray-100 pt-6 text-sm text-gray-600 sm:grid-cols-2">
+                  <p><span className="font-medium text-gray-900">Format unique</span><br />Décant 50 ml</p>
+                  <p><span className="font-medium text-gray-900">Livraison</span><br />France et Europe</p>
+                </div>
               )}
             </div>
 

@@ -6366,3 +6366,8 @@
 - [x] Auditer les dimensions, espacements et zones tactiles des cartes sous 640 px
 - [x] Ajuster la disposition mobile sans dégrader le rendu bureau
 - [x] Couvrir le comportement mobile et valider la publication
+
+## Fiche produit — Parcours d’achat
+- [x] Auditer la hiérarchie de contenu et les états d’achat de la fiche
+- [x] Clarifier les informations utiles avant l’ajout au panier
+- [x] Ajouter une protection de régression et valider la publication
