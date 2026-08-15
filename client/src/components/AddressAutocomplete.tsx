@@ -110,6 +110,8 @@ export default function AddressAutocomplete({
     suppressNextSearchRef.current = true;
     setIsSelecting(true);
     setIsLoading(true);
+    setSuggestions([]);
+    setIsListOpen(false);
     onValueChange(suggestion.primaryText);
 
     placesService.current.getDetails(

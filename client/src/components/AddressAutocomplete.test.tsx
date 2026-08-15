@@ -100,6 +100,7 @@ describe("AddressAutocomplete", () => {
     fireEvent.click(suggestion);
 
     await waitFor(() => expect(getDetails).toHaveBeenCalledTimes(1));
+    expect(screen.queryByRole("option", { name: /27 Rue du Maroc/ })).toBeNull();
     const detailsCallback = pendingDetails.callback;
     if (!detailsCallback) throw new Error("Le callback de détails doit être enregistré.");
 

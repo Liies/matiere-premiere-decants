@@ -6305,3 +6305,8 @@
 - [x] Renvoyer le total final et les frais de livraison après création
 - [x] Afficher le récapitulatif financier sur l’écran de confirmation
 - [x] Ajouter les tests de régression et valider le build
+
+## Correctif checkout — Fermeture des suggestions d’adresse
+- [x] Fermer les suggestions immédiatement après sélection d’une adresse
+- [x] Préserver le remplissage automatique des champs de livraison
+- [x] Ajouter un test de régression et valider le build
