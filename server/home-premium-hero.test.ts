@@ -1,6 +1,5 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
-import { getHeroScrollBehavior, HERO_NEXT_SECTION_ID } from "../shared/home-hero";
 
 const homePremiumSource = readFileSync(
   new URL("../client/src/pages/HomePremium.tsx", import.meta.url),
@@ -14,11 +13,9 @@ describe("hero de l’accueil premium", () => {
     expect(homePremiumSource).not.toContain("getProductImage(1)");
   });
 
-  it("dirige le bouton vers la section suivante et conserve le mouvement réduit", () => {
-    expect(HERO_NEXT_SECTION_ID).toBe("story");
-    expect(getHeroScrollBehavior(false)).toBe("smooth");
-    expect(getHeroScrollBehavior(true)).toBe("auto");
-    expect(homePremiumSource).toContain('onClick={scrollToStory}');
+  it("dirige le CTA principal vers le catalogue sans ajouter de détour narratif", () => {
+    expect(homePremiumSource).toContain('<Link href="/products"');
+    expect(homePremiumSource).toContain("Découvrir la collection");
   });
 
   it("ouvre le quiz de recommandation depuis le CTA final d’exploration", () => {
@@ -26,7 +23,7 @@ describe("hero de l’accueil premium", () => {
     expect(homePremiumSource).toContain("<ScentQuizDialog open={isScentQuizOpen} onOpenChange={setIsScentQuizOpen} />");
   });
 
-  it("utilise la composition éditoriale des dix flacons sous le hero", () => {
+  it("utilise une unique composition éditoriale pour la collection", () => {
     expect(homePremiumSource).toContain("matiere-premiere-ten-bottles-editorial_30095232.jpg");
     expect(homePremiumSource).toContain("Dix flacons de la collection Matière Première, composition éditoriale");
   });
@@ -35,5 +32,12 @@ describe("hero de l’accueil premium", () => {
     expect(homePremiumSource).not.toContain("min-h-[calc(100svh-4.5rem)]");
     expect(homePremiumSource).not.toContain("min-h-[calc(100svh-14.5rem)]");
     expect(homePremiumSource).toContain("relative overflow-hidden px-4 py-14");
+  });
+
+  it("retire les longues sections d’histoire, matières et créateur de l’accueil", () => {
+    expect(homePremiumSource).not.toContain('id="story"');
+    expect(homePremiumSource).not.toContain('id="ingredients"');
+    expect(homePremiumSource).not.toContain('id="craft"');
+    expect(homePremiumSource).not.toContain('id="noses"');
   });
 });

@@ -6482,3 +6482,8 @@
 - [x] Auditer les indicateurs de suivi existants
 - [x] Ajouter les indicateurs opérationnels et les accès rapides pertinents
 - [x] Couvrir et publier le tableau de bord enrichi
+
+## Accueil — Hiérarchie éditoriale
+- [x] Auditer les sections et appels à l’action de l’accueil
+- [x] Épurer le hero et les sections pour réduire la surcharge visuelle
+- [x] Couvrir et publier la nouvelle hiérarchie d’accueil
