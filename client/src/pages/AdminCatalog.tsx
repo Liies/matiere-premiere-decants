@@ -15,11 +15,22 @@ import { toast } from "sonner";
 type CatalogDraft = {
   name: string;
   description: string;
+  topNotes: string;
+  heartNotes: string;
+  baseNotes: string;
   price: string;
   volumeMl: string;
 };
 
-const EMPTY_DRAFT: CatalogDraft = { name: "", description: "", price: "", volumeMl: "50" };
+const EMPTY_DRAFT: CatalogDraft = {
+  name: "",
+  description: "",
+  topNotes: "",
+  heartNotes: "",
+  baseNotes: "",
+  price: "",
+  volumeMl: "50",
+};
 
 export default function AdminCatalog() {
   const { user, isAuthenticated } = useAuth();
@@ -52,6 +63,9 @@ export default function AdminCatalog() {
       setDraft({
         name: selectedProduct.name,
         description: selectedProduct.description ?? "",
+        topNotes: selectedProduct.topNotes ?? "",
+        heartNotes: selectedProduct.heartNotes ?? "",
+        baseNotes: selectedProduct.baseNotes ?? "",
         price: (selectedProduct.price / 100).toFixed(2),
         volumeMl: String(selectedProduct.volumeMl ?? 50),
       });
@@ -83,6 +97,9 @@ export default function AdminCatalog() {
         id: selectedProduct.id,
         name: draft.name.trim(),
         description: draft.description.trim(),
+        topNotes: draft.topNotes.trim(),
+        heartNotes: draft.heartNotes.trim(),
+        baseNotes: draft.baseNotes.trim(),
         price: Math.round(normalizedPrice * 100),
         volumeMl,
       },
@@ -159,7 +176,7 @@ export default function AdminCatalog() {
           <div>
             <p className="text-xs font-medium uppercase tracking-[0.2em] text-gray-500">Administration</p>
             <h1 className="mt-2 text-3xl font-light text-gray-900 sm:text-4xl">Gestion du catalogue</h1>
-            <p className="mt-2 max-w-2xl text-sm text-gray-600">Modifiez le nom, la description, le prix et la contenance affichés à vos clients.</p>
+            <p className="mt-2 max-w-2xl text-sm text-gray-600">Modifiez le nom, la description, les notes olfactives, le prix et la contenance affichés à vos clients.</p>
           </div>
           <a href="/products" className="inline-flex min-h-11 items-center justify-center border border-gray-300 px-4 text-sm text-gray-700 transition hover:border-gray-900 hover:text-gray-900">Voir la boutique</a>
         </div>
@@ -214,6 +231,31 @@ export default function AdminCatalog() {
                     <Textarea id="catalog-product-description" value={draft.description} onChange={(event) => updateDraft("description", event.target.value)} rows={8} maxLength={4000} required />
                     <p className="text-xs text-gray-500">{draft.description.length}/4000 caractères</p>
                   </div>
+
+                  <section className="space-y-4 border-t border-gray-200 pt-5" aria-labelledby="catalog-notes-title">
+                    <div>
+                      <p className="text-xs font-medium uppercase tracking-[0.18em] text-gray-500">Pyramide olfactive</p>
+                      <h3 id="catalog-notes-title" className="mt-2 text-lg font-medium text-gray-900">Notes du parfum</h3>
+                      <p className="mt-1 text-xs text-gray-500">Séparez les matières par des virgules. Ces notes sont reprises sur la fiche produit.</p>
+                    </div>
+                    <div className="grid gap-4 sm:grid-cols-3">
+                      <div className="space-y-2">
+                        <Label htmlFor="catalog-product-top-notes">Notes de tête</Label>
+                        <Textarea id="catalog-product-top-notes" value={draft.topNotes} onChange={(event) => updateDraft("topNotes", event.target.value)} rows={4} maxLength={1000} />
+                        <p className="text-xs text-gray-500">{draft.topNotes.length}/1000</p>
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="catalog-product-heart-notes">Notes de cœur</Label>
+                        <Textarea id="catalog-product-heart-notes" value={draft.heartNotes} onChange={(event) => updateDraft("heartNotes", event.target.value)} rows={4} maxLength={1000} />
+                        <p className="text-xs text-gray-500">{draft.heartNotes.length}/1000</p>
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="catalog-product-base-notes">Notes de fond</Label>
+                        <Textarea id="catalog-product-base-notes" value={draft.baseNotes} onChange={(event) => updateDraft("baseNotes", event.target.value)} rows={4} maxLength={1000} />
+                        <p className="text-xs text-gray-500">{draft.baseNotes.length}/1000</p>
+                      </div>
+                    </div>
+                  </section>
 
                   <div className="grid gap-5 sm:grid-cols-2">
                     <div className="space-y-2">

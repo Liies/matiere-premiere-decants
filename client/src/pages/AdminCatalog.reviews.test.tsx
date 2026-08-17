@@ -6,10 +6,14 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 
 const state = vi.hoisted(() => ({
   updateStockMutate: vi.fn(),
+  updateProductMutate: vi.fn(),
   product: {
     id: 42,
     name: "Vanilla Powder",
     description: "Une description administrable suffisamment détaillée.",
+    topNotes: "Absolu de vanille",
+    heartNotes: "Bois ambrés",
+    baseNotes: "Musc blanc",
     price: 12000,
     volumeMl: 50,
   },
@@ -20,7 +24,7 @@ vi.mock("@/lib/trpc", () => ({
   trpc: {
     adminCatalog: {
       list: { useQuery: () => ({ data: [state.product], isLoading: false }) },
-      update: { useMutation: () => ({ mutate: vi.fn(), isPending: false }) },
+      update: { useMutation: () => ({ mutate: state.updateProductMutate, isPending: false }) },
     },
     adminInventory: {
       variants: { useQuery: () => ({ data: state.variants, isLoading: false }) },
@@ -54,6 +58,7 @@ describe("administration des avis", () => {
   afterEach(() => {
     cleanup();
     state.updateStockMutate.mockClear();
+    state.updateProductMutate.mockClear();
   });
 
   it("affiche un état vide honnête lorsqu’aucun avis vérifié ne requiert de modération", () => {
@@ -76,6 +81,29 @@ describe("administration des avis", () => {
 
     expect(state.updateStockMutate).toHaveBeenCalledWith(
       { variantId: 142, stock: 8 },
+      expect.objectContaining({ onSuccess: expect.any(Function), onError: expect.any(Function) }),
+    );
+  });
+
+  it("charge et enregistre les notes de tête, de cœur et de fond", () => {
+    render(<AdminCatalog />);
+
+    expect((screen.getByLabelText("Notes de tête") as HTMLTextAreaElement).value).toBe("Absolu de vanille");
+    expect((screen.getByLabelText("Notes de cœur") as HTMLTextAreaElement).value).toBe("Bois ambrés");
+    expect((screen.getByLabelText("Notes de fond") as HTMLTextAreaElement).value).toBe("Musc blanc");
+
+    fireEvent.change(screen.getByLabelText("Notes de tête"), { target: { value: "Poivre noir" } });
+    fireEvent.change(screen.getByLabelText("Notes de cœur"), { target: { value: "Iris, ambroxan" } });
+    fireEvent.change(screen.getByLabelText("Notes de fond"), { target: { value: "Bois de santal" } });
+    fireEvent.click(screen.getByRole("button", { name: "Enregistrer" }));
+
+    expect(state.updateProductMutate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        id: 42,
+        topNotes: "Poivre noir",
+        heartNotes: "Iris, ambroxan",
+        baseNotes: "Bois de santal",
+      }),
       expect.objectContaining({ onSuccess: expect.any(Function), onError: expect.any(Function) }),
     );
   });

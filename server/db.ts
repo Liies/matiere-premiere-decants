@@ -248,6 +248,9 @@ export async function getProductByBrandSlug(brandSlug: string, productSlug: stri
 export type ProductCatalogUpdate = {
   name: string;
   description: string;
+  topNotes: string | null;
+  heartNotes: string | null;
+  baseNotes: string | null;
   price: number;
   volumeMl: number;
 };

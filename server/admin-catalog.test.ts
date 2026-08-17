@@ -49,6 +49,21 @@ describe("adminCatalog", () => {
     ).rejects.toThrow();
   });
 
+  it("rejette des notes olfactives trop longues avant toute écriture", async () => {
+    await expect(
+      createCaller("admin").adminCatalog.update({
+        id: 1,
+        name: "Vanilla Powder",
+        description: "Une description administrable suffisamment détaillée.",
+        topNotes: "a".repeat(1_001),
+        heartNotes: "Musc blanc",
+        baseNotes: "Bois ambrés",
+        price: 12_000,
+        volumeMl: 50,
+      }),
+    ).rejects.toThrow();
+  });
+
   it("refuse la modification de stock à un utilisateur non administrateur", async () => {
     await expect(
       createCaller("user").adminInventory.updateStock({ variantId: 1, stock: 5 }),

@@ -37,6 +37,9 @@ const PRODUCT_CATALOG_UPDATE = z.object({
   id: z.number().int().positive(),
   name: z.string().trim().min(2, "Le nom doit comporter au moins 2 caractères").max(255),
   description: z.string().trim().min(10, "La description doit comporter au moins 10 caractères").max(4000),
+  topNotes: z.string().trim().max(1000, "Les notes de tête ne peuvent pas dépasser 1 000 caractères").default(""),
+  heartNotes: z.string().trim().max(1000, "Les notes de cœur ne peuvent pas dépasser 1 000 caractères").default(""),
+  baseNotes: z.string().trim().max(1000, "Les notes de fond ne peuvent pas dépasser 1 000 caractères").default(""),
   price: z.number().int().min(100, "Le prix doit être d’au moins 1,00 €").max(1_000_000),
   volumeMl: z.number().int().min(1, "La contenance doit être supérieure à 0 ml").max(1_000),
 });
@@ -250,6 +253,9 @@ export const appRouter = router({
       await updateProductCatalog(input.id, {
         name: input.name,
         description: input.description,
+        topNotes: input.topNotes || null,
+        heartNotes: input.heartNotes || null,
+        baseNotes: input.baseNotes || null,
         price: input.price,
         volumeMl: input.volumeMl,
       });

@@ -6466,3 +6466,14 @@
 - [x] Auditer le rendu des variantes sur les cartes produit
 - [x] Rétablir l’affichage simplifié lorsqu’une seule contenance est disponible
 - [x] Couvrir et publier la régression de présentation
+
+## Paiement — PayPal
+- [ ] Vérifier l’intégration Checkout PayPal et obtenir les identifiants sandbox
+- [ ] Ajouter la création et la capture sécurisées des commandes PayPal
+- [ ] Proposer PayPal dans le checkout sans modifier le parcours Stripe
+- [ ] Tester et publier le paiement PayPal en mode sandbox
+
+## Administration — Notes olfactives
+- [x] Auditer le formulaire du catalogue et la mutation de mise à jour
+- [x] Ajouter l’édition des notes de tête, de cœur et de fond
+- [x] Couvrir et publier la mise à jour des notes
