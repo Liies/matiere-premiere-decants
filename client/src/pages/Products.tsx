@@ -26,6 +26,7 @@ export default function Products() {
   const { isWishlisted, toggleWishlist } = useWishlist();
   const addToCart = trpc.cart.addVariant.useMutation();
   const [selectedQuantity, setSelectedQuantity] = useState<Record<number, number>>({});
+  const [selectedVariantIds, setSelectedVariantIds] = useState<Record<number, number>>({});
   const [selectedFilters, setSelectedFilters] = useState<string[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [isSearchFocused, setIsSearchFocused] = useState(false);
@@ -108,9 +109,16 @@ export default function Products() {
 
   const getSelectedVariant = (product: CatalogProduct) => {
     const variants = getPublicVariants(product);
-    return variants.find((variant: { stock: number }) => variant.stock > 0)
+    return variants.find((variant: { id: number }) => variant.id === selectedVariantIds[product.id])
+      ?? variants.find((variant: { stock: number }) => variant.stock > 0)
       ?? variants[0]
       ?? null;
+  };
+  const hasMultiplePublicVariants = (product: CatalogProduct) => getPublicVariants(product).length > 1;
+  const getFormatLabel = (product: CatalogProduct) => {
+    const variants = getPublicVariants(product);
+    if (variants.length === 1) return `Décant ${variants[0]?.sizeMl ?? product.volumeMl ?? 50} ml`;
+    return variants.length > 1 ? `${variants.length} contenances disponibles` : `Décant ${product.volumeMl ?? 50} ml`;
   };
 
   const clearHoverFlipTimer = () => {
@@ -456,7 +464,7 @@ export default function Products() {
                       </div>
                       <a href={productPath(product)} className="mt-5 block" aria-label={`Voir la fiche de ${product.name}`}>
                         <h3 className="text-lg font-light text-gray-900 hover:text-gray-600 transition-colors">{product.name}</h3>
-                        <p className="text-xs text-gray-500 font-medium mt-1">Décant 50 ml</p>
+                        <p className="text-xs text-gray-500 font-medium mt-1">{getFormatLabel(product)}</p>
                       </a>
                     </div>
 
@@ -484,6 +492,23 @@ export default function Products() {
 
                       {isProductAvailable(product) ? (
                         <div className="flex w-full min-w-0 flex-col gap-2 sm:w-auto sm:items-end">
+                          {hasMultiplePublicVariants(product) && (
+                            <div className="flex w-full min-w-0 items-center gap-2 sm:justify-end">
+                              <label htmlFor={`format-${product.id}`} className="sr-only">Format de {product.name}</label>
+                              <select
+                                id={`format-${product.id}`}
+                                value={getSelectedVariant(product)?.id ?? ""}
+                                onChange={(event) => setSelectedVariantIds((previous) => ({ ...previous, [product.id]: Number(event.target.value) }))}
+                                className="h-11 min-w-0 flex-1 rounded border border-gray-200 bg-white px-3 text-sm text-gray-900 sm:w-auto sm:flex-none"
+                              >
+                                {getPublicVariants(product).map((variant: { id: number; sizeMl: number; priceCents: number; stock: number }) => (
+                                  <option key={variant.id} value={variant.id} disabled={variant.stock === 0}>
+                                    {variant.sizeMl} ml · {formatPrice(variant.priceCents)}{variant.stock === 0 ? " — Rupture" : ""}
+                                  </option>
+                                ))}
+                              </select>
+                            </div>
+                          )}
                           <div className="flex w-full min-w-0 items-center gap-2 sm:justify-end">
                             <label htmlFor={`quantity-${product.id}`} className="sr-only">Quantité de {product.name}</label>
                             <input

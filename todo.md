@@ -6461,3 +6461,8 @@
 - [x] Auditer les pages et données administratives disponibles
 - [x] Ajouter un tableau de bord des commandes, stocks et actions prioritaires
 - [x] Couvrir les droits d’accès et les indicateurs par des tests
+
+## Catalogue — Présentation par contenance
+- [x] Auditer le rendu des variantes sur les cartes produit
+- [x] Rétablir l’affichage simplifié lorsqu’une seule contenance est disponible
+- [x] Couvrir et publier la régression de présentation

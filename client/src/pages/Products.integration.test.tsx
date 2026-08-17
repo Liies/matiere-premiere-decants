@@ -180,6 +180,7 @@ describe("intégration catalogue — panier et souhaits", () => {
 
     const grid = screen.getByTestId("catalog-products-grid");
     const actions = screen.getByTestId("catalog-card-actions-1");
+    const vanillaCard = screen.getByTestId("catalog-card-body-1");
     const quantity = screen.getByLabelText("Quantité de Vanilla Powder");
     const addButton = screen.getAllByRole("button", { name: "Ajouter" })[0]!;
 
@@ -187,6 +188,7 @@ describe("intégration catalogue — panier et souhaits", () => {
     expect(grid.className).toContain("md:grid-cols-2");
     expect(actions.className).toContain("sm:items-end");
     expect(screen.queryByLabelText("Format de Vanilla Powder")).toBeNull();
+    expect(within(vanillaCard).getByText("Décant 50 ml")).toBeTruthy();
     expect(quantity.className).toContain("h-11");
     expect(addButton.className).toContain("min-h-11");
   });
