@@ -9,6 +9,7 @@ import {
   getAllProducts,
   getBrands,
   getCatalogProducts,
+  getLowStockVariants,
   getProductBySlug,
   getProductByBrandSlug,
   getProductById,
@@ -258,6 +259,10 @@ export const appRouter = router({
   }),
 
   adminInventory: router({
+    lowStock: protectedProcedure.query(({ ctx }) => {
+      requireAdmin(ctx.user);
+      return getLowStockVariants();
+    }),
     variants: protectedProcedure
       .input(z.object({ productId: z.number().int().positive() }))
       .query(({ input, ctx }) => {

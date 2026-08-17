@@ -6456,3 +6456,8 @@
 - [x] Auditer les procédures d’inventaire et l’interface du catalogue
 - [x] Ajouter l’ajustement validé du stock 50 ml avec mouvement tracé
 - [x] Couvrir les autorisations, les limites et le rendu administrateur
+
+## Administration — Outils de pilotage
+- [x] Auditer les pages et données administratives disponibles
+- [x] Ajouter un tableau de bord des commandes, stocks et actions prioritaires
+- [x] Couvrir les droits d’accès et les indicateurs par des tests

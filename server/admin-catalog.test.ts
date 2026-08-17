@@ -55,6 +55,12 @@ describe("adminCatalog", () => {
     ).rejects.toThrow("Accès refusé");
   });
 
+  it("réserve les alertes de stock aux administrateurs", async () => {
+    await expect(createCaller(null).adminInventory.lowStock()).rejects.toThrow();
+    await expect(createCaller("user").adminInventory.lowStock()).rejects.toThrow("Accès refusé");
+    await expect(createCaller("admin").adminInventory.lowStock()).resolves.toEqual(expect.any(Array));
+  });
+
   it("rejette un stock négatif avant toute écriture", async () => {
     await expect(
       createCaller("admin").adminInventory.updateStock({ variantId: 1, stock: -1 }),

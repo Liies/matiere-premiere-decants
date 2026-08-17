@@ -1,4 +1,4 @@
-import { and, asc, eq, gt, gte, inArray, sql, or, like, desc } from "drizzle-orm";
+import { and, asc, eq, gt, gte, inArray, sql, or, like, desc, lte } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
 import { InsertUser, users, brands, products, cartItems, cartSyncReceipts, orders, orderItems, InsertOrder, InsertOrderItem, sourceBottles, variants, savedDeliveryAddresses, productReviews, stockMovements } from "../drizzle/schema";
 import { ENV } from './_core/env';
@@ -147,6 +147,28 @@ export async function getProductVariants(productId: number) {
     .where(and(eq(variants.productId, productId), eq(variants.isActive, true)))
     .orderBy(asc(variants.sortOrder), asc(variants.sizeMl));
   return productVariants.map((variant) => ({ ...variant, availableQuantity: variant.stock }));
+}
+
+/** Variantes actives dont le stock nécessite un suivi opérationnel. */
+export async function getLowStockVariants(threshold: number = 3) {
+  const db = await getDb();
+  if (!db) return [];
+  return db
+    .select({
+      id: variants.id,
+      productId: variants.productId,
+      productName: products.name,
+      sizeMl: variants.sizeMl,
+      stock: variants.stock,
+    })
+    .from(variants)
+    .innerJoin(products, eq(variants.productId, products.id))
+    .where(and(
+      eq(variants.isActive, true),
+      eq(products.isArchived, false),
+      lte(variants.stock, threshold),
+    ))
+    .orderBy(asc(variants.stock), asc(products.name), asc(variants.sizeMl));
 }
 
 export async function getVariantsByProductIds(productIds: number[]) {

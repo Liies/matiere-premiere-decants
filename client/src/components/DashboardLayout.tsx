@@ -21,14 +21,14 @@ import {
 } from "@/components/ui/sidebar";
 import { getLoginUrl } from "@/const";
 import { useIsMobile } from "@/hooks/useMobile";
-import { Leaf, LogOut, Package, PanelLeft, ShoppingBag } from "lucide-react";
+import { LayoutDashboard, Leaf, LogOut, Package, PanelLeft } from "lucide-react";
 import { CSSProperties, useEffect, useRef, useState } from "react";
 import { useLocation } from "wouter";
 import { DashboardLayoutSkeleton } from './DashboardLayoutSkeleton';
 import { Button } from "./ui/button";
 
 const menuItems = [
-  { icon: ShoppingBag, label: "Commandes", path: "/admin" },
+  { icon: LayoutDashboard, label: "Pilotage", path: "/admin" },
   { icon: Package, label: "Catalogue", path: "/admin/catalogue" },
 ];
 
