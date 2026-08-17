@@ -6409,3 +6409,8 @@
 - [x] Afficher la confirmation uniquement après réception du statut paid
 - [x] Couvrir les statuts annulé et non confirmé
 - [x] Valider et publier la protection de l’écran de retour
+
+## Stripe — Préparation du mode réel
+- [ ] Vérifier les prérequis KYC, clés réelles et webhook de production
+- [x] Ajouter des contrôles de cohérence de configuration Stripe
+- [ ] Documenter la bascule et demander confirmation avant toute activation réelle

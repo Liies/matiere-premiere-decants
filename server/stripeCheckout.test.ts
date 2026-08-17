@@ -8,12 +8,14 @@ vi.mock("stripe", () => ({
   },
 }));
 
+import { getStripeRuntimeConfig, getStripeWebhookSecret } from "./stripeConfig";
 import { createStripeCheckoutSession } from "./stripeCheckout";
 
 describe("Stripe Checkout", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     process.env.STRIPE_SECRET_KEY = "sk_test_checkout";
+    process.env.STRIPE_WEBHOOK_SECRET = "whsec_test_checkout";
     state.createSession.mockResolvedValue({ id: "cs_checkout_1", url: "https://checkout.stripe.test/cs_checkout_1" });
   });
 
@@ -43,5 +45,20 @@ describe("Stripe Checkout", () => {
         expect.objectContaining({ quantity: 1, price_data: expect.objectContaining({ unit_amount: 495 }) }),
       ]),
     }));
+  });
+
+  it("identifie explicitement les configurations test et réel valides", () => {
+    expect(getStripeRuntimeConfig()).toMatchObject({ mode: "test", secretKey: "sk_test_checkout" });
+    process.env.STRIPE_SECRET_KEY = "rk_live_prepared";
+    expect(getStripeRuntimeConfig()).toMatchObject({ mode: "live", secretKey: "rk_live_prepared" });
+    expect(getStripeWebhookSecret()).toBe("whsec_test_checkout");
+  });
+
+  it("refuse une clé Stripe ou un secret de webhook invalide", () => {
+    process.env.STRIPE_SECRET_KEY = "pk_live_public";
+    process.env.STRIPE_WEBHOOK_SECRET = "invalid";
+
+    expect(getStripeRuntimeConfig).toThrow("clé Stripe");
+    expect(getStripeWebhookSecret).toThrow("secret de signature");
   });
 });

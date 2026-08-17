@@ -4,6 +4,7 @@ import type Stripe from "stripe";
 import { notifyOwner } from "./_core/notification";
 import { markStripeCheckoutOrderPaid, releaseExpiredStripeCheckoutOrder } from "./db";
 import { sendOrderCreatedEmails } from "./transactionalEmail";
+import { getStripeWebhookSecret } from "./stripeConfig";
 import { getStripeClient } from "./stripeCheckout";
 
 async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
@@ -51,13 +52,12 @@ export async function processStripeWebhookEvent(event: Stripe.Event) {
 export function registerStripeWebhook(app: Express) {
   app.post("/api/stripe/webhook", express.raw({ type: "application/json" }), async (req: Request, res: Response) => {
     const signature = req.headers["stripe-signature"];
-    const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
-    if (typeof signature !== "string" || !webhookSecret) {
+    if (typeof signature !== "string") {
       return res.status(400).json({ error: "Signature Stripe manquante" });
     }
 
     try {
-      const event = getStripeClient().webhooks.constructEvent(req.body, signature, webhookSecret);
+      const event = getStripeClient().webhooks.constructEvent(req.body, signature, getStripeWebhookSecret());
       if (event.id.startsWith("evt_test_")) {
         console.log("[Webhook] Test event detected, returning verification response");
         return res.json({ verified: true });

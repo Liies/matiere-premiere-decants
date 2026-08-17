@@ -1,4 +1,5 @@
 import Stripe from "stripe";
+import { getStripeRuntimeConfig } from "./stripeConfig";
 
 type CheckoutLine = {
   productName: string;
@@ -19,9 +20,7 @@ type CreateStripeCheckoutInput = {
 };
 
 export function getStripeClient() {
-  const secretKey = process.env.STRIPE_SECRET_KEY;
-  if (!secretKey) throw new Error("Le paiement Stripe n’est pas configuré");
-  return new Stripe(secretKey);
+  return new Stripe(getStripeRuntimeConfig().secretKey);
 }
 
 export async function createStripeCheckoutSession(input: CreateStripeCheckoutInput) {
