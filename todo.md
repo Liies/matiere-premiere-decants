@@ -6487,3 +6487,8 @@
 - [x] Auditer les sections et appels à l’action de l’accueil
 - [x] Épurer le hero et les sections pour réduire la surcharge visuelle
 - [x] Couvrir et publier la nouvelle hiérarchie d’accueil
+
+## Qualité — Tests unitaires récents
+- [x] Auditer la couverture des modifications récentes
+- [x] Ajouter les scénarios unitaires manquants et mettre à jour les régressions
+- [x] Exécuter la suite complète et publier la couverture consolidée

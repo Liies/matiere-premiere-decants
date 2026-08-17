@@ -48,6 +48,20 @@ const state = vi.hoisted(() => ({
       createdAt: new Date("2026-08-17T09:00:00Z"),
       items: [],
     },
+    {
+      id: 4,
+      orderNumber: "MP-OLD-PAID",
+      status: "paid",
+      totalAmount: 12000,
+      customerName: "Mina",
+      customerEmail: "mina@example.com",
+      shippingAddress: "1 rue Montorgueil",
+      shippingPostalCode: "75001",
+      shippingCity: "Paris",
+      shippingCountry: "France",
+      createdAt: new Date("2026-07-01T09:00:00Z"),
+      items: [],
+    },
   ],
   lowStock: [{ id: 42, productId: 9, productName: "Vanilla Powder", sizeMl: 50, stock: 0 }],
 }));
@@ -89,6 +103,7 @@ describe("tableau de bord administrateur", () => {
 
     expect(screen.getByRole("heading", { name: /pilotage de la boutique/i })).toBeTruthy();
     expect(screen.getByText(/240,00/)).toBeTruthy();
+    expect(screen.queryByText(/360,00/)).toBeNull();
     expect(screen.getByText(/panier moyen/i)).toBeTruthy();
     expect(screen.getByText(/1 paiement en attente/i)).toBeTruthy();
     expect(screen.getByText("Vanilla Powder")).toBeTruthy();
