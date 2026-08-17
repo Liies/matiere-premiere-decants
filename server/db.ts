@@ -106,6 +106,13 @@ export async function getAllProducts() {
   return db.select().from(products);
 }
 
+/** Liste les références retirées de la boutique, réservée aux outils administratifs. */
+export async function getArchivedProducts() {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(products).where(eq(products.isArchived, true));
+}
+
 export async function getCatalogProducts(brandSlug: string = PUBLIC_BRAND_SLUG, search?: string) {
   const db = await getDb();
   if (!db) return [];

@@ -64,6 +64,8 @@ const state = vi.hoisted(() => ({
     },
   ],
   lowStock: [{ id: 42, productId: 9, productName: "Vanilla Powder", sizeMl: 50, stock: 0 }],
+  archivedProducts: [{ id: 77, name: "Crystal Safran", concentration: "extrait", isArchived: true }],
+  restoreProductMutate: vi.fn(),
 }));
 
 vi.mock("@/lib/trpc", () => ({
@@ -75,9 +77,17 @@ vi.mock("@/lib/trpc", () => ({
     adminInventory: {
       lowStock: { useQuery: () => ({ data: state.lowStock, isLoading: false }) },
     },
+    adminCatalog: {
+      archived: { useQuery: () => ({ data: state.archivedProducts, isLoading: false }) },
+      restore: { useMutation: () => ({ mutate: state.restoreProductMutate, isPending: false }) },
+    },
     reviews: {
       pending: { useQuery: () => ({ data: [{ id: 1 }], isLoading: false }) },
     },
+    useUtils: () => ({
+      adminCatalog: { archived: { invalidate: vi.fn() }, list: { invalidate: vi.fn() } },
+      catalog: { list: { invalidate: vi.fn() } },
+    }),
   },
 }));
 
@@ -96,6 +106,7 @@ describe("tableau de bord administrateur", () => {
   afterEach(() => {
     cleanup();
     vi.useRealTimers();
+    state.restoreProductMutate.mockClear();
   });
 
   it("affiche les indicateurs de commande et les alertes de stock réelles", () => {
@@ -128,5 +139,19 @@ describe("tableau de bord administrateur", () => {
     expect(screen.getByText("MP-PENDING")).toBeTruthy();
     expect(screen.queryByText("MP-PAID")).toBeNull();
     expect(screen.queryByText("MP-SHIPPED")).toBeNull();
+  });
+
+  it("affiche les archives et déclenche une restauration depuis le tableau de bord", () => {
+    render(<Admin />);
+
+    expect(screen.getByRole("heading", { name: "Produits archivés" })).toBeTruthy();
+    expect(screen.getByText("Crystal Safran")).toBeTruthy();
+    expect(screen.getByText(/extrait de parfum/i)).toBeTruthy();
+
+    fireEvent.click(screen.getByRole("button", { name: "Restaurer" }));
+    expect(state.restoreProductMutate).toHaveBeenCalledWith(
+      { id: 77 },
+      expect.objectContaining({ onSuccess: expect.any(Function), onError: expect.any(Function) }),
+    );
   });
 });

@@ -6513,3 +6513,8 @@
 - [x] Vérifier les informations officielles et préparer des visuels cohérents
 - [x] Actualiser les données et libellés publics des extraits de parfum
 - [x] Couvrir, vérifier et publier la mise à jour du catalogue
+
+## Administration — Archives du dashboard
+- [x] Auditer les procédures d’archivage et de restauration disponibles
+- [x] Afficher les produits archivés dans le tableau de bord avec action de restauration
+- [x] Couvrir et publier la gestion des archives depuis le dashboard

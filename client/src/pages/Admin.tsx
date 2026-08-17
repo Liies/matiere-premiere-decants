@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { trpc } from "@/lib/trpc";
 import { useAuth } from "@/_core/hooks/useAuth";
-import { AlertTriangle, ArrowUpRight, CheckCircle2, CircleDollarSign, ClipboardList, PackageCheck, ReceiptText, Truck } from "lucide-react";
+import { AlertTriangle, ArchiveRestore, ArrowUpRight, CheckCircle2, CircleDollarSign, ClipboardList, PackageCheck, ReceiptText, RotateCcw, Truck } from "lucide-react";
 import { toast } from "sonner";
 import { useMemo, useState } from "react";
 
@@ -39,7 +39,12 @@ export default function Admin() {
   const { data: pendingReviews } = trpc.reviews.pending.useQuery(undefined, {
     enabled: isAuthenticated && user?.role === "admin",
   });
+  const { data: archivedProducts, isLoading: isArchivedLoading } = trpc.adminCatalog.archived.useQuery(undefined, {
+    enabled: isAuthenticated && user?.role === "admin",
+  });
+  const trpcUtils = trpc.useUtils();
   const updateStatus = trpc.orders.updateStatus.useMutation();
+  const restoreProduct = trpc.adminCatalog.restore.useMutation();
   const [selectedStatus, setSelectedStatus] = useState<Record<number, OrderStatusType | undefined>>({});
   const [orderFilter, setOrderFilter] = useState<OrderFilter>("all");
 
@@ -75,6 +80,21 @@ export default function Admin() {
           setSelectedStatus((previous) => ({ ...previous, [orderId]: undefined }));
         },
         onError: (error) => toast.error(error.message || "Erreur lors de la mise à jour"),
+      },
+    );
+  };
+
+  const handleRestoreProduct = (productId: number, productName: string) => {
+    restoreProduct.mutate(
+      { id: productId },
+      {
+        onSuccess: () => {
+          void trpcUtils.adminCatalog.archived.invalidate();
+          void trpcUtils.adminCatalog.list.invalidate();
+          void trpcUtils.catalog.list.invalidate();
+          toast.success(`${productName} a été restauré dans le catalogue.`);
+        },
+        onError: (error) => toast.error(error.message || "Impossible de restaurer ce parfum."),
       },
     );
   };
@@ -199,6 +219,53 @@ export default function Admin() {
                     <span>{dashboard.shipping.length} commande{dashboard.shipping.length === 1 ? "" : "s"} expédiée{dashboard.shipping.length === 1 ? "" : "s"}</span><Truck className="h-4 w-4" aria-hidden="true" />
                   </button>
                 </div>
+              </Card>
+            </section>
+
+            <section aria-labelledby="admin-archives-title">
+              <Card className="p-5 sm:p-6">
+                <div className="flex flex-col gap-3 border-b border-gray-200 pb-4 sm:flex-row sm:items-end sm:justify-between">
+                  <div>
+                    <p className="text-xs font-medium uppercase tracking-[0.18em] text-gray-500">Catalogue</p>
+                    <h2 id="admin-archives-title" className="mt-2 text-xl font-light text-gray-900">Produits archivés</h2>
+                    <p className="mt-1 text-sm text-gray-600">Les références retirées restent conservées et peuvent être remises en ligne à tout moment.</p>
+                  </div>
+                  <span className="inline-flex w-fit items-center gap-2 text-sm text-gray-600">
+                    <ArchiveRestore className="h-4 w-4" aria-hidden="true" />
+                    {isArchivedLoading ? "…" : `${archivedProducts?.length ?? 0} archive${(archivedProducts?.length ?? 0) === 1 ? "" : "s"}`}
+                  </span>
+                </div>
+
+                {isArchivedLoading ? (
+                  <p className="py-6 text-sm text-gray-600">Chargement des archives…</p>
+                ) : !archivedProducts || archivedProducts.length === 0 ? (
+                  <div className="flex gap-3 py-6 text-sm text-gray-600">
+                    <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-emerald-700" aria-hidden="true" />
+                    <p>Aucun parfum n’est actuellement archivé.</p>
+                  </div>
+                ) : (
+                  <ul className="divide-y divide-gray-100">
+                    {archivedProducts.map((product) => (
+                      <li key={product.id} className="flex flex-col gap-3 py-4 sm:flex-row sm:items-center sm:justify-between">
+                        <div>
+                          <p className="text-sm font-medium text-gray-900">{product.name}</p>
+                          <p className="mt-1 text-xs text-gray-500">{product.concentration === "extrait" ? "Extrait de Parfum" : "Eau de Parfum"} · Retiré du catalogue public</p>
+                        </div>
+                        <Button
+                          type="button"
+                          size="sm"
+                          variant="outline"
+                          disabled={restoreProduct.isPending}
+                          onClick={() => handleRestoreProduct(product.id, product.name)}
+                          className="min-h-11 shrink-0 border-gray-300 text-gray-900 hover:border-gray-900"
+                        >
+                          <RotateCcw className="mr-2 h-4 w-4" aria-hidden="true" />
+                          Restaurer
+                        </Button>
+                      </li>
+                    ))}
+                  </ul>
+                )}
               </Card>
             </section>
 

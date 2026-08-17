@@ -2,12 +2,14 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const mocks = vi.hoisted(() => ({
   getProductById: vi.fn(),
+  getArchivedProducts: vi.fn(),
   setProductArchived: vi.fn(),
 }));
 
 vi.mock("./db", async (importOriginal) => ({
   ...(await importOriginal<typeof import("./db")>()),
   getProductById: mocks.getProductById,
+  getArchivedProducts: mocks.getArchivedProducts,
   setProductArchived: mocks.setProductArchived,
 }));
 
@@ -35,6 +37,7 @@ describe("adminCatalog — archivage réversible", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mocks.getProductById.mockResolvedValue({ id: 42, name: "Radical Rose" });
+    mocks.getArchivedProducts.mockResolvedValue([{ id: 42, name: "Radical Rose", isArchived: true }]);
     mocks.setProductArchived.mockResolvedValue(undefined);
   });
 
@@ -46,6 +49,13 @@ describe("adminCatalog — archivage réversible", () => {
   it("restaure un parfum archivé pour un administrateur", async () => {
     await expect(createCaller("admin").adminCatalog.restore({ id: 42 })).resolves.toEqual({ success: true });
     expect(mocks.setProductArchived).toHaveBeenCalledWith(42, false);
+  });
+
+  it("liste les archives pour un administrateur sans les exposer à un utilisateur standard", async () => {
+    await expect(createCaller("admin").adminCatalog.archived()).resolves.toEqual([
+      { id: 42, name: "Radical Rose", isArchived: true },
+    ]);
+    await expect(createCaller("user").adminCatalog.archived()).rejects.toThrow("Accès refusé");
   });
 
   it("refuse l’archivage à un utilisateur non administrateur", async () => {

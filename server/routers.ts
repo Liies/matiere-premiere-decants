@@ -7,6 +7,7 @@ import { publicProcedure, protectedProcedure, router } from "./_core/trpc";
 import {
   createCatalogVariant,
   getAllProducts,
+  getArchivedProducts,
   getBrands,
   getCatalogProducts,
   getLowStockVariants,
@@ -247,6 +248,10 @@ export const appRouter = router({
     list: protectedProcedure.query(({ ctx }) => {
       requireAdmin(ctx.user);
       return getAllProducts();
+    }),
+    archived: protectedProcedure.query(({ ctx }) => {
+      requireAdmin(ctx.user);
+      return getArchivedProducts();
     }),
     update: protectedProcedure.input(PRODUCT_CATALOG_UPDATE).mutation(async ({ input, ctx }) => {
       requireAdmin(ctx.user);
