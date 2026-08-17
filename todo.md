@@ -6533,3 +6533,8 @@
 - [x] Auditer les sources de visuels et les en-têtes de cache actuellement servis
 - [x] Appliquer un cache durable, invalidable lors d’un changement de visuel
 - [x] Couvrir, vérifier et publier l’optimisation de cache des images
+
+## Catalogue — Uniformité des visuels favoris
+- [x] Auditer les sources d’images du catalogue et de la liste de souhaits
+- [x] Unifier les deux affichages sur la même source de visuel produit
+- [x] Couvrir, vérifier et publier la cohérence visuelle

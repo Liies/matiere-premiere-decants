@@ -50,6 +50,7 @@ export default function Wishlist() {
             <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
               {wishedProducts.map((product) => {
                 const image = getProductImage(product.id);
+                const imageSrc = product.imageUrl ?? image?.compressed;
                 return (
                   <Card key={product.id} className="group overflow-hidden border-gray-200 transition-all duration-500 hover:-translate-y-1 hover:shadow-xl motion-reduce:transform-none motion-reduce:transition-none">
                     <div className="relative p-4 sm:p-5">
@@ -63,7 +64,7 @@ export default function Wishlist() {
                       </button>
                       <Link href={`/product/${product.id}`} className="block">
                         <div className="luxury-image-frame product-bottle-frame flex h-64 items-center justify-center rounded-lg bg-gray-100">
-                          {image ? <img src={image.compressed} alt={product.name} className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-[1.03]" /> : <Leaf className="h-12 w-12 text-gray-300" aria-hidden="true" />}
+                          {imageSrc ? <img src={imageSrc} alt={product.name} loading="lazy" className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-[1.03]" /> : <Leaf className="h-12 w-12 text-gray-300" aria-hidden="true" />}
                         </div>
                         <h2 className="mt-5 text-xl font-light text-gray-900">{product.name}</h2>
                         <p className="mt-1 text-sm text-gray-500">Décant {product.volumeMl ?? 50} ml · €{(product.price / 100).toFixed(2)}</p>
