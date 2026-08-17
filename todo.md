@@ -6426,3 +6426,8 @@
 - [x] Tester catalogue et fiche produit, puis publier le correctif
 - [x] Désactiver la variante 2 ml conservée en données historiques
 - [x] Vérifier que seule la variante 50 ml à 120 € est publique
+
+## Diagnostic production — Vanilla Powder
+- [x] Comparer la fiche et l’image sur le domaine publié et la prévisualisation
+- [x] Corriger la source réellement servie en production si nécessaire
+- [x] Vérifier le rechargement et communiquer la marche à suivre
