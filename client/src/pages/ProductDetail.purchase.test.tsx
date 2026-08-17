@@ -13,9 +13,10 @@ const product = {
   topNotes: "Vanille",
   heartNotes: "",
   baseNotes: "Musc blanc",
+  concentration: "extrait",
   price: 12_000,
   volumeMl: 50,
-  imageUrl: "/manus-storage/perfume-bottle-1_35573870.png",
+  imageUrl: "/manus-storage/vanilla-powder-extrait_a69128dc.jpg",
   brand: { name: "Matière Première", slug: "matiere-premiere" },
   variants: [
     { id: 1, productId: 30017, sizeMl: 2, sku: "MP-VANPOW-02", priceCents: 1_000, stock: 10, isActive: false, sortOrder: 1 },
@@ -30,13 +31,14 @@ const productImageFixtures = [
     id: 2,
     name: "Crystal Saffron",
     slug: "crystal-saffron",
-    imageUrl: "/manus-storage/perfume-bottle-2_439724d1.png",
+    imageUrl: "/manus-storage/crystal-saffron-extrait_493b0085.jpg",
   },
   {
     ...product,
     id: 30019,
     name: "Parisian Musk",
     slug: "parisian-musk",
+    concentration: "edp",
     imageUrl: "/manus-storage/parisian-musk-matiere-premiere_a554914c.webp",
   },
   {
@@ -44,6 +46,7 @@ const productImageFixtures = [
     id: 30020,
     name: "French Flower",
     slug: "french-flower",
+    concentration: "edp",
     imageUrl: "/manus-storage/french-flower-matiere-premiere_d8b4b81c.jpg",
   },
 ];
@@ -102,12 +105,14 @@ describe("fiche de parfum — format public unique", () => {
   it("propose uniquement le décant actif de 50 ml et affiche ses informations d’achat", () => {
     render(<ProductDetail />);
 
-    expect(screen.getByRole("img", { name: "Vanilla Powder" }).getAttribute("src")).toBe("/manus-storage/perfume-bottle-1_35573870.png");
+    expect(screen.getByRole("img", { name: "Vanilla Powder" }).getAttribute("src")).toBe("/manus-storage/vanilla-powder-extrait_a69128dc.jpg");
     const summary = screen.getByTestId("product-purchase-summary");
     expect(summary.textContent ?? "").toMatch(/120,00\s*€/);
     expect(summary.textContent).toContain("50 ml · Format unique");
     expect(summary.textContent).toContain("En stock");
     expect(screen.getByText("Format unique")).toBeTruthy();
+    expect(screen.getByText("Concentration")).toBeTruthy();
+    expect(screen.getByText("Extrait de Parfum")).toBeTruthy();
     expect(screen.getByText("Livraison")).toBeTruthy();
     expect(screen.queryByText("Contenance disponible")).toBeNull();
     expect(screen.queryByRole("button", { name: /2 ml/ })).toBeNull();

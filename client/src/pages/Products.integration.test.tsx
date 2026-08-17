@@ -19,6 +19,7 @@ vi.mock("@/lib/trpc", () => ({
               topNotes: "Absolu de vanille",
               heartNotes: "Bois ambrés",
               baseNotes: "Musc blanc",
+              concentration: "extrait",
               price: 19500,
               stock: 5,
               imageUrl: "/manus-storage/vanilla-powder-test.png",
@@ -34,6 +35,7 @@ vi.mock("@/lib/trpc", () => ({
               topNotes: "Safran",
               heartNotes: "Ambroxan",
               baseNotes: "Cèdre",
+              concentration: "edp",
               price: 19500,
               stock: 5,
               imageUrl: "/manus-storage/crystal-saffron-test.png",
@@ -188,7 +190,7 @@ describe("intégration catalogue — panier et souhaits", () => {
     expect(grid.className).toContain("md:grid-cols-2");
     expect(actions.className).toContain("sm:items-end");
     expect(screen.queryByLabelText("Format de Vanilla Powder")).toBeNull();
-    expect(within(vanillaCard).getByText("Décant 50 ml")).toBeTruthy();
+    expect(within(vanillaCard).getByText("Extrait de Parfum · Décant 50 ml")).toBeTruthy();
     expect(quantity.className).toContain("h-11");
     expect(addButton.className).toContain("min-h-11");
   });
@@ -198,7 +200,8 @@ describe("intégration catalogue — panier et souhaits", () => {
 
     expect(screen.queryByLabelText("Filtrer les parfums par contenance")).toBeNull();
     expect(screen.queryByText("Contenance")).toBeNull();
-    expect(screen.getAllByText("Décant 50 ml")).toHaveLength(2);
+    expect(screen.getByText("Extrait de Parfum · Décant 50 ml")).toBeTruthy();
+    expect(screen.getByText("Eau de Parfum · Décant 50 ml")).toBeTruthy();
     expect(screen.queryByRole("option", { name: /2 ml/ })).toBeNull();
   });
 

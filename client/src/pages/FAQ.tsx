@@ -25,7 +25,7 @@ export default function FAQ() {
     {
       question: "Quelle est la différence entre une Eau de Parfum et une Eau de Toilette ?",
       answer:
-        "L'Eau de Parfum contient 15-20% de concentration en parfum et dure plus longtemps (4-8 heures). L'Eau de Toilette en contient 5-15% et dure environ 3-4 heures. Nos décants sont des Eaux de Parfum pour une meilleure tenue.",
+        "La concentration varie selon la création. Le catalogue indique explicitement les Extraits de Parfum et les Eaux de Parfum : consultez la fiche de chaque parfum pour connaître le format exact de votre décant 50 ml.",
     },
     {
       question: "Comment conserver mon parfum ?",

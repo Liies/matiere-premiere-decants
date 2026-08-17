@@ -22,6 +22,7 @@ import { useAuth } from "@/_core/hooks/useAuth";
 import { Archive, Check, Package, RotateCcw, Save, Trash2 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
+import { CONCENTRATION_OPTIONS, type FragranceConcentration } from "@shared/fragrance-concentration";
 
 type CatalogDraft = {
   name: string;
@@ -29,6 +30,7 @@ type CatalogDraft = {
   topNotes: string;
   heartNotes: string;
   baseNotes: string;
+  concentration: FragranceConcentration;
   price: string;
   volumeMl: string;
 };
@@ -39,6 +41,7 @@ const EMPTY_DRAFT: CatalogDraft = {
   topNotes: "",
   heartNotes: "",
   baseNotes: "",
+  concentration: "edp",
   price: "",
   volumeMl: "50",
 };
@@ -83,6 +86,7 @@ export default function AdminCatalog() {
         topNotes: selectedProduct.topNotes ?? "",
         heartNotes: selectedProduct.heartNotes ?? "",
         baseNotes: selectedProduct.baseNotes ?? "",
+        concentration: (selectedProduct.concentration as FragranceConcentration | undefined) ?? "edp",
         price: (selectedProduct.price / 100).toFixed(2),
         volumeMl: String(selectedProduct.volumeMl ?? 50),
       });
@@ -117,6 +121,7 @@ export default function AdminCatalog() {
         topNotes: draft.topNotes.trim(),
         heartNotes: draft.heartNotes.trim(),
         baseNotes: draft.baseNotes.trim(),
+        concentration: draft.concentration,
         price: Math.round(normalizedPrice * 100),
         volumeMl,
       },
@@ -331,6 +336,21 @@ export default function AdminCatalog() {
                       </div>
                     </div>
                   </section>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="catalog-product-concentration">Concentration</Label>
+                    <select
+                      id="catalog-product-concentration"
+                      value={draft.concentration}
+                      onChange={(event) => updateDraft("concentration", event.target.value as FragranceConcentration)}
+                      className="min-h-11 w-full rounded border border-gray-200 bg-white px-3 text-sm text-gray-900"
+                    >
+                      {CONCENTRATION_OPTIONS.map((option) => (
+                        <option key={option.value} value={option.value}>{option.label}</option>
+                      ))}
+                    </select>
+                    <p className="text-xs text-gray-500">Choisissez le libellé réellement présent sur le flacon source.</p>
+                  </div>
 
                   <div className="grid gap-5 sm:grid-cols-2">
                     <div className="space-y-2">

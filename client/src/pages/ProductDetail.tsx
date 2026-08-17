@@ -7,7 +7,8 @@ import Footer from '@/components/Footer';
 import { trpc } from '@/lib/trpc';
 import { useLocalCart } from '@/hooks/useLocalCart';
 import { toast } from 'sonner';
-import { formatPrice } from '@shared/price';
+import { formatPrice } from "@shared/price";
+import { getConcentrationLabel } from "@shared/fragrance-concentration";
 import { CART_CONFIRMATION_DURATION_MS, getCartConfirmationLabel } from '@shared/cart-feedback';
 import { getOlfactoryRevealDelay } from '@shared/olfactory-reveal';
 import { getProductStory } from '@shared/product-stories';
@@ -298,8 +299,9 @@ export default function ProductDetail() {
               )}
 
               {publicProductVariants.length > 0 && (
-                <div className="mt-6 grid gap-3 border-t border-gray-100 pt-6 text-sm text-gray-600 sm:grid-cols-2">
+                <div className="mt-6 grid gap-3 border-t border-gray-100 pt-6 text-sm text-gray-600 sm:grid-cols-3">
                   <p><span className="font-medium text-gray-900">Format unique</span><br />Décant 50 ml</p>
+                  {getConcentrationLabel(product.concentration) ? <p><span className="font-medium text-gray-900">Concentration</span><br />{getConcentrationLabel(product.concentration)}</p> : null}
                   <p><span className="font-medium text-gray-900">Livraison</span><br />France et Europe</p>
                 </div>
               )}

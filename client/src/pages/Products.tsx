@@ -16,6 +16,7 @@ import { CART_CONFIRMATION_DURATION_MS, getCartFeedbackKey } from "@shared/cart-
 import { getOlfactoryFilterIdFromHash } from "@shared/catalog-category-route";
 import { useWishlist } from "@/hooks/useWishlist";
 import { formatPrice } from "@shared/price";
+import { getConcentrationLabel } from "@shared/fragrance-concentration";
 import { useLocation } from "wouter";
 
 export default function Products() {
@@ -107,8 +108,11 @@ export default function Products() {
   const hasMultiplePublicVariants = (product: CatalogProduct) => getPublicVariants(product).length > 1;
   const getFormatLabel = (product: CatalogProduct) => {
     const variants = getPublicVariants(product);
-    if (variants.length === 1) return `Décant ${variants[0]?.sizeMl ?? product.volumeMl ?? 50} ml`;
-    return variants.length > 1 ? `${variants.length} contenances disponibles` : `Décant ${product.volumeMl ?? 50} ml`;
+    const concentration = getConcentrationLabel(product.concentration);
+    const format = variants.length === 1
+      ? `Décant ${variants[0]?.sizeMl ?? product.volumeMl ?? 50} ml`
+      : variants.length > 1 ? `${variants.length} contenances disponibles` : `Décant ${product.volumeMl ?? 50} ml`;
+    return concentration ? `${concentration} · ${format}` : format;
   };
 
   const clearHoverFlipTimer = () => {

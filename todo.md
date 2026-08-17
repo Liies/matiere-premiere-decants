@@ -6507,3 +6507,9 @@
 - [x] Auditer l’état de confirmation des cartes produit
 - [x] Limiter l’animation à la carte ajoutée au panier
 - [x] Couvrir et publier la correction d’animation
+
+## Catalogue — Extraits de parfum
+- [x] Auditer les produits, visuels et mentions actuels du catalogue
+- [x] Vérifier les informations officielles et préparer des visuels cohérents
+- [x] Actualiser les données et libellés publics des extraits de parfum
+- [x] Couvrir, vérifier et publier la mise à jour du catalogue

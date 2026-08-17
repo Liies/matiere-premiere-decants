@@ -16,6 +16,7 @@ const state = vi.hoisted(() => ({
     topNotes: "Absolu de vanille",
     heartNotes: "Bois ambrés",
     baseNotes: "Musc blanc",
+    concentration: "extrait",
     price: 12000,
     volumeMl: 50,
   },
@@ -110,6 +111,22 @@ describe("administration des avis", () => {
         heartNotes: "Iris, ambroxan",
         baseNotes: "Bois de santal",
       }),
+      expect.objectContaining({ onSuccess: expect.any(Function), onError: expect.any(Function) }),
+    );
+  });
+
+  it("affiche et transmet la concentration exacte du parfum", () => {
+    render(<AdminCatalog />);
+
+    const concentration = screen.getByLabelText("Concentration") as HTMLSelectElement;
+    expect(concentration.value).toBe("extrait");
+    expect((screen.getByRole("option", { name: "Extrait de Parfum" }) as HTMLOptionElement).selected).toBe(true);
+
+    fireEvent.change(concentration, { target: { value: "edp" } });
+    fireEvent.click(screen.getByRole("button", { name: "Enregistrer" }));
+
+    expect(state.updateProductMutate).toHaveBeenCalledWith(
+      expect.objectContaining({ id: 42, concentration: "edp" }),
       expect.objectContaining({ onSuccess: expect.any(Function), onError: expect.any(Function) }),
     );
   });

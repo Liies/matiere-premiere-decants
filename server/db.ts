@@ -251,6 +251,7 @@ export type ProductCatalogUpdate = {
   topNotes: string | null;
   heartNotes: string | null;
   baseNotes: string | null;
+  concentration: "edt" | "edp" | "extrait" | "parfum" | "esprit" | "cologne";
   price: number;
   volumeMl: number;
 };
