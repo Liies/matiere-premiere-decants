@@ -2,6 +2,10 @@
 
 > **Important :** ce document prépare la bascule, mais ne l’active pas. Ne remplacez les secrets de test que lorsque le compte Stripe est vérifié et que vous êtes prêt à accepter de vrais paiements.
 
+## Déjà prêt dans la boutique
+
+La création de session Checkout, la vérification de signature du webhook, la confirmation idempotente de paiement, la libération du stock lors d’une expiration et les contrôles qui distinguent les clés test des clés réelles sont déjà en place. Aucun changement de code n’est nécessaire pour passer en mode réel.
+
 ## Pré-requis
 
 | Élément | À vérifier avant la bascule |
@@ -20,13 +24,21 @@ Le webhook de la boutique traite les événements suivants :
 - `checkout.session.async_payment_succeeded`
 - `checkout.session.expired`
 
-## Procédure de bascule
+## Les seules actions à effectuer le moment venu
 
-1. Dans Stripe, passez le tableau de bord en **mode réel** et créez l’endpoint HTTPS ci-dessus pour votre compte.
-2. Récupérez le secret de signature **de cet endpoint réel**.
-3. Dans les paramètres de paiement du projet, remplacez `STRIPE_SECRET_KEY` par la clé serveur réelle et `STRIPE_WEBHOOK_SECRET` par ce nouveau secret de signature. Ajoutez `VITE_STRIPE_PUBLISHABLE_KEY` avec la clé `pk_live_…` uniquement si nécessaire.
-4. Vérifiez que le mode test reste désactivé dans Stripe avant de réaliser une commande réelle volontaire.
-5. Réalisez une commande de contrôle à faible risque, puis vérifiez la livraison de `checkout.session.completed` et le passage de la commande à l’état payé.
+| Étape | Action dans Stripe ou dans le projet |
+| --- | --- |
+| 1 | Finalisez les informations demandées par Stripe et ajoutez votre compte bancaire pour les versements. |
+| 2 | Dans le tableau de bord Stripe, passez en **mode réel**, puis créez l’endpoint HTTPS indiqué ci-dessus avec les trois événements listés. |
+| 3 | Copiez le secret `whsec_…` affiché pour cet endpoint réel. Ne réutilisez pas le secret de test. |
+| 4 | Dans les paramètres de paiement du projet, renseignez `STRIPE_SECRET_KEY` avec `sk_live_…` ou `rk_live_…`, et `STRIPE_WEBHOOK_SECRET` avec le nouveau `whsec_…`. La clé `VITE_STRIPE_PUBLISHABLE_KEY` n’est pas nécessaire au Checkout hébergé actuel ; elle peut rester vide jusqu’à l’ajout d’un paiement intégré à la page. |
+| 5 | Demandez la publication des nouveaux secrets, puis envoyez un événement test depuis le webhook réel afin de confirmer sa réception. |
+
+> Le dernier test avec une vraie carte ne doit être réalisé que lorsque vous êtes prêt à accepter un débit réel. Avant cela, le test d’événement du webhook ne débite personne.
+
+## Après la bascule
+
+Le site utilise automatiquement le mode correspondant à la clé serveur renseignée. Une clé `sk_live_…` ou `rk_live_…` fait passer les nouvelles sessions Checkout en mode réel ; une clé `sk_test_…` conserve les paiements simulés. La validation d’un webhook réel fait passer la commande à l’état payé et déclenche alors les emails de commande.
 
 ## Sécurité et exploitation
 

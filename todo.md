@@ -6414,3 +6414,8 @@
 - [ ] Vérifier les prérequis KYC, clés réelles et webhook de production
 - [x] Ajouter des contrôles de cohérence de configuration Stripe
 - [ ] Documenter la bascule et demander confirmation avant toute activation réelle
+
+## Stripe — Prêt à basculer
+- [x] Vérifier que la checklist couvre les actions Stripe et les secrets du projet
+- [x] Préparer une procédure simple de remplacement sécurisé des clés
+- [x] Valider la préparation sans activer le mode réel
