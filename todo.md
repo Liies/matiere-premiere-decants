@@ -6528,3 +6528,8 @@
 - [x] Auditer les règles de sous-total, livraison et total sur le panier, le checkout et le serveur
 - [x] Corriger toute divergence de calcul identifiée
 - [x] Ajouter et exécuter les tests de seuils de livraison et de total de commande
+
+## Performance — Cache des images
+- [x] Auditer les sources de visuels et les en-têtes de cache actuellement servis
+- [x] Appliquer un cache durable, invalidable lors d’un changement de visuel
+- [x] Couvrir, vérifier et publier l’optimisation de cache des images

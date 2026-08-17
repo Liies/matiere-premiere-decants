@@ -1,6 +1,13 @@
 import type { Express } from "express";
 import { ENV } from "./env";
 
+const IMMUTABLE_IMAGE_CACHE_CONTROL = "public, max-age=31536000, immutable";
+const CACHEABLE_IMAGE_KEY = /\.(?:avif|gif|jpe?g|png|webp)$/i;
+
+export function isCacheableImageKey(key: string) {
+  return CACHEABLE_IMAGE_KEY.test(key);
+}
+
 export function registerStorageProxy(app: Express) {
   app.get("/manus-storage/*", async (req, res) => {
     const params = req.params as unknown as Record<string, string>;
@@ -36,6 +43,23 @@ export function registerStorageProxy(app: Express) {
       const { url } = (await forgeResp.json()) as { url: string };
       if (!url) {
         res.status(502).send("Empty signed URL from backend");
+        return;
+      }
+
+      if (isCacheableImageKey(key)) {
+        const assetResponse = await fetch(url);
+        if (!assetResponse.ok) {
+          console.error(`[StorageProxy] asset error: ${assetResponse.status}`);
+          res.status(502).send("Storage asset error");
+          return;
+        }
+
+        const asset = Buffer.from(await assetResponse.arrayBuffer());
+        res.status(200);
+        res.set("Cache-Control", IMMUTABLE_IMAGE_CACHE_CONTROL);
+        res.set("Content-Type", assetResponse.headers.get("content-type") || "application/octet-stream");
+        res.set("Content-Length", String(asset.byteLength));
+        res.send(asset);
         return;
       }
 
