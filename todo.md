@@ -6419,3 +6419,10 @@
 - [x] Vérifier que la checklist couvre les actions Stripe et les secrets du projet
 - [x] Préparer une procédure simple de remplacement sécurisé des clés
 - [x] Valider la préparation sans activer le mode réel
+
+## Correctif image — Vanilla Powder
+- [x] Identifier l’URL, la donnée source et le point de rendu défaillants
+- [x] Corriger la référence d’image avec une solution de repli fiable
+- [x] Tester catalogue et fiche produit, puis publier le correctif
+- [x] Désactiver la variante 2 ml conservée en données historiques
+- [x] Vérifier que seule la variante 50 ml à 120 € est publique
