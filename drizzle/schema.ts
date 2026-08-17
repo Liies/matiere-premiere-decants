@@ -175,6 +175,7 @@ export const orders = mysqlTable("orders", {
   status: mysqlEnum("status", ["awaiting_payment", "pending", "paid", "processing", "shipped", "delivered", "cancelled"]).default("awaiting_payment").notNull(),
   totalAmount: int("totalAmount").notNull(),
   shippingCost: int("shippingCost").notNull().default(0),
+  stripeCheckoutSessionId: varchar("stripeCheckoutSessionId", { length: 255 }).unique(),
   stripePaymentIntentId: varchar("stripePaymentIntentId", { length: 255 }),
   customerEmail: varchar("customerEmail", { length: 320 }).notNull(),
   customerName: varchar("customerName", { length: 255 }).notNull(),

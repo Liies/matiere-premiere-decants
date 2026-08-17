@@ -2,6 +2,8 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const mocks = vi.hoisted(() => ({
   createReservedOrder: vi.fn(),
+  getOrderItems: vi.fn(),
+  setOrderStripeCheckoutSession: vi.fn(),
   notifyOwner: vi.fn(),
   sendOrderCreatedEmails: vi.fn(),
 }));
@@ -9,8 +11,14 @@ const mocks = vi.hoisted(() => ({
 vi.mock("./db", async (importOriginal) => ({
   ...(await importOriginal<typeof import("./db")>()),
   createReservedOrder: mocks.createReservedOrder,
+  getOrderItems: mocks.getOrderItems,
+  setOrderStripeCheckoutSession: mocks.setOrderStripeCheckoutSession,
 }));
 vi.mock("./_core/notification", () => ({ notifyOwner: mocks.notifyOwner }));
+vi.mock("./stripeCheckout", () => ({
+  createStripeCheckoutSession: vi.fn().mockResolvedValue({ id: "cs_concurrent", url: "https://checkout.stripe.test/cs_concurrent" }),
+  getStripeClient: vi.fn(),
+}));
 vi.mock("./transactionalEmail", () => ({
   sendOrderCreatedEmails: mocks.sendOrderCreatedEmails,
   sendOrderStatusEmail: vi.fn(),
@@ -47,6 +55,8 @@ describe("orders.create — concurrence de stock", () => {
     vi.clearAllMocks();
     mocks.notifyOwner.mockResolvedValue(true);
     mocks.sendOrderCreatedEmails.mockResolvedValue([]);
+    mocks.getOrderItems.mockResolvedValue([{ productName: "Vanilla Powder", sizeMl: 50, quantity: 1, unitPrice: 1_000 }]);
+    mocks.setOrderStripeCheckoutSession.mockResolvedValue(undefined);
   });
 
   it("autorise exactement une commande concurrente sur la dernière unité", async () => {
@@ -59,11 +69,12 @@ describe("orders.create — concurrence de stock", () => {
         orderId: 700,
         orderNumber: "MP-CONCURRENT",
         totalAmount: 1_000,
+        shippingCost: 0,
         items: [{ productName: "Vanilla Powder", quantity: 1, unitPrice: 1_000 }],
       };
     });
 
-    const caller = appRouter.createCaller({ user: customer, req: {} as any, res: {} as any });
+    const caller = appRouter.createCaller({ user: customer, req: { headers: { origin: "https://boutique.test" } } as any, res: {} as any });
     const results = await Promise.allSettled([
       caller.orders.create(orderPayload),
       caller.orders.create(orderPayload),

@@ -20,6 +20,7 @@ const state = vi.hoisted(() => ({
 }));
 const createOrderMutate = vi.fn();
 const saveDeliveryAddressMutate = vi.fn();
+const cancelPaymentMutate = vi.fn();
 const toastSpies = vi.hoisted(() => ({ error: vi.fn(), success: vi.fn() }));
 
 vi.mock("@/lib/trpc", () => ({
@@ -32,6 +33,12 @@ vi.mock("@/lib/trpc", () => ({
     orders: {
       create: {
         useMutation: () => ({ mutate: createOrderMutate, isPending: false }),
+      },
+      cancelPayment: {
+        useMutation: () => ({ mutate: cancelPaymentMutate, isPending: false }),
+      },
+      getById: {
+        useQuery: () => ({ data: null, isLoading: false }),
       },
     },
     profile: {
@@ -113,15 +120,16 @@ describe("intégration checkout", () => {
       success: true,
       orderNumber: "MP-TEST-CHECKOUT",
       orderId: 88,
-      totalAmount: 17_495,
-      shippingCost: 495,
+      checkoutUrl: "https://checkout.stripe.test/session",
     }));
     saveDeliveryAddressMutate.mockImplementation((_input, callbacks) => callbacks.onSuccess());
+    cancelPaymentMutate.mockReset();
+    vi.spyOn(window, "open").mockReturnValue({} as Window);
   });
 
   afterEach(() => cleanup());
 
-  it("soumet un panier complet avec le montant calculé et confirme la commande", async () => {
+  it("soumet un panier complet avec le montant calculé et ouvre Stripe Checkout", async () => {
     const { container } = render(<Checkout />);
     setInput(container, "shippingAddress", "12 rue des Fleurs");
     setInput(container, "shippingCity", "Paris");
@@ -137,10 +145,8 @@ describe("intégration checkout", () => {
       items: [{ variantId: 101, quantity: 2 }],
       totalAmount: 17_495,
     }), expect.any(Object));
-    expect(screen.getByText("Commande confirmée !")).toBeTruthy();
-    expect(screen.getByText("MP-TEST-CHECKOUT")).toBeTruthy();
-    expect(screen.getByText("Total de la commande")).toBeTruthy();
-    expect(screen.getAllByText(/174,95\s*€/).length).toBeGreaterThan(0);
+    expect(window.open).toHaveBeenCalledWith("https://checkout.stripe.test/session", "_blank", "noopener,noreferrer");
+    expect(screen.getByText(/La page de paiement sécurisée pour la commande MP-TEST-CHECKOUT/i)).toBeTruthy();
   });
 
   it("affiche les frais de livraison et le total final avant la confirmation", () => {
@@ -210,7 +216,7 @@ describe("intégration checkout", () => {
     setInput(container, "shippingCountry", "États-Unis");
 
     expect(screen.getByText("La livraison est disponible en France métropolitaine et en Europe.")).toBeTruthy();
-    expect(screen.getByRole("button", { name: "Confirmer la commande" }).hasAttribute("disabled")).toBe(true);
+    expect(screen.getByRole("button", { name: "Payer avec Stripe" }).hasAttribute("disabled")).toBe(true);
   });
 
   it("empêche la création d’une commande lorsque le panier est vide", async () => {
@@ -232,7 +238,7 @@ describe("intégration checkout", () => {
     render(<Checkout />);
 
     expect(screen.getByText("Veuillez vous connecter pour continuer")).toBeTruthy();
-    expect(screen.queryByRole("button", { name: "Confirmer la commande" })).toBeNull();
+    expect(screen.queryByRole("button", { name: "Payer avec Stripe" })).toBeNull();
     expect(createOrderMutate).not.toHaveBeenCalled();
   });
 
@@ -247,7 +253,6 @@ describe("intégration checkout", () => {
     fireEvent.submit(container.querySelector("form")!);
 
     await waitFor(() => expect(toastSpies.error).toHaveBeenCalledWith("Paiement indisponible"));
-    expect(screen.queryByText("Commande confirmée !")).toBeNull();
-    expect(screen.getByRole("button", { name: "Confirmer la commande" })).toBeTruthy();
+    expect(screen.getByRole("button", { name: "Payer avec Stripe" })).toBeTruthy();
   });
 });

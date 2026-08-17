@@ -2,13 +2,14 @@ import { trpc } from "@/lib/trpc";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import Header from "@/components/Header";
-import { Link, useLocation } from "wouter";
-import { CheckCircle } from "lucide-react";
+import Footer from "@/components/Footer";
+import { Link } from "wouter";
+import { CheckCircle, ExternalLink, Loader2, ShieldCheck } from "lucide-react";
 import { useAuth } from "@/_core/hooks/useAuth";
 import AddressAutocomplete from "@/components/AddressAutocomplete";
 import DeliveryLocationMap from "@/components/DeliveryLocationMap";
 import { toast } from "sonner";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -28,17 +29,32 @@ type CheckoutFormData = z.infer<typeof checkoutSchema>;
 
 export default function Checkout() {
   const { user, isAuthenticated } = useAuth();
-  const [, setLocation] = useLocation();
   const { data: cartItems } = trpc.cart.getItems.useQuery();
   const createOrder = trpc.orders.create.useMutation();
+  const cancelPayment = trpc.orders.cancelPayment.useMutation();
   const { data: savedDeliveryAddress, isLoading: isSavedAddressLoading } = trpc.profile.getDeliveryAddress.useQuery();
   const saveDeliveryAddress = trpc.profile.saveDeliveryAddress.useMutation();
   const totalAmount = (cartItems || []).reduce(
     (sum, item) => sum + (item.variant?.priceCents ?? item.product?.price ?? 0) * item.quantity,
     0,
   );
-  const [orderCreated, setOrderCreated] = useState<{ orderNumber: string; orderId: number; totalAmount: number; shippingCost: number } | null>(null);
+  const paymentParams = new URLSearchParams(window.location.search);
+  const paymentOutcome = paymentParams.get("payment");
+  const paymentOrderId = Number(paymentParams.get("order_id"));
+  const hasPaymentOrder = Number.isInteger(paymentOrderId) && paymentOrderId > 0;
+  const { data: paymentOrder, isLoading: isPaymentOrderLoading } = trpc.orders.getById.useQuery(
+    { orderId: paymentOrderId },
+    { enabled: hasPaymentOrder && paymentOutcome === "success", refetchInterval: paymentOutcome === "success" ? 2_000 : false },
+  );
+  const [checkoutOpened, setCheckoutOpened] = useState<{ orderNumber: string; checkoutUrl: string } | null>(null);
   const [saveAddressForLater, setSaveAddressForLater] = useState(false);
+  const cancellationRequested = useRef(false);
+
+  useEffect(() => {
+    if (paymentOutcome !== "cancelled" || !hasPaymentOrder || cancellationRequested.current) return;
+    cancellationRequested.current = true;
+    cancelPayment.mutate({ orderId: paymentOrderId });
+  }, [cancelPayment, hasPaymentOrder, paymentOrderId, paymentOutcome]);
 
   const {
     register,
@@ -104,37 +120,44 @@ export default function Checkout() {
     );
   }
 
-  if (orderCreated) {
+  if (paymentOutcome === "success") {
     return (
       <div className="min-h-screen flex flex-col bg-white">
         <Header />
         <main className="flex-1 flex items-center justify-center py-12 px-4">
           <div className="text-center max-w-md">
-            <CheckCircle className="w-16 h-16 text-green-600 mx-auto mb-4" />
-            <h2 className="text-3xl font-light text-gray-900 mb-2">Commande confirmée !</h2>
-            <p className="text-gray-600 mb-2">
-              Numéro de commande: <span className="font-medium">{orderCreated.orderNumber}</span>
-            </p>
-            <p className="text-gray-600 mb-6">
-              Un email de confirmation a été envoyé à votre adresse.
-            </p>
-            <div className="mb-6 rounded-xl border border-stone-200 bg-stone-50 px-5 py-4 text-left" aria-label="Récapitulatif de la commande">
-              <div className="flex justify-between text-sm text-gray-600">
-                <span>Livraison</span>
-                <span>{orderCreated.shippingCost === 0 ? "Offerte" : formatPrice(orderCreated.shippingCost)}</span>
-              </div>
-              <div className="mt-3 flex justify-between border-t border-stone-200 pt-3 text-base text-gray-900">
-                <span className="font-medium">Total de la commande</span>
-                <span className="font-medium">{formatPrice(orderCreated.totalAmount)}</span>
-              </div>
-            </div>
-            <Link href="/account">
-              <Button className="bg-gray-900 hover:bg-gray-800 text-white">
-                Voir mes commandes
-              </Button>
-            </Link>
+            {isPaymentOrderLoading || !paymentOrder || paymentOrder.status === "awaiting_payment" ? (
+              <>
+                <Loader2 className="mx-auto mb-4 h-12 w-12 animate-spin text-gray-700" aria-hidden="true" />
+                <h2 className="text-3xl font-light text-gray-900">Validation du paiement…</h2>
+                <p className="mt-3 text-gray-600">Nous attendons la confirmation sécurisée de Stripe. Cette page se met à jour automatiquement.</p>
+              </>
+            ) : (
+              <>
+                <CheckCircle className="w-16 h-16 text-green-600 mx-auto mb-4" />
+                <h2 className="text-3xl font-light text-gray-900 mb-2">Paiement confirmé</h2>
+                <p className="text-gray-600 mb-2">Numéro de commande : <span className="font-medium">{paymentOrder.orderNumber}</span></p>
+                <p className="text-gray-600 mb-6">Un email de confirmation a été envoyé à votre adresse.</p>
+                <div className="mb-6 rounded-xl border border-stone-200 bg-stone-50 px-5 py-4 text-left" aria-label="Récapitulatif de la commande">
+                  <div className="flex justify-between text-sm text-gray-600"><span>Livraison</span><span>{paymentOrder.shippingCost === 0 ? "Offerte" : formatPrice(paymentOrder.shippingCost)}</span></div>
+                  <div className="mt-3 flex justify-between border-t border-stone-200 pt-3 text-base text-gray-900"><span className="font-medium">Total réglé</span><span className="font-medium">{formatPrice(paymentOrder.totalAmount)}</span></div>
+                </div>
+                <Link href="/account"><Button className="bg-gray-900 hover:bg-gray-800 text-white">Voir mes commandes</Button></Link>
+              </>
+            )}
           </div>
         </main>
+        <Footer />
+      </div>
+    );
+  }
+
+  if (paymentOutcome === "cancelled") {
+    return (
+      <div className="min-h-screen flex flex-col bg-white">
+        <Header />
+        <main className="flex-1 flex items-center justify-center py-12 px-4"><div className="max-w-md text-center"><h2 className="text-3xl font-light text-gray-900">Paiement annulé</h2><p className="mt-3 text-gray-600">Votre panier est conservé. La réservation de stock est libérée afin que vous puissiez reprendre votre commande sereinement.</p><Link href="/cart"><Button className="mt-6 bg-gray-900 text-white hover:bg-gray-800">Retourner au panier</Button></Link></div></main>
+        <Footer />
       </div>
     );
   }
@@ -162,13 +185,13 @@ export default function Checkout() {
       },
       {
         onSuccess: (result) => {
-          setOrderCreated({
-            orderNumber: result.orderNumber,
-            orderId: result.orderId,
-            totalAmount: result.totalAmount,
-            shippingCost: result.shippingCost,
-          });
-          toast.success("Commande créée avec succès !");
+          setCheckoutOpened({ orderNumber: result.orderNumber, checkoutUrl: result.checkoutUrl });
+          const paymentWindow = window.open(result.checkoutUrl, "_blank", "noopener,noreferrer");
+          if (!paymentWindow) {
+            toast.error("Le paiement sécurisé n’a pas pu s’ouvrir. Autorisez les pop-ups puis réessayez.");
+            return;
+          }
+          toast.success("Redirection vers le paiement sécurisé Stripe.");
         },
         onError: (error) => {
           toast.error(error.message || "Erreur lors de la création de la commande");
@@ -338,8 +361,10 @@ export default function Checkout() {
                   disabled={createOrder.isPending || saveDeliveryAddress.isPending || deliveryEligibility?.eligible === false || isShippingRateLoading || Boolean(deliveryEligibility?.eligible && !shippingRate)}
                   className="min-h-12 w-full bg-gray-900 py-3 text-white hover:bg-gray-800"
                 >
-                  {createOrder.isPending || saveDeliveryAddress.isPending ? "Traitement..." : isShippingRateLoading ? "Calcul de la livraison…" : "Confirmer la commande"}
+                  {createOrder.isPending || saveDeliveryAddress.isPending ? "Ouverture du paiement sécurisé…" : isShippingRateLoading ? "Calcul de la livraison…" : "Payer avec Stripe"}
                 </Button>
+                <p className="flex items-center justify-center gap-2 text-center text-xs text-gray-500"><ShieldCheck className="h-4 w-4" aria-hidden="true" /> Paiement sécurisé par Stripe. Vous ne serez débité qu’après validation sur Stripe.</p>
+                {checkoutOpened ? <div role="status" className="rounded border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-900">La page de paiement sécurisée pour la commande {checkoutOpened.orderNumber} est ouverte dans un nouvel onglet. <a className="font-medium underline underline-offset-2" href={checkoutOpened.checkoutUrl} target="_blank" rel="noreferrer">Ouvrir Stripe</a></div> : null}
               </form>
             </div>
 
@@ -353,9 +378,7 @@ export default function Checkout() {
                       <span className="text-gray-600">
                         {item.product?.name} x {item.quantity}
                       </span>
-                      <span className="text-gray-900">
-                        €{(((item.variant?.priceCents ?? item.product?.price ?? 0) * item.quantity) / 100).toFixed(2)}
-                      </span>
+                      <span className="text-gray-900">{formatPrice((item.variant?.priceCents ?? item.product?.price ?? 0) * item.quantity)}</span>
                     </div>
                   ))}
                 </div>
@@ -392,12 +415,7 @@ export default function Checkout() {
         </div>
       </main>
 
-      {/* Footer */}
-      <footer className="border-t border-gray-200 py-8 px-4 mt-12">
-        <div className="container text-center text-sm text-gray-600">
-          <p>© 2026 Matière Première. Tous droits réservés.</p>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 }

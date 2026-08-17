@@ -532,7 +532,6 @@ export async function createReservedOrder(input: CreateReservedOrderInput): Prom
     if (!orderId) throw new Error("Impossible de créer la commande");
 
     await tx.insert(orderItems).values(orderItemsToInsert.map((item) => ({ orderId, ...item })));
-    await tx.delete(cartItems).where(eq(cartItems.userId, input.userId));
 
     return {
       orderId,
@@ -556,6 +555,106 @@ export async function getOrderByNumber(orderNumber: string) {
   if (!db) return undefined;
   const result = await db.select().from(orders).where(eq(orders.orderNumber, orderNumber)).limit(1);
   return result.length > 0 ? result[0] : undefined;
+}
+
+export async function getOrderByStripeCheckoutSessionId(stripeCheckoutSessionId: string) {
+  const db = await getDb();
+  if (!db) return undefined;
+  const result = await db.select().from(orders).where(eq(orders.stripeCheckoutSessionId, stripeCheckoutSessionId)).limit(1);
+  return result.length > 0 ? result[0] : undefined;
+}
+
+export async function setOrderStripeCheckoutSession(orderId: number, stripeCheckoutSessionId: string) {
+  const db = await getDb();
+  if (!db) throw new Error("La préparation du paiement est temporairement indisponible");
+  await db
+    .update(orders)
+    .set({ stripeCheckoutSessionId })
+    .where(and(eq(orders.id, orderId), eq(orders.status, "awaiting_payment")));
+}
+
+export async function markStripeCheckoutOrderPaid(input: {
+  orderId: number;
+  stripeCheckoutSessionId: string;
+  stripePaymentIntentId: string | null;
+}) {
+  const db = await getDb();
+  if (!db) throw new Error("La confirmation du paiement est temporairement indisponible");
+
+  return db.transaction(async (tx) => {
+    const rows = await tx.select().from(orders).where(eq(orders.id, input.orderId)).for("update");
+    const order = rows[0];
+    if (!order) throw new Error("Commande introuvable lors de la confirmation du paiement");
+    if (order.stripeCheckoutSessionId !== input.stripeCheckoutSessionId) {
+      throw new Error("La session de paiement ne correspond pas à la commande");
+    }
+    if (order.status !== "awaiting_payment") {
+      return { changed: false as const, order, items: [] };
+    }
+
+    await tx
+      .update(orders)
+      .set({ status: "paid", stripePaymentIntentId: input.stripePaymentIntentId })
+      .where(eq(orders.id, order.id));
+    const items = await tx.select().from(orderItems).where(eq(orderItems.orderId, order.id));
+    await tx.delete(cartItems).where(eq(cartItems.userId, order.userId));
+
+    return {
+      changed: true as const,
+      order: { ...order, status: "paid" as const, stripePaymentIntentId: input.stripePaymentIntentId },
+      items,
+    };
+  });
+}
+
+export async function releaseExpiredStripeCheckoutOrder(stripeCheckoutSessionId: string) {
+  const db = await getDb();
+  if (!db) throw new Error("La libération de la réservation est temporairement indisponible");
+
+  return db.transaction(async (tx) => {
+    const rows = await tx
+      .select()
+      .from(orders)
+      .where(eq(orders.stripeCheckoutSessionId, stripeCheckoutSessionId))
+      .for("update");
+    const order = rows[0];
+    if (!order || order.status !== "awaiting_payment") return { released: false as const, order: order ?? null };
+
+    const items = await tx.select().from(orderItems).where(eq(orderItems.orderId, order.id));
+    for (const item of items) {
+      if (item.variantId) {
+        await tx
+          .update(variants)
+          .set({ stock: sql`${variants.stock} + ${item.quantity}` })
+          .where(eq(variants.id, item.variantId));
+      }
+    }
+    await tx.update(orders).set({ status: "cancelled" }).where(eq(orders.id, order.id));
+    return { released: true as const, order: { ...order, status: "cancelled" as const } };
+  });
+}
+
+export async function releaseReservedOrder(orderId: number) {
+  const db = await getDb();
+  if (!db) throw new Error("La libération de la réservation est temporairement indisponible");
+
+  return db.transaction(async (tx) => {
+    const rows = await tx.select().from(orders).where(eq(orders.id, orderId)).for("update");
+    const order = rows[0];
+    if (!order || order.status !== "awaiting_payment") return { released: false as const, order: order ?? null };
+
+    const items = await tx.select().from(orderItems).where(eq(orderItems.orderId, order.id));
+    for (const item of items) {
+      if (item.variantId) {
+        await tx
+          .update(variants)
+          .set({ stock: sql`${variants.stock} + ${item.quantity}` })
+          .where(eq(variants.id, item.variantId));
+      }
+    }
+    await tx.update(orders).set({ status: "cancelled" }).where(eq(orders.id, order.id));
+    return { released: true as const, order: { ...order, status: "cancelled" as const } };
+  });
 }
 
 export async function getUserOrders(userId: number) {

@@ -12,12 +12,16 @@ import {
   getUserOrders,
   InventoryUnavailableError,
   OrderTotalMismatchError,
+  releaseExpiredStripeCheckoutOrder,
+  releaseReservedOrder,
+  setOrderStripeCheckoutSession,
   updateOrderStatus,
 } from "../db";
-import { sendOrderCreatedEmails, sendOrderStatusEmail } from "../transactionalEmail";
+import { sendOrderStatusEmail } from "../transactionalEmail";
 import { requireAdmin } from "./authorization";
 import { getDeliveryEligibility } from "../../shared/delivery-zones";
 import { invalidateAdvisorCatalogCache } from "../advisorCatalog";
+import { createStripeCheckoutSession, getStripeClient } from "../stripeCheckout";
 
 const ORDER_STATUS = z.enum(["awaiting_payment", "pending", "paid", "processing", "shipped", "delivered", "cancelled"]);
 const ORDER_INPUT = z.object({
@@ -83,39 +87,36 @@ export const ordersRouter = router({
       }
       throw error;
     }
-    invalidateAdvisorCatalogCache();
-
     try {
-      await notifyOwner({
-        title: `🎉 Nouvelle commande: ${orderNumber}`,
-        content: `Commande de ${input.customerName} (${input.customerEmail})\nMontant: €${(result.totalAmount / 100).toFixed(2)}\nAdresse: ${input.shippingAddress}, ${input.shippingPostalCode} ${input.shippingCity}, ${input.shippingCountry}`,
-      });
-    } catch (error) {
-      console.error("Erreur lors de l'envoi de la notification:", error);
-    }
-
-    try {
-      const emailResults = await sendOrderCreatedEmails({
+      const origin = ctx.req.headers.origin;
+      if (!origin) throw new Error("Origine du checkout introuvable");
+      const checkout = await createStripeCheckoutSession({
+        orderId: result.orderId,
         orderNumber,
-        customerName: input.customerName,
+        userId: ctx.user.id,
         customerEmail: input.customerEmail,
-        totalAmount: result.totalAmount,
-        items: result.items,
+        customerName: input.customerName,
+        shippingCost: result.shippingCost,
+        lines: (await getOrderItems(result.orderId)).map((item) => ({
+          productName: item.productName,
+          sizeMl: item.sizeMl,
+          quantity: item.quantity,
+          unitPrice: item.unitPrice,
+        })),
+        origin,
       });
-      emailResults
-        .filter((emailResult) => emailResult.status === "rejected")
-        .forEach((emailResult) => console.error("Erreur lors de l’envoi d’email de commande:", emailResult.reason));
+      await setOrderStripeCheckoutSession(result.orderId, checkout.id);
+      invalidateAdvisorCatalogCache();
+      return {
+        success: true as const,
+        orderNumber,
+        orderId: result.orderId,
+        checkoutUrl: checkout.url,
+      };
     } catch (error) {
-      console.error("Erreur lors de la préparation des emails de commande:", error);
+      await releaseReservedOrder(result.orderId);
+      throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Impossible de préparer le paiement sécurisé" });
     }
-
-    return {
-      success: true as const,
-      orderNumber,
-      orderId: result.orderId,
-      totalAmount: result.totalAmount,
-      shippingCost: result.shippingCost,
-    };
   }),
 
   getMyOrders: protectedProcedure.query(async ({ ctx }) => getOrdersWithItems(await getUserOrders(ctx.user.id))),
@@ -128,6 +129,22 @@ export const ordersRouter = router({
         throw new TRPCError({ code: "NOT_FOUND", message: "Commande non trouvée" });
       }
       return { ...order, items: await getOrderItems(order.id) };
+    }),
+
+  cancelPayment: protectedProcedure
+    .input(z.object({ orderId: z.number().int().positive() }))
+    .mutation(async ({ input, ctx }) => {
+      const order = await getOrderById(input.orderId);
+      if (!order || order.userId !== ctx.user.id) throw new TRPCError({ code: "NOT_FOUND", message: "Commande non trouvée" });
+      if (order.status !== "awaiting_payment" || !order.stripeCheckoutSessionId) return { released: false as const };
+
+      try {
+        await getStripeClient().checkout.sessions.expire(order.stripeCheckoutSessionId);
+      } catch (error) {
+        throw new TRPCError({ code: "CONFLICT", message: "Cette session de paiement ne peut plus être annulée" });
+      }
+      const released = await releaseExpiredStripeCheckoutOrder(order.stripeCheckoutSessionId);
+      return { released: released.released };
     }),
 
   getAllOrders: protectedProcedure.query(async ({ ctx }) => {

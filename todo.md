@@ -6395,3 +6395,12 @@
 ## Routage — Alias du catalogue
 - [x] Rediriger /catalogue vers la route publique /products
 - [x] Couvrir la redirection sans rechargement et valider la publication
+
+## Checkout et paiement
+- [x] Auditer les écrans de récapitulatif, paiement et confirmation
+- [x] Renforcer les repères de confiance et les états de paiement
+- [x] Ajouter les tests de régression et valider la publication
+- [x] Créer une session Stripe Checkout à partir d’une commande réservée
+- [x] Confirmer le paiement via un webhook Stripe signé et idempotent
+- [x] Retarder les emails opérationnels jusqu’à la confirmation du paiement
+- [x] Mettre à jour le checkout avec une redirection sécurisée vers Stripe
