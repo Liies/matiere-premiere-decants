@@ -48,4 +48,26 @@ describe("adminCatalog", () => {
       }),
     ).rejects.toThrow();
   });
+
+  it("refuse la modification de stock à un utilisateur non administrateur", async () => {
+    await expect(
+      createCaller("user").adminInventory.updateStock({ variantId: 1, stock: 5 }),
+    ).rejects.toThrow("Accès refusé");
+  });
+
+  it("rejette un stock négatif avant toute écriture", async () => {
+    await expect(
+      createCaller("admin").adminInventory.updateStock({ variantId: 1, stock: -1 }),
+    ).rejects.toThrow();
+  });
+
+  it("autorise un administrateur à confirmer le stock courant d’une variante", async () => {
+    const variants = await createCaller("admin").adminInventory.variants({ productId: 1 });
+    expect(variants.length).toBeGreaterThan(0);
+
+    const variant = variants[0]!;
+    await expect(
+      createCaller("admin").adminInventory.updateStock({ variantId: variant.id, stock: variant.stock }),
+    ).resolves.toEqual({ success: true, delta: 0 });
+  });
 });

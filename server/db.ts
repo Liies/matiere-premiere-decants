@@ -1,6 +1,6 @@
 import { and, asc, eq, gt, gte, inArray, sql, or, like, desc } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import { InsertUser, users, brands, products, cartItems, cartSyncReceipts, orders, orderItems, InsertOrder, InsertOrderItem, sourceBottles, variants, savedDeliveryAddresses, productReviews } from "../drizzle/schema";
+import { InsertUser, users, brands, products, cartItems, cartSyncReceipts, orders, orderItems, InsertOrder, InsertOrderItem, sourceBottles, variants, savedDeliveryAddresses, productReviews, stockMovements } from "../drizzle/schema";
 import { ENV } from './_core/env';
 import { buildCartSyncPlan } from "@shared/cart-sync";
 import { consolidateOrderLines, type RequestedOrderLine } from "@shared/inventory";
@@ -245,6 +245,32 @@ export async function createCatalogVariant(values: {
   const db = await getDb();
   if (!db) throw new Error("La mise à jour de l’inventaire est indisponible");
   await db.insert(variants).values(values);
+}
+
+/** Définit un stock administrativement et enregistre les écarts réels dans le journal des mouvements. */
+export async function updateVariantStock(variantId: number, stock: number, userId: number) {
+  const db = await getDb();
+  if (!db) throw new Error("La mise à jour de l’inventaire est indisponible");
+
+  return db.transaction(async (tx) => {
+    const rows = await tx.select().from(variants).where(eq(variants.id, variantId)).limit(1);
+    const variant = rows[0];
+    if (!variant) return undefined;
+
+    const delta = stock - variant.stock;
+    if (delta === 0) return { variant: { ...variant, stock }, delta };
+
+    await tx.update(variants).set({ stock }).where(eq(variants.id, variantId));
+    await tx.insert(stockMovements).values({
+      variantId,
+      delta,
+      reason: "adjustment",
+      userId,
+      note: "Ajustement administratif du stock",
+    });
+
+    return { variant: { ...variant, stock }, delta };
+  });
 }
 
 export async function recordSourceBottle(values: {

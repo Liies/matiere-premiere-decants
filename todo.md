@@ -6451,3 +6451,8 @@
 - [x] Étendre les fixtures de fiches avec des images issues de la base
 - [x] Vérifier qu’une image exploitable est rendue par chaque fiche
 - [x] Exécuter la suite complète et publier la couverture
+
+## Administration — Modification de stock
+- [x] Auditer les procédures d’inventaire et l’interface du catalogue
+- [x] Ajouter l’ajustement validé du stock 50 ml avec mouvement tracé
+- [x] Couvrir les autorisations, les limites et le rendu administrateur

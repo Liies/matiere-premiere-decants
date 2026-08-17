@@ -1,14 +1,30 @@
 // @vitest-environment jsdom
 
 import React from "react";
-import { cleanup, render, screen } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
+
+const state = vi.hoisted(() => ({
+  updateStockMutate: vi.fn(),
+  product: {
+    id: 42,
+    name: "Vanilla Powder",
+    description: "Une description administrable suffisamment détaillée.",
+    price: 12000,
+    volumeMl: 50,
+  },
+  variants: [{ id: 142, productId: 42, sizeMl: 50, stock: 3, isActive: true }],
+}));
 
 vi.mock("@/lib/trpc", () => ({
   trpc: {
     adminCatalog: {
-      list: { useQuery: () => ({ data: [], isLoading: false }) },
+      list: { useQuery: () => ({ data: [state.product], isLoading: false }) },
       update: { useMutation: () => ({ mutate: vi.fn(), isPending: false }) },
+    },
+    adminInventory: {
+      variants: { useQuery: () => ({ data: state.variants, isLoading: false }) },
+      updateStock: { useMutation: () => ({ mutate: state.updateStockMutate, isPending: false }) },
     },
     reviews: {
       pending: { useQuery: () => ({ data: [], isLoading: false }) },
@@ -17,6 +33,8 @@ vi.mock("@/lib/trpc", () => ({
     useUtils: () => ({
       adminCatalog: { list: { invalidate: vi.fn() } },
       products: { list: { invalidate: vi.fn() }, getById: { invalidate: vi.fn() } },
+      catalog: { list: { invalidate: vi.fn() } },
+      adminInventory: { variants: { invalidate: vi.fn() } },
       reviews: { pending: { invalidate: vi.fn() } },
     }),
   },
@@ -33,7 +51,10 @@ vi.mock("sonner", () => ({ toast: { success: vi.fn(), error: vi.fn() } }));
 import AdminCatalog from "./AdminCatalog";
 
 describe("administration des avis", () => {
-  afterEach(() => cleanup());
+  afterEach(() => {
+    cleanup();
+    state.updateStockMutate.mockClear();
+  });
 
   it("affiche un état vide honnête lorsqu’aucun avis vérifié ne requiert de modération", () => {
     render(<AdminCatalog />);
@@ -41,5 +62,21 @@ describe("administration des avis", () => {
     expect(screen.getByRole("heading", { name: /avis à modérer/i })).toBeTruthy();
     expect(screen.getByText(/aucun avis en attente de modération/i)).toBeTruthy();
     expect(screen.getByText(/seuls les avis liés à une commande vérifiée/i)).toBeTruthy();
+  });
+
+  it("affiche le stock actuel et transmet la nouvelle valeur de la variante au serveur", () => {
+    render(<AdminCatalog />);
+
+    expect(screen.getByRole("heading", { name: /stock disponible/i })).toBeTruthy();
+    expect(screen.getByText(/stock actuel : 3 unités/i)).toBeTruthy();
+
+    const stockInput = screen.getByLabelText("Nouveau stock") as HTMLInputElement;
+    fireEvent.change(stockInput, { target: { value: "8" } });
+    fireEvent.click(screen.getByRole("button", { name: "Mettre à jour" }));
+
+    expect(state.updateStockMutate).toHaveBeenCalledWith(
+      { variantId: 142, stock: 8 },
+      expect.objectContaining({ onSuccess: expect.any(Function), onError: expect.any(Function) }),
+    );
   });
 });

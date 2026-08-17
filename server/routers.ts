@@ -16,6 +16,7 @@ import {
   getVariantsByProductIds,
   PUBLIC_BRAND_SLUG,
   recordSourceBottle,
+  updateVariantStock,
   updateProductCatalog,
 } from "./db";
 import { contactMessageSchema, CONTACT_SUBJECT_LABELS } from "@shared/contact";
@@ -53,6 +54,11 @@ const SOURCE_BOTTLE_INPUT = z.object({
   remainingMl: z.number().positive().max(1_000),
   purchasePriceCents: z.number().int().min(0).max(10_000_000),
   purchasedAt: z.date().optional(),
+});
+
+const UPDATE_VARIANT_STOCK_INPUT = z.object({
+  variantId: z.number().int().positive(),
+  stock: z.number().int().min(0, "Le stock ne peut pas être négatif").max(10_000, "Le stock ne peut pas dépasser 10 000 unités"),
 });
 
 export const appRouter = router({
@@ -265,6 +271,12 @@ export const appRouter = router({
       await createCatalogVariant(input);
       invalidateAdvisorCatalogCache();
       return { success: true } as const;
+    }),
+    updateStock: protectedProcedure.input(UPDATE_VARIANT_STOCK_INPUT).mutation(async ({ input, ctx }) => {
+      requireAdmin(ctx.user);
+      const updated = await updateVariantStock(input.variantId, input.stock, ctx.user.id);
+      if (!updated) throw new TRPCError({ code: "NOT_FOUND", message: "Variante introuvable" });
+      return { success: true, delta: updated.delta } as const;
     }),
     recordSourceBottle: protectedProcedure.input(SOURCE_BOTTLE_INPUT).mutation(async ({ input, ctx }) => {
       requireAdmin(ctx.user);

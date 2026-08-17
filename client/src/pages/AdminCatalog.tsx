@@ -28,16 +28,22 @@ export default function AdminCatalog() {
     enabled: isAuthenticated && user?.role === "admin",
   });
   const updateProduct = trpc.adminCatalog.update.useMutation();
+  const updateStock = trpc.adminInventory.updateStock.useMutation();
   const { data: pendingReviews, isLoading: areReviewsLoading } = trpc.reviews.pending.useQuery(undefined, {
     enabled: isAuthenticated && user?.role === "admin",
   });
   const moderateReview = trpc.reviews.moderate.useMutation();
   const [selectedId, setSelectedId] = useState<number | null>(null);
   const [draft, setDraft] = useState<CatalogDraft>(EMPTY_DRAFT);
+  const [stockDrafts, setStockDrafts] = useState<Record<number, string>>({});
 
   const selectedProduct = useMemo(
     () => products?.find((product) => product.id === selectedId) ?? products?.[0] ?? null,
     [products, selectedId],
+  );
+  const { data: variants, isLoading: areVariantsLoading } = trpc.adminInventory.variants.useQuery(
+    { productId: selectedProduct?.id ?? 1 },
+    { enabled: Boolean(selectedProduct) },
   );
 
   useEffect(() => {
@@ -51,6 +57,11 @@ export default function AdminCatalog() {
       });
     }
   }, [selectedProduct?.id]);
+
+  useEffect(() => {
+    if (!variants) return;
+    setStockDrafts(Object.fromEntries(variants.map((variant) => [variant.id, String(variant.stock)])));
+  }, [variants]);
 
   const updateDraft = (field: keyof CatalogDraft, value: string) => {
     setDraft((previous) => ({ ...previous, [field]: value }));
@@ -98,6 +109,30 @@ export default function AdminCatalog() {
           toast.success(status === "published" ? "Avis publié" : "Avis refusé");
         },
         onError: (error) => toast.error(error.message || "La modération a échoué"),
+      },
+    );
+  };
+
+  const handleStockSave = (variantId: number) => {
+    if (!selectedProduct) return;
+    const stock = Number(stockDrafts[variantId]);
+    if (!Number.isInteger(stock) || stock < 0 || stock > 10_000) {
+      toast.error("Saisissez un stock entier compris entre 0 et 10 000.");
+      return;
+    }
+
+    updateStock.mutate(
+      { variantId, stock },
+      {
+        onSuccess: async ({ delta }) => {
+          await Promise.all([
+            utils.adminInventory.variants.invalidate({ productId: selectedProduct.id }),
+            utils.products.list.invalidate(),
+            utils.catalog.list.invalidate(),
+          ]);
+          toast.success(delta === 0 ? "Stock inchangé" : "Stock mis à jour");
+        },
+        onError: (error) => toast.error(error.message || "La mise à jour du stock a échoué"),
       },
     );
   };
@@ -190,6 +225,53 @@ export default function AdminCatalog() {
                       <Input id="catalog-product-volume" type="number" min="1" max="1000" value={draft.volumeMl} onChange={(event) => updateDraft("volumeMl", event.target.value)} required />
                     </div>
                   </div>
+
+                  <section className="space-y-4 border-t border-gray-200 pt-5" aria-labelledby="catalog-stock-title">
+                    <div>
+                      <p className="text-xs font-medium uppercase tracking-[0.18em] text-gray-500">Inventaire</p>
+                      <h3 id="catalog-stock-title" className="mt-2 text-lg font-medium text-gray-900">Stock disponible</h3>
+                      <p className="mt-1 text-xs text-gray-500">Chaque ajustement est enregistré dans le journal des mouvements de stock.</p>
+                    </div>
+
+                    {areVariantsLoading ? (
+                      <p className="text-sm text-gray-600">Chargement du stock…</p>
+                    ) : !variants || variants.length === 0 ? (
+                      <p className="text-sm text-gray-600">Aucune variante active pour ce parfum.</p>
+                    ) : (
+                      <div className="divide-y divide-gray-200 border-y border-gray-200">
+                        {variants.map((variant) => (
+                          <div key={variant.id} className="grid gap-3 py-4 sm:grid-cols-[1fr_minmax(8rem,10rem)_auto] sm:items-end">
+                            <div>
+                              <p className="text-sm font-medium text-gray-900">{variant.sizeMl} ml</p>
+                              <p className="mt-1 text-xs text-gray-500">Stock actuel : {variant.stock} unité{variant.stock === 1 ? "" : "s"}</p>
+                            </div>
+                            <div className="space-y-2">
+                              <Label htmlFor={`catalog-variant-stock-${variant.id}`}>Nouveau stock</Label>
+                              <Input
+                                id={`catalog-variant-stock-${variant.id}`}
+                                type="number"
+                                min="0"
+                                max="10000"
+                                step="1"
+                                inputMode="numeric"
+                                value={stockDrafts[variant.id] ?? ""}
+                                onChange={(event) => setStockDrafts((previous) => ({ ...previous, [variant.id]: event.target.value }))}
+                              />
+                            </div>
+                            <Button
+                              type="button"
+                              variant="outline"
+                              onClick={() => handleStockSave(variant.id)}
+                              disabled={updateStock.isPending}
+                              className="min-h-11"
+                            >
+                              {updateStock.isPending ? "Mise à jour…" : "Mettre à jour"}
+                            </Button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </section>
 
                   <div className="flex flex-col gap-3 border-t border-gray-200 pt-5 sm:flex-row sm:items-center sm:justify-between">
                     <p className="text-xs text-gray-500">Les prix sont enregistrés en centimes côté serveur.</p>
