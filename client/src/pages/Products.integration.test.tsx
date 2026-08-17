@@ -21,6 +21,7 @@ vi.mock("@/lib/trpc", () => ({
               baseNotes: "Musc blanc",
               price: 19500,
               stock: 5,
+              imageUrl: "/manus-storage/vanilla-powder-test.png",
               variants: [
                 { id: 101, productId: 1, sizeMl: 2, sku: "MP-VANPOW-02", priceCents: 1000, stock: 10, isActive: false, sortOrder: 1, createdAt: new Date(), updatedAt: new Date() },
                 { id: 102, productId: 1, sizeMl: 50, sku: "MP-VANPOW-50", priceCents: 12000, stock: 10, isActive: true, sortOrder: 2, createdAt: new Date(), updatedAt: new Date() },
@@ -150,6 +151,7 @@ describe("intégration catalogue — panier et souhaits", () => {
   it("affiche le prix unique du décant 50 ml avec le symbole euro après le montant", () => {
     render(<Products />);
 
+    expect(screen.getByRole("img", { name: "Vanilla Powder" }).getAttribute("src")).toBe("/manus-storage/vanilla-powder-test.png");
     const vanillaPrice = screen.getByTestId("catalog-price-1");
     expect(vanillaPrice.textContent).toContain("120,00");
     expect(vanillaPrice.textContent?.indexOf("€")).toBeGreaterThan(vanillaPrice.textContent?.indexOf("120,00") ?? -1);

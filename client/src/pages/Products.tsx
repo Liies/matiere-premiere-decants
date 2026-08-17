@@ -421,9 +421,10 @@ export default function Products() {
                           <a href={productPath(product)} className="catalog-flip-face catalog-flip-front luxury-image-frame product-bottle-frame flex h-56 w-full items-center justify-center overflow-hidden rounded-lg bg-gray-100 sm:h-64" aria-label={`Voir la fiche de ${product.name}`}>
                             {(() => {
                               const image = getProductImage(product.id);
-                              return image ? (
+                              const imageSrc = product.imageUrl ?? image?.compressed;
+                              return imageSrc ? (
                                 <img
-                                  src={image.compressed}
+                                  src={imageSrc}
                                   alt={product.name}
                                   loading="lazy"
                                   className="h-full w-full object-cover transition-transform duration-1000 ease-out group-hover/product-card:scale-[1.035] group-focus-within/product-card:scale-[1.035] motion-reduce:transform-none motion-reduce:transition-none"

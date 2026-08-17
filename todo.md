@@ -6436,3 +6436,8 @@
 - [x] Vérifier les liens de marque, images et variantes actives
 - [x] Corriger les données non conformes à l’offre 50 ml
 - [x] Contrôler les fiches sur le domaine publié et publier le résultat
+
+## Catalogue — Images des cartes corrigées
+- [x] Vérifier les cartes Crystal Saffron, Parisian Musk et French Flower
+- [x] Corriger le rendu ou les données catalogue si nécessaire
+- [x] Valider le catalogue publié et communiquer le résultat
