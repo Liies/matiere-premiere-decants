@@ -46,6 +46,7 @@ export default function Checkout() {
     { orderId: paymentOrderId },
     { enabled: hasPaymentOrder && paymentOutcome === "success", refetchInterval: paymentOutcome === "success" ? 2_000 : false },
   );
+  const paymentConfirmed = paymentOrder?.status === "paid" || paymentOrder?.status === "processing" || paymentOrder?.status === "shipped" || paymentOrder?.status === "delivered";
   const [checkoutOpened, setCheckoutOpened] = useState<{ orderNumber: string; checkoutUrl: string } | null>(null);
   const [saveAddressForLater, setSaveAddressForLater] = useState(false);
   const cancellationRequested = useRef(false);
@@ -131,6 +132,12 @@ export default function Checkout() {
                 <Loader2 className="mx-auto mb-4 h-12 w-12 animate-spin text-gray-700" aria-hidden="true" />
                 <h2 className="text-3xl font-light text-gray-900">Validation du paiement…</h2>
                 <p className="mt-3 text-gray-600">Nous attendons la confirmation sécurisée de Stripe. Cette page se met à jour automatiquement.</p>
+              </>
+            ) : !paymentConfirmed ? (
+              <>
+                <h2 className="text-3xl font-light text-gray-900">Paiement non confirmé</h2>
+                <p className="mt-3 text-gray-600">Cette commande n’a pas été confirmée comme payée. Votre panier reste disponible pour reprendre votre achat.</p>
+                <Link href="/cart"><Button className="mt-6 bg-gray-900 text-white hover:bg-gray-800">Retourner au panier</Button></Link>
               </>
             ) : (
               <>

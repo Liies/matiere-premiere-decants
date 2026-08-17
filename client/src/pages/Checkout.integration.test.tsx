@@ -17,6 +17,7 @@ const state = vi.hoisted(() => ({
     },
   ] as Array<any>,
   savedDeliveryAddress: null as any,
+  paymentOrder: null as any,
 }));
 const createOrderMutate = vi.fn();
 const saveDeliveryAddressMutate = vi.fn();
@@ -38,7 +39,7 @@ vi.mock("@/lib/trpc", () => ({
         useMutation: () => ({ mutate: cancelPaymentMutate, isPending: false }),
       },
       getById: {
-        useQuery: () => ({ data: null, isLoading: false }),
+        useQuery: () => ({ data: state.paymentOrder, isLoading: false }),
       },
     },
     profile: {
@@ -116,6 +117,8 @@ describe("intégration checkout", () => {
       variant: { id: 101, sizeMl: 2, priceCents: 8500 },
     }];
     state.savedDeliveryAddress = null;
+    state.paymentOrder = null;
+    window.history.replaceState({}, "", "/checkout");
     createOrderMutate.mockImplementation((_input, callbacks) => callbacks.onSuccess({
       success: true,
       orderNumber: "MP-TEST-CHECKOUT",
@@ -254,5 +257,15 @@ describe("intégration checkout", () => {
 
     await waitFor(() => expect(toastSpies.error).toHaveBeenCalledWith("Paiement indisponible"));
     expect(screen.getByRole("button", { name: "Payer avec Stripe" })).toBeTruthy();
+  });
+
+  it("n’affiche pas de succès Stripe lorsqu’une commande retournée est annulée", () => {
+    state.paymentOrder = { orderNumber: "MP-CANCELLED", status: "cancelled", totalAmount: 12_495, shippingCost: 495 };
+    window.history.replaceState({}, "", "/checkout?payment=success&order_id=88");
+
+    render(<Checkout />);
+
+    expect(screen.getByText("Paiement non confirmé")).toBeTruthy();
+    expect(screen.queryByText("Paiement confirmé")).toBeNull();
   });
 });

@@ -6404,3 +6404,8 @@
 - [x] Confirmer le paiement via un webhook Stripe signé et idempotent
 - [x] Retarder les emails opérationnels jusqu’à la confirmation du paiement
 - [x] Mettre à jour le checkout avec une redirection sécurisée vers Stripe
+
+## Checkout Stripe — Retour de paiement
+- [x] Afficher la confirmation uniquement après réception du statut paid
+- [x] Couvrir les statuts annulé et non confirmé
+- [x] Valider et publier la protection de l’écran de retour
