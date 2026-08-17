@@ -6502,3 +6502,8 @@
 - [x] Auditer le déclenchement des suggestions lors de la réutilisation d’adresse
 - [x] Fermer et neutraliser les suggestions après utilisation d’une adresse enregistrée
 - [x] Couvrir et publier la correction de suggestions
+
+## Catalogue — Animation d’ajout au panier
+- [x] Auditer l’état de confirmation des cartes produit
+- [x] Limiter l’animation à la carte ajoutée au panier
+- [x] Couvrir et publier la correction d’animation
