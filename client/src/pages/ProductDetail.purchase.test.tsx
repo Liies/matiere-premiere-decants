@@ -23,6 +23,33 @@ const product = {
   ],
 };
 
+const productImageFixtures = [
+  product,
+  {
+    ...product,
+    id: 2,
+    name: "Crystal Saffron",
+    slug: "crystal-saffron",
+    imageUrl: "/manus-storage/perfume-bottle-2_439724d1.png",
+  },
+  {
+    ...product,
+    id: 30019,
+    name: "Parisian Musk",
+    slug: "parisian-musk",
+    imageUrl: "/manus-storage/parisian-musk-matiere-premiere_a554914c.webp",
+  },
+  {
+    ...product,
+    id: 30020,
+    name: "French Flower",
+    slug: "french-flower",
+    imageUrl: "/manus-storage/french-flower-matiere-premiere_d8b4b81c.jpg",
+  },
+];
+
+let productForTest = product;
+
 vi.mock("@/lib/trpc", () => ({
   trpc: {
     cart: {
@@ -31,7 +58,7 @@ vi.mock("@/lib/trpc", () => ({
     },
     products: {
       getById: { useQuery: () => ({ data: undefined, isLoading: false }) },
-      getByBrandSlug: { useQuery: () => ({ data: product, isLoading: false }) },
+      getByBrandSlug: { useQuery: () => ({ data: productForTest, isLoading: false }) },
       list: { useQuery: () => ({ data: [] }) },
     },
     reviews: {
@@ -63,6 +90,7 @@ import ProductDetail from "./ProductDetail";
 
 describe("fiche de parfum — format public unique", () => {
   beforeEach(() => {
+    productForTest = product;
     Object.defineProperty(window, "matchMedia", {
       configurable: true,
       value: vi.fn().mockReturnValue({ matches: true }),
@@ -84,5 +112,14 @@ describe("fiche de parfum — format public unique", () => {
     expect(screen.queryByText("Contenance disponible")).toBeNull();
     expect(screen.queryByRole("button", { name: /2 ml/ })).toBeNull();
     expect(screen.getByRole("button", { name: "Ajouter au panier" }).getAttribute("disabled")).toBeNull();
+  });
+
+  it.each(productImageFixtures.map((fixture) => [fixture.name, fixture] as const))("rend une image exploitable pour la fiche %s", (_productName, productFixture) => {
+    productForTest = productFixture;
+    render(<ProductDetail />);
+
+    const image = screen.getByRole("img", { name: productFixture.name });
+    expect(image.getAttribute("src")).toMatch(/^\/manus-storage\/.+/);
+    expect(image.getAttribute("alt")).toBe(productFixture.name);
   });
 });

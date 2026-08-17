@@ -6446,3 +6446,8 @@
 - [x] Étendre les fixtures avec des images de produits issues de la base
 - [x] Vérifier qu’une image exploitable est rendue pour chaque carte
 - [x] Exécuter la suite complète et publier la couverture
+
+## Tests d’intégration — Images des fiches produit
+- [x] Étendre les fixtures de fiches avec des images issues de la base
+- [x] Vérifier qu’une image exploitable est rendue par chaque fiche
+- [x] Exécuter la suite complète et publier la couverture
