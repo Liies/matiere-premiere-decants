@@ -6431,3 +6431,8 @@
 - [x] Comparer la fiche et l’image sur le domaine publié et la prévisualisation
 - [x] Corriger la source réellement servie en production si nécessaire
 - [x] Vérifier le rechargement et communiquer la marche à suivre
+
+## Audit fiches — Parisian Musk, Crystal Saffron, French Flower
+- [x] Vérifier les liens de marque, images et variantes actives
+- [x] Corriger les données non conformes à l’offre 50 ml
+- [x] Contrôler les fiches sur le domaine publié et publier le résultat
