@@ -49,6 +49,7 @@ export default function Checkout() {
   const paymentConfirmed = paymentOrder?.status === "paid" || paymentOrder?.status === "processing" || paymentOrder?.status === "shipped" || paymentOrder?.status === "delivered";
   const [checkoutOpened, setCheckoutOpened] = useState<{ orderNumber: string; checkoutUrl: string } | null>(null);
   const [saveAddressForLater, setSaveAddressForLater] = useState(false);
+  const [isSavedAddressApplied, setIsSavedAddressApplied] = useState(false);
   const cancellationRequested = useRef(false);
 
   useEffect(() => {
@@ -87,7 +88,7 @@ export default function Checkout() {
   const shippingCost = shippingRate?.appliedCostCents ?? 0;
   const finalTotal = totalAmount + shippingCost;
 
-  const applySuggestedAddress = (address: { address: string; city: string; postalCode: string; country: string }) => {
+  const applyDeliveryAddress = (address: { address: string; city: string; postalCode: string; country: string }) => {
     setValue("shippingAddress", address.address, { shouldDirty: true, shouldValidate: true });
     setValue("shippingCity", address.city, { shouldDirty: true, shouldValidate: true });
     setValue("shippingPostalCode", address.postalCode, { shouldDirty: true, shouldValidate: true });
@@ -95,9 +96,15 @@ export default function Checkout() {
     setFocus("shippingCity");
   };
 
+  const applySuggestedAddress = (address: { address: string; city: string; postalCode: string; country: string }) => {
+    setIsSavedAddressApplied(false);
+    applyDeliveryAddress(address);
+  };
+
   const applySavedAddress = () => {
     if (!savedDeliveryAddress) return;
-    applySuggestedAddress({
+    setIsSavedAddressApplied(true);
+    applyDeliveryAddress({
       address: savedDeliveryAddress.address,
       city: savedDeliveryAddress.city,
       postalCode: savedDeliveryAddress.postalCode,
@@ -295,9 +302,13 @@ export default function Checkout() {
                       value={shippingAddress}
                       inputRef={shippingAddressField.ref}
                       onBlur={shippingAddressField.onBlur}
-                      onValueChange={(address) => setValue("shippingAddress", address, { shouldDirty: true, shouldValidate: true })}
+                      onValueChange={(address) => {
+                        setIsSavedAddressApplied(false);
+                        setValue("shippingAddress", address, { shouldDirty: true, shouldValidate: true });
+                      }}
                       onAddressSelected={applySuggestedAddress}
                       error={errors.shippingAddress?.message}
+                      suppressSuggestions={isSavedAddressApplied}
                     />
                     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                       <div>

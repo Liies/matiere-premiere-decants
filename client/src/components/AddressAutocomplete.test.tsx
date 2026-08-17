@@ -162,4 +162,31 @@ describe("AddressAutocomplete", () => {
 
     await waitFor(() => expect(screen.queryByRole("option", { name: /27 Rue du Maroc/ })).toBeNull());
   });
+
+  it("n’ouvre aucune suggestion lorsqu’une adresse enregistrée vient d’être appliquée", async () => {
+    const getPlacePredictions = vi.fn();
+
+    vi.stubGlobal("google", {
+      maps: {
+        places: {
+          AutocompleteService: class { getPlacePredictions = getPlacePredictions },
+          PlacesService: class {},
+          PlacesServiceStatus: { OK: "OK" },
+        },
+      },
+    });
+
+    render(
+      <AddressAutocomplete
+        value="27 Rue du Maroc"
+        onValueChange={vi.fn()}
+        onAddressSelected={vi.fn()}
+        suppressSuggestions
+      />,
+    );
+
+    await new Promise((resolve) => window.setTimeout(resolve, 220));
+    expect(getPlacePredictions).not.toHaveBeenCalled();
+    expect(screen.queryByRole("listbox", { name: "Suggestions d’adresses" })).toBeNull();
+  });
 });

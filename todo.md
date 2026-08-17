@@ -6497,3 +6497,8 @@
 - [x] Auditer les dépendances de suppression et l’archivage existant
 - [x] Ajouter l’archivage réversible avec confirmation explicite
 - [x] Couvrir et publier le retrait d’un parfum du catalogue
+
+## Checkout — Adresse enregistrée
+- [x] Auditer le déclenchement des suggestions lors de la réutilisation d’adresse
+- [x] Fermer et neutraliser les suggestions après utilisation d’une adresse enregistrée
+- [x] Couvrir et publier la correction de suggestions

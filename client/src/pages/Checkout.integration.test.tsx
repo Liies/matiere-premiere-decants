@@ -70,9 +70,10 @@ vi.mock("@/_core/hooks/useAuth", () => ({
 
 vi.mock("@/components/Header", () => ({ default: () => <header>Navigation</header> }));
 vi.mock("@/components/AddressAutocomplete", () => ({
-  default: ({ value, onValueChange, onAddressSelected }: any) => (
+  default: ({ value, onValueChange, onAddressSelected, suppressSuggestions }: any) => (
     <div>
       <input name="shippingAddress" value={value} onChange={(event) => onValueChange(event.target.value)} />
+      {!suppressSuggestions && value.length >= 3 ? <p>Suggestions d’adresses actives</p> : null}
       <button
         type="button"
         onClick={() => onAddressSelected({
@@ -192,6 +193,7 @@ describe("intégration checkout", () => {
     fireEvent.click(screen.getByRole("button", { name: "Utiliser cette adresse" }));
 
     expect(container.querySelector<HTMLInputElement>('input[name="shippingAddress"]')?.value).toBe("27 Rue du Maroc");
+    expect(screen.queryByText("Suggestions d’adresses actives")).toBeNull();
     expect(screen.getByText("Cette adresse se trouve dans notre zone de livraison.")).toBeTruthy();
     expect(screen.getByText("Carte de confirmation")).toBeTruthy();
   });

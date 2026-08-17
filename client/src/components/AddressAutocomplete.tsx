@@ -17,6 +17,7 @@ type AddressAutocompleteProps = {
   onBlur?: FocusEventHandler<HTMLInputElement>;
   error?: string;
   disabled?: boolean;
+  suppressSuggestions?: boolean;
 };
 
 /** Champ Places progressif : la saisie manuelle reste possible si le service est indisponible. */
@@ -28,6 +29,7 @@ export default function AddressAutocomplete({
   onBlur,
   error,
   disabled = false,
+  suppressSuggestions = false,
 }: AddressAutocompleteProps) {
   const listboxId = useId();
   const autocompleteService = useRef<google.maps.places.AutocompleteService | null>(null);
@@ -66,9 +68,19 @@ export default function AddressAutocomplete({
   }, []);
 
   useEffect(() => {
+    if (!suppressSuggestions) return;
+    selectionLockedRef.current = true;
+    suppressNextSearchRef.current = false;
+    suggestionRequestIdRef.current += 1;
+    setSuggestions([]);
+    setIsListOpen(false);
+    setIsLoading(false);
+  }, [suppressSuggestions]);
+
+  useEffect(() => {
     const query = value.trim();
     const requestId = ++suggestionRequestIdRef.current;
-    if (selectionLockedRef.current) {
+    if (suppressSuggestions || selectionLockedRef.current) {
       setSuggestions([]);
       setIsListOpen(false);
       setIsLoading(false);
@@ -111,7 +123,7 @@ export default function AddressAutocomplete({
       window.clearTimeout(timer);
       setIsLoading(false);
     };
-  }, [isPlacesReady, isSelecting, value]);
+  }, [isPlacesReady, isSelecting, suppressSuggestions, value]);
 
   const assignInputRef = (node: HTMLInputElement | null) => {
     addressInputRef.current = node;
