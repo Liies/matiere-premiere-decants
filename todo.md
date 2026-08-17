@@ -6523,3 +6523,8 @@
 - [x] Auditer la structure, les filtres et les interactions actuels
 - [x] Redessiner la barre de filtres avec une direction éditoriale luxe et responsive
 - [x] Couvrir, valider et publier le redesign de la barre de filtres
+
+## Checkout — Totaux et livraison
+- [x] Auditer les règles de sous-total, livraison et total sur le panier, le checkout et le serveur
+- [x] Corriger toute divergence de calcul identifiée
+- [x] Ajouter et exécuter les tests de seuils de livraison et de total de commande

@@ -18,6 +18,7 @@ const state = vi.hoisted(() => ({
   ] as Array<any>,
   savedDeliveryAddress: null as any,
   paymentOrder: null as any,
+  shippingRate: { appliedCostCents: 495, isFree: false, carrier: "Colissimo", estimatedDeliveryDays: "2-3 jours ouvrés" } as any,
 }));
 const createOrderMutate = vi.fn();
 const saveDeliveryAddressMutate = vi.fn();
@@ -53,7 +54,7 @@ vi.mock("@/lib/trpc", () => ({
     shipping: {
       calculate: {
         useQuery: () => ({
-          data: { appliedCostCents: 495, isFree: false, carrier: "Colissimo", estimatedDeliveryDays: "2-3 jours ouvrés" },
+          data: state.shippingRate,
           isFetching: false,
         }),
       },
@@ -119,6 +120,7 @@ describe("intégration checkout", () => {
     }];
     state.savedDeliveryAddress = null;
     state.paymentOrder = null;
+    state.shippingRate = { appliedCostCents: 495, isFree: false, carrier: "Colissimo", estimatedDeliveryDays: "2-3 jours ouvrés" };
     window.history.replaceState({}, "", "/checkout");
     createOrderMutate.mockImplementation((_input, callbacks) => callbacks.onSuccess({
       success: true,
@@ -164,6 +166,58 @@ describe("intégration checkout", () => {
     expect(screen.getAllByText(/4,95\s*€/).length).toBeGreaterThan(0);
     expect(screen.getByText("Total à régler")).toBeTruthy();
     expect(screen.getAllByText(/174,95\s*€/).length).toBeGreaterThan(0);
+  });
+
+  it("envoie le sous-total seul lorsque la livraison France est offerte au seuil de 80 €", async () => {
+    state.cartItems = [{
+      id: 1,
+      productId: 1,
+      variantId: 101,
+      quantity: 1,
+      product: { id: 1, name: "Vanilla Powder", price: 8000 },
+      variant: { id: 101, sizeMl: 50, priceCents: 8000 },
+    }];
+    state.shippingRate = { appliedCostCents: 0, isFree: true, carrier: "Colissimo", estimatedDeliveryDays: "2-3 jours ouvrés" };
+    const { container } = render(<Checkout />);
+    setInput(container, "shippingAddress", "12 rue des Fleurs");
+    setInput(container, "shippingCity", "Paris");
+    setInput(container, "shippingPostalCode", "75001");
+    setInput(container, "shippingCountry", "France");
+
+    expect(screen.getByText("Offerte")).toBeTruthy();
+    expect(screen.getAllByText(/80,00\s*€/).length).toBeGreaterThan(0);
+    fireEvent.submit(container.querySelector("form")!);
+
+    await waitFor(() => expect(createOrderMutate).toHaveBeenCalledWith(
+      expect.objectContaining({ totalAmount: 8000 }),
+      expect.any(Object),
+    ));
+  });
+
+  it("additionne les frais Europe au sous-total envoyé au serveur", async () => {
+    state.cartItems = [{
+      id: 1,
+      productId: 1,
+      variantId: 101,
+      quantity: 1,
+      product: { id: 1, name: "Vanilla Powder", price: 12000 },
+      variant: { id: 101, sizeMl: 50, priceCents: 12000 },
+    }];
+    state.shippingRate = { appliedCostCents: 995, isFree: false, carrier: "Colissimo Europe", estimatedDeliveryDays: "4-7 jours ouvrés" };
+    const { container } = render(<Checkout />);
+    setInput(container, "shippingAddress", "Rue de la Loi 1");
+    setInput(container, "shippingCity", "Bruxelles");
+    setInput(container, "shippingPostalCode", "1000");
+    setInput(container, "shippingCountry", "Belgique");
+
+    expect(screen.getAllByText(/9,95\s*€/).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/129,95\s*€/).length).toBeGreaterThan(0);
+    fireEvent.submit(container.querySelector("form")!);
+
+    await waitFor(() => expect(createOrderMutate).toHaveBeenCalledWith(
+      expect.objectContaining({ totalAmount: 12995 }),
+      expect.any(Object),
+    ));
   });
 
   it("renseigne ville, code postal et pays lorsqu’une adresse suggérée est sélectionnée", () => {

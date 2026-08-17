@@ -5,7 +5,7 @@ import { ENV } from './_core/env';
 import { buildCartSyncPlan } from "@shared/cart-sync";
 import { consolidateOrderLines, type RequestedOrderLine } from "@shared/inventory";
 import { REVIEW_ELIGIBLE_ORDER_STATUSES } from "@shared/reviews";
-import { calculateShipping } from "@shared/shipping";
+import { calculateOrderTotal } from "@shared/shipping";
 
 export const PUBLIC_BRAND_SLUG = "matiere-premiere";
 
@@ -582,8 +582,11 @@ export async function createReservedOrder(input: CreateReservedOrderInput): Prom
       orderItemsToInsert.push({ productId: product.id, variantId: variant.id, productName: product.name, sizeMl: variant.sizeMl, quantity: line.quantity, unitPrice: variant.priceCents });
     }
 
-    const shipping = calculateShipping(orderValues.shippingCountry, subtotalAmount);
-    const totalAmount = subtotalAmount + shipping.appliedCostCents;
+    const { shipping, totalCents: totalAmount } = calculateOrderTotal({
+      countryName: orderValues.shippingCountry,
+      postalCode: orderValues.shippingPostalCode,
+      subtotalCents: subtotalAmount,
+    });
     if (requestedTotalAmount !== undefined && requestedTotalAmount !== totalAmount) {
       throw new OrderTotalMismatchError();
     }

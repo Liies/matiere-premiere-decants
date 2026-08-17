@@ -7,10 +7,11 @@ export const shippingRouter = router({
     .input(
       z.object({
         country: z.string().min(1),
+        postalCode: z.string().optional(),
         subtotalCents: z.number().int().min(0),
       })
     )
     .query(({ input }) => {
-      return calculateShipping(input.country, input.subtotalCents);
+      return calculateShipping(input.country, input.subtotalCents, input.postalCode);
     }),
 });

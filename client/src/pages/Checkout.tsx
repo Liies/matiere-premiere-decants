@@ -82,7 +82,7 @@ export default function Checkout() {
     ? getDeliveryEligibility({ country: shippingCountry, postalCode: shippingPostalCode })
     : null;
   const { data: shippingRate, isFetching: isShippingRateLoading } = trpc.shipping.calculate.useQuery(
-    { country: shippingCountry, subtotalCents: totalAmount },
+    { country: shippingCountry, postalCode: shippingPostalCode, subtotalCents: totalAmount },
     { enabled: Boolean(deliveryEligibility?.eligible) },
   );
   const shippingCost = shippingRate?.appliedCostCents ?? 0;
