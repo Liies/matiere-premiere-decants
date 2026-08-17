@@ -36,6 +36,7 @@ vi.mock("@/lib/trpc", () => ({
               baseNotes: "Cèdre",
               price: 19500,
               stock: 5,
+              imageUrl: "/manus-storage/crystal-saffron-test.png",
               variants: [
                 { id: 201, productId: 2, sizeMl: 2, sku: "MP-CRYSAF-02", priceCents: 1000, stock: 10, isActive: false, sortOrder: 1, createdAt: new Date(), updatedAt: new Date() },
                 { id: 202, productId: 2, sizeMl: 50, sku: "MP-CRYSAF-50", priceCents: 12000, stock: 0, isActive: true, sortOrder: 2, createdAt: new Date(), updatedAt: new Date() },
@@ -159,6 +160,19 @@ describe("intégration catalogue — panier et souhaits", () => {
 
     expect(screen.getByTestId("catalog-card-body-1").className).toContain("h-full");
     expect(screen.getByTestId("catalog-card-actions-1").className).toContain("mt-auto");
+  });
+
+  it("rend une image exploitable pour chaque carte reçue du catalogue", () => {
+    render(<Products />);
+
+    const cards = document.querySelectorAll('[data-testid^="catalog-flip-card-"]');
+    const images = screen.getAllByRole("img");
+
+    expect(images).toHaveLength(cards.length);
+    images.forEach((image) => {
+      expect(image.getAttribute("src")).toMatch(/^\/manus-storage\/.+/);
+      expect(image.getAttribute("alt")).toBeTruthy();
+    });
   });
 
   it("conserve des contrôles d’achat tactiles et compacts pour le format public unique", () => {

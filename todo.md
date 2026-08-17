@@ -6441,3 +6441,8 @@
 - [x] Vérifier les cartes Crystal Saffron, Parisian Musk et French Flower
 - [x] Corriger le rendu ou les données catalogue si nécessaire
 - [x] Valider le catalogue publié et communiquer le résultat
+
+## Tests d’intégration — Images du catalogue
+- [x] Étendre les fixtures avec des images de produits issues de la base
+- [x] Vérifier qu’une image exploitable est rendue pour chaque carte
+- [x] Exécuter la suite complète et publier la couverture
