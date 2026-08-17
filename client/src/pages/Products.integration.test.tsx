@@ -205,6 +205,24 @@ describe("intégration catalogue — panier et souhaits", () => {
     expect(screen.queryByRole("option", { name: /2 ml/ })).toBeNull();
   });
 
+  it("présente les filtres comme un module olfactif et conserve leur remise à zéro", () => {
+    render(<Products />);
+
+    const filterModule = screen.getByTestId("catalog-olfactory-filters");
+    expect(filterModule.className).toContain("bg-[#181814]");
+    expect(screen.getByRole("heading", { name: "Explorez la collection par accords." })).toBeTruthy();
+    expect(screen.getByText("Collection complète")).toBeTruthy();
+
+    fireEvent.click(screen.getByRole("button", { name: "Filtrer par notes Boisé" }));
+
+    expect(screen.getByText("1 accord sélectionné")).toBeTruthy();
+    expect(screen.getByText("2 parfums correspondants")).toBeTruthy();
+
+    fireEvent.click(screen.getByRole("button", { name: "Réinitialiser les filtres olfactifs" }));
+    expect(screen.getByText("Collection complète")).toBeTruthy();
+    expect(screen.getByText("2 parfums affichés")).toBeTruthy();
+  });
+
   it("affiche une rupture claire sans contrôle d’achat pour un parfum temporairement indisponible", () => {
     render(<Products />);
 

@@ -6518,3 +6518,8 @@
 - [x] Auditer les procédures d’archivage et de restauration disponibles
 - [x] Afficher les produits archivés dans le tableau de bord avec action de restauration
 - [x] Couvrir et publier la gestion des archives depuis le dashboard
+
+## Catalogue — Barre de filtres premium
+- [x] Auditer la structure, les filtres et les interactions actuels
+- [x] Redessiner la barre de filtres avec une direction éditoriale luxe et responsive
+- [x] Couvrir, valider et publier le redesign de la barre de filtres
