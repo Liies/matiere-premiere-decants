@@ -6477,3 +6477,8 @@
 - [x] Auditer le formulaire du catalogue et la mutation de mise à jour
 - [x] Ajouter l’édition des notes de tête, de cœur et de fond
 - [x] Couvrir et publier la mise à jour des notes
+
+## Administration — Tableau de bord de suivi
+- [x] Auditer les indicateurs de suivi existants
+- [x] Ajouter les indicateurs opérationnels et les accès rapides pertinents
+- [x] Couvrir et publier le tableau de bord enrichi

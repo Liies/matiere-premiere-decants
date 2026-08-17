@@ -5,12 +5,12 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { trpc } from "@/lib/trpc";
 import { useAuth } from "@/_core/hooks/useAuth";
-import { AlertTriangle, ArrowUpRight, CheckCircle2, CircleDollarSign, ClipboardList, PackageCheck, Truck } from "lucide-react";
+import { AlertTriangle, ArrowUpRight, CheckCircle2, CircleDollarSign, ClipboardList, PackageCheck, ReceiptText, Truck } from "lucide-react";
 import { toast } from "sonner";
 import { useMemo, useState } from "react";
 
 type OrderStatusType = "awaiting_payment" | "pending" | "paid" | "processing" | "shipped" | "delivered" | "cancelled";
-type OrderFilter = "all" | "to_fulfill" | "shipping";
+type OrderFilter = "all" | "to_fulfill" | "payment_pending" | "shipping";
 
 const statuses: OrderStatusType[] = ["awaiting_payment", "pending", "paid", "processing", "shipped", "delivered", "cancelled"];
 const statusLabels: Record<OrderStatusType, string> = {
@@ -24,6 +24,8 @@ const statusLabels: Record<OrderStatusType, string> = {
 };
 const paidStatuses = new Set<OrderStatusType>(["paid", "processing", "shipped", "delivered"]);
 const fulfillmentStatuses = new Set<OrderStatusType>(["paid", "processing"]);
+const paymentPendingStatuses = new Set<OrderStatusType>(["awaiting_payment", "pending"]);
+const THIRTY_DAYS_MS = 30 * 24 * 60 * 60 * 1000;
 const euro = new Intl.NumberFormat("fr-FR", { style: "currency", currency: "EUR" });
 
 export default function Admin() {
@@ -43,17 +45,24 @@ export default function Admin() {
 
   const dashboard = useMemo(() => {
     const allOrders = orders ?? [];
-    const revenue = allOrders
-      .filter((order) => paidStatuses.has(order.status as OrderStatusType))
+    const periodStart = Date.now() - THIRTY_DAYS_MS;
+    const paidRecentOrders = allOrders.filter((order) => (
+      paidStatuses.has(order.status as OrderStatusType)
+      && new Date(order.createdAt).getTime() >= periodStart
+    ));
+    const revenue = paidRecentOrders
       .reduce((sum, order) => sum + order.totalAmount, 0);
+    const averageBasket = paidRecentOrders.length > 0 ? revenue / paidRecentOrders.length : 0;
     const toFulfill = allOrders.filter((order) => fulfillmentStatuses.has(order.status as OrderStatusType));
+    const paymentPending = allOrders.filter((order) => paymentPendingStatuses.has(order.status as OrderStatusType));
     const shipping = allOrders.filter((order) => order.status === "shipped");
     const filteredOrders = allOrders.filter((order) => {
       if (orderFilter === "to_fulfill") return fulfillmentStatuses.has(order.status as OrderStatusType);
+      if (orderFilter === "payment_pending") return paymentPendingStatuses.has(order.status as OrderStatusType);
       if (orderFilter === "shipping") return order.status === "shipped";
       return true;
     });
-    return { revenue, toFulfill, shipping, filteredOrders };
+    return { revenue, averageBasket, toFulfill, paymentPending, shipping, filteredOrders };
   }, [orders, orderFilter]);
 
   const handleStatusChange = (orderId: number, status: OrderStatusType) => {
@@ -106,12 +115,18 @@ export default function Admin() {
           <p className="text-gray-600">Chargement des commandes…</p>
         ) : (
           <>
-            <section aria-label="Indicateurs de la boutique" className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+            <section aria-label="Indicateurs de la boutique" className="grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
               <Card className="p-5">
                 <CircleDollarSign className="h-5 w-5 text-emerald-700" aria-hidden="true" />
                 <p className="mt-4 text-xs font-medium uppercase tracking-[0.15em] text-gray-500">Chiffre d’affaires encaissé</p>
                 <p className="mt-2 text-2xl font-light text-gray-900">{euro.format(dashboard.revenue / 100)}</p>
-                <p className="mt-1 text-xs text-gray-500">Commandes payées et livrées incluses</p>
+                <p className="mt-1 text-xs text-gray-500">30 derniers jours</p>
+              </Card>
+              <Card className="p-5">
+                <ReceiptText className="h-5 w-5 text-violet-700" aria-hidden="true" />
+                <p className="mt-4 text-xs font-medium uppercase tracking-[0.15em] text-gray-500">Panier moyen</p>
+                <p className="mt-2 text-2xl font-light text-gray-900">{euro.format(dashboard.averageBasket / 100)}</p>
+                <p className="mt-1 text-xs text-gray-500">Commandes réglées sur 30 jours</p>
               </Card>
               <Card className="p-5">
                 <PackageCheck className="h-5 w-5 text-amber-700" aria-hidden="true" />
@@ -120,10 +135,10 @@ export default function Admin() {
                 <p className="mt-1 text-xs text-gray-500">Commandes payées ou en préparation</p>
               </Card>
               <Card className="p-5">
-                <Truck className="h-5 w-5 text-sky-700" aria-hidden="true" />
-                <p className="mt-4 text-xs font-medium uppercase tracking-[0.15em] text-gray-500">En livraison</p>
-                <p className="mt-2 text-2xl font-light text-gray-900">{dashboard.shipping.length}</p>
-                <p className="mt-1 text-xs text-gray-500">Commandes marquées expédiées</p>
+                <ClipboardList className="h-5 w-5 text-rose-700" aria-hidden="true" />
+                <p className="mt-4 text-xs font-medium uppercase tracking-[0.15em] text-gray-500">Paiements à confirmer</p>
+                <p className="mt-2 text-2xl font-light text-gray-900">{dashboard.paymentPending.length}</p>
+                <p className="mt-1 text-xs text-gray-500">En attente de règlement</p>
               </Card>
               <Card className="p-5">
                 <AlertTriangle className="h-5 w-5 text-rose-700" aria-hidden="true" />
@@ -177,6 +192,12 @@ export default function Admin() {
                   <button type="button" onClick={() => setOrderFilter("to_fulfill")} className="flex w-full items-center justify-between text-left text-sm text-gray-800 transition hover:text-gray-500">
                     <span>{dashboard.toFulfill.length} commande{dashboard.toFulfill.length === 1 ? "" : "s"} à préparer</span><ClipboardList className="h-4 w-4" aria-hidden="true" />
                   </button>
+                  <button type="button" onClick={() => setOrderFilter("payment_pending")} className="flex w-full items-center justify-between text-left text-sm text-gray-800 transition hover:text-gray-500">
+                    <span>{dashboard.paymentPending.length} paiement{dashboard.paymentPending.length === 1 ? "" : "s"} en attente</span><CircleDollarSign className="h-4 w-4" aria-hidden="true" />
+                  </button>
+                  <button type="button" onClick={() => setOrderFilter("shipping")} className="flex w-full items-center justify-between text-left text-sm text-gray-800 transition hover:text-gray-500">
+                    <span>{dashboard.shipping.length} commande{dashboard.shipping.length === 1 ? "" : "s"} expédiée{dashboard.shipping.length === 1 ? "" : "s"}</span><Truck className="h-4 w-4" aria-hidden="true" />
+                  </button>
                 </div>
               </Card>
             </section>
@@ -191,6 +212,7 @@ export default function Admin() {
                   {([
                     ["all", "Toutes"],
                     ["to_fulfill", "À préparer"],
+                    ["payment_pending", "Paiements en attente"],
                     ["shipping", "Expédiées"],
                   ] as const).map(([filter, label]) => (
                     <Button key={filter} type="button" size="sm" variant={orderFilter === filter ? "default" : "outline"} onClick={() => setOrderFilter(filter)} className={orderFilter === filter ? "bg-gray-900 text-white hover:bg-gray-800" : ""}>{label}</Button>
