@@ -6492,3 +6492,8 @@
 - [x] Auditer la couverture des modifications récentes
 - [x] Ajouter les scénarios unitaires manquants et mettre à jour les régressions
 - [x] Exécuter la suite complète et publier la couverture consolidée
+
+## Administration — Retrait de catalogue
+- [x] Auditer les dépendances de suppression et l’archivage existant
+- [x] Ajouter l’archivage réversible avec confirmation explicite
+- [x] Couvrir et publier le retrait d’un parfum du catalogue

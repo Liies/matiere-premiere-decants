@@ -6,9 +6,20 @@ import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { trpc } from "@/lib/trpc";
 import { useAuth } from "@/_core/hooks/useAuth";
-import { Check, Package, Save } from "lucide-react";
+import { Archive, Check, Package, RotateCcw, Save, Trash2 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 
@@ -39,18 +50,24 @@ export default function AdminCatalog() {
     enabled: isAuthenticated && user?.role === "admin",
   });
   const updateProduct = trpc.adminCatalog.update.useMutation();
+  const archiveProduct = trpc.adminCatalog.archive.useMutation();
+  const restoreProduct = trpc.adminCatalog.restore.useMutation();
   const updateStock = trpc.adminInventory.updateStock.useMutation();
   const { data: pendingReviews, isLoading: areReviewsLoading } = trpc.reviews.pending.useQuery(undefined, {
     enabled: isAuthenticated && user?.role === "admin",
   });
   const moderateReview = trpc.reviews.moderate.useMutation();
   const [selectedId, setSelectedId] = useState<number | null>(null);
+  const [showArchived, setShowArchived] = useState(false);
   const [draft, setDraft] = useState<CatalogDraft>(EMPTY_DRAFT);
   const [stockDrafts, setStockDrafts] = useState<Record<number, string>>({});
 
+  const activeProducts = useMemo(() => products?.filter((product) => !product.isArchived) ?? [], [products]);
+  const archivedProducts = useMemo(() => products?.filter((product) => product.isArchived) ?? [], [products]);
+  const visibleProducts = showArchived ? archivedProducts : activeProducts;
   const selectedProduct = useMemo(
-    () => products?.find((product) => product.id === selectedId) ?? products?.[0] ?? null,
-    [products, selectedId],
+    () => visibleProducts.find((product) => product.id === selectedId) ?? visibleProducts[0] ?? null,
+    [visibleProducts, selectedId],
   );
   const { data: variants, isLoading: areVariantsLoading } = trpc.adminInventory.variants.useQuery(
     { productId: selectedProduct?.id ?? 1 },
@@ -154,6 +171,45 @@ export default function AdminCatalog() {
     );
   };
 
+  const invalidateCatalog = async (productId: number) => {
+    await Promise.all([
+      utils.adminCatalog.list.invalidate(),
+      utils.products.list.invalidate(),
+      utils.products.getById.invalidate({ id: productId }),
+      utils.catalog.list.invalidate(),
+    ]);
+  };
+
+  const handleArchive = (productId: number) => {
+    archiveProduct.mutate(
+      { id: productId },
+      {
+        onSuccess: async () => {
+          await invalidateCatalog(productId);
+          setShowArchived(false);
+          setSelectedId(null);
+          toast.success("Parfum retiré du catalogue");
+        },
+        onError: (error) => toast.error(error.message || "Le retrait du catalogue a échoué"),
+      },
+    );
+  };
+
+  const handleRestore = (productId: number) => {
+    restoreProduct.mutate(
+      { id: productId },
+      {
+        onSuccess: async () => {
+          await invalidateCatalog(productId);
+          setShowArchived(false);
+          setSelectedId(productId);
+          toast.success("Parfum restauré dans le catalogue");
+        },
+        onError: (error) => toast.error(error.message || "La restauration a échoué"),
+      },
+    );
+  };
+
   if (!isAuthenticated || user?.role !== "admin") {
     return (
       <div className="flex min-h-screen flex-col bg-white">
@@ -176,7 +232,7 @@ export default function AdminCatalog() {
           <div>
             <p className="text-xs font-medium uppercase tracking-[0.2em] text-gray-500">Administration</p>
             <h1 className="mt-2 text-3xl font-light text-gray-900 sm:text-4xl">Gestion du catalogue</h1>
-            <p className="mt-2 max-w-2xl text-sm text-gray-600">Modifiez le nom, la description, les notes olfactives, le prix et la contenance affichés à vos clients.</p>
+            <p className="mt-2 max-w-2xl text-sm text-gray-600">Modifiez l’offre affichée à vos clients ou retirez un parfum du catalogue sans effacer son historique.</p>
           </div>
           <a href="/products" className="inline-flex min-h-11 items-center justify-center border border-gray-300 px-4 text-sm text-gray-700 transition hover:border-gray-900 hover:text-gray-900">Voir la boutique</a>
         </div>
@@ -190,10 +246,17 @@ export default function AdminCatalog() {
             <Card className="overflow-hidden p-0">
               <div className="border-b border-gray-200 px-5 py-4">
                 <p className="text-sm font-medium text-gray-900">Produits</p>
-                <p className="mt-1 text-xs text-gray-500">Sélectionnez un parfum à modifier.</p>
+                <p className="mt-1 text-xs text-gray-500">Sélectionnez un parfum à modifier ou à retirer.</p>
+              </div>
+              <div className="border-b border-gray-200 px-3 py-3">
+                <Button type="button" variant="outline" size="sm" onClick={() => { setShowArchived((current) => !current); setSelectedId(null); }}>
+                  {showArchived ? "Voir le catalogue actif" : `Voir les retraits (${archivedProducts.length})`}
+                </Button>
               </div>
               <div className="max-h-[28rem] overflow-y-auto p-2">
-                {products.map((product) => {
+                {visibleProducts.length === 0 ? (
+                  <p className="px-3 py-6 text-sm text-gray-600">{showArchived ? "Aucun parfum retiré pour le moment." : "Aucun parfum actif à administrer."}</p>
+                ) : visibleProducts.map((product) => {
                   const selected = selectedProduct?.id === product.id;
                   return (
                     <button
@@ -214,7 +277,19 @@ export default function AdminCatalog() {
             </Card>
 
             <Card className="p-5 sm:p-6">
-              {selectedProduct && (
+              {selectedProduct?.isArchived ? (
+                <section className="space-y-5" aria-labelledby="archived-product-title">
+                  <div className="border-b border-gray-200 pb-5">
+                    <p className="text-xs font-medium uppercase tracking-[0.18em] text-gray-500">Parfum retiré</p>
+                    <h2 id="archived-product-title" className="mt-2 text-2xl font-light text-gray-900">{selectedProduct.name}</h2>
+                  </div>
+                  <p className="text-sm leading-6 text-gray-600">Ce parfum n’est plus visible dans le catalogue public. Ses données et l’historique des commandes sont conservés.</p>
+                  <Button type="button" onClick={() => handleRestore(selectedProduct.id)} disabled={restoreProduct.isPending} className="min-h-11 bg-gray-900 text-white hover:bg-gray-800">
+                    <RotateCcw className="mr-2 h-4 w-4" aria-hidden="true" />
+                    {restoreProduct.isPending ? "Restauration…" : "Restaurer dans le catalogue"}
+                  </Button>
+                </section>
+              ) : selectedProduct ? (
                 <form className="space-y-5" onSubmit={handleSubmit}>
                   <div className="border-b border-gray-200 pb-5">
                     <p className="text-xs font-medium uppercase tracking-[0.18em] text-gray-500">Produit sélectionné</p>
@@ -322,8 +397,37 @@ export default function AdminCatalog() {
                       {updateProduct.isPending ? "Enregistrement…" : "Enregistrer"}
                     </Button>
                   </div>
+
+                  <section className="space-y-3 border-t border-rose-200 pt-5" aria-labelledby="catalog-archive-title">
+                    <div>
+                      <p className="text-xs font-medium uppercase tracking-[0.18em] text-rose-700">Zone de retrait</p>
+                      <h3 id="catalog-archive-title" className="mt-2 text-lg font-medium text-gray-900">Retirer ce parfum du catalogue</h3>
+                      <p className="mt-1 text-xs leading-5 text-gray-600">Le parfum disparaîtra de la boutique, mais les commandes et les données seront conservées. Vous pourrez le restaurer à tout moment.</p>
+                    </div>
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <Button type="button" variant="destructive" disabled={archiveProduct.isPending} className="min-h-11">
+                          <Archive className="mr-2 h-4 w-4" aria-hidden="true" />
+                          Retirer du catalogue
+                        </Button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>Retirer {selectedProduct.name} du catalogue ?</AlertDialogTitle>
+                          <AlertDialogDescription>Le parfum ne sera plus proposé aux clients. Cette action est réversible depuis la liste des retraits et ne supprime pas l’historique des commandes.</AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>Annuler</AlertDialogCancel>
+                          <AlertDialogAction onClick={() => handleArchive(selectedProduct.id)} className="bg-rose-700 text-white hover:bg-rose-800">
+                            <Trash2 className="mr-2 h-4 w-4" aria-hidden="true" />
+                            Retirer le parfum
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
+                  </section>
                 </form>
-              )}
+              ) : null}
             </Card>
           </div>
         )}

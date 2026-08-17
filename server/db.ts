@@ -261,6 +261,13 @@ export async function updateProductCatalog(id: number, values: ProductCatalogUpd
   await db.update(products).set(values).where(eq(products.id, id));
 }
 
+/** Retire ou restaure un parfum du catalogue public sans supprimer les données liées aux commandes. */
+export async function setProductArchived(id: number, isArchived: boolean) {
+  const db = await getDb();
+  if (!db) throw new Error("La mise à jour du catalogue est indisponible");
+  await db.update(products).set({ isArchived }).where(eq(products.id, id));
+}
+
 export async function createCatalogVariant(values: {
   productId: number;
   sizeMl: number;

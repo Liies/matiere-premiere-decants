@@ -17,6 +17,7 @@ import {
   getVariantsByProductIds,
   PUBLIC_BRAND_SLUG,
   recordSourceBottle,
+  setProductArchived,
   updateVariantStock,
   updateProductCatalog,
 } from "./db";
@@ -259,6 +260,22 @@ export const appRouter = router({
         price: input.price,
         volumeMl: input.volumeMl,
       });
+      invalidateAdvisorCatalogCache();
+      return { success: true } as const;
+    }),
+    archive: protectedProcedure.input(z.object({ id: z.number().int().positive() })).mutation(async ({ input, ctx }) => {
+      requireAdmin(ctx.user);
+      const product = await getProductById(input.id);
+      if (!product) throw new TRPCError({ code: "NOT_FOUND", message: "Parfum introuvable" });
+      await setProductArchived(input.id, true);
+      invalidateAdvisorCatalogCache();
+      return { success: true } as const;
+    }),
+    restore: protectedProcedure.input(z.object({ id: z.number().int().positive() })).mutation(async ({ input, ctx }) => {
+      requireAdmin(ctx.user);
+      const product = await getProductById(input.id);
+      if (!product) throw new TRPCError({ code: "NOT_FOUND", message: "Parfum introuvable" });
+      await setProductArchived(input.id, false);
       invalidateAdvisorCatalogCache();
       return { success: true } as const;
     }),

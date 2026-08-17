@@ -7,6 +7,8 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 const state = vi.hoisted(() => ({
   updateStockMutate: vi.fn(),
   updateProductMutate: vi.fn(),
+  archiveProductMutate: vi.fn(),
+  restoreProductMutate: vi.fn(),
   product: {
     id: 42,
     name: "Vanilla Powder",
@@ -25,6 +27,8 @@ vi.mock("@/lib/trpc", () => ({
     adminCatalog: {
       list: { useQuery: () => ({ data: [state.product], isLoading: false }) },
       update: { useMutation: () => ({ mutate: state.updateProductMutate, isPending: false }) },
+      archive: { useMutation: () => ({ mutate: state.archiveProductMutate, isPending: false }) },
+      restore: { useMutation: () => ({ mutate: state.restoreProductMutate, isPending: false }) },
     },
     adminInventory: {
       variants: { useQuery: () => ({ data: state.variants, isLoading: false }) },
@@ -59,6 +63,8 @@ describe("administration des avis", () => {
     cleanup();
     state.updateStockMutate.mockClear();
     state.updateProductMutate.mockClear();
+    state.archiveProductMutate.mockClear();
+    state.restoreProductMutate.mockClear();
   });
 
   it("affiche un état vide honnête lorsqu’aucun avis vérifié ne requiert de modération", () => {
@@ -104,6 +110,21 @@ describe("administration des avis", () => {
         heartNotes: "Iris, ambroxan",
         baseNotes: "Bois de santal",
       }),
+      expect.objectContaining({ onSuccess: expect.any(Function), onError: expect.any(Function) }),
+    );
+  });
+
+  it("demande une confirmation avant de retirer un parfum du catalogue", () => {
+    render(<AdminCatalog />);
+
+    fireEvent.click(screen.getByRole("button", { name: "Retirer du catalogue" }));
+
+    expect(screen.getByRole("alertdialog")).toBeTruthy();
+    expect(screen.getByText(/ne supprime pas l’historique des commandes/i)).toBeTruthy();
+    fireEvent.click(screen.getByRole("button", { name: "Retirer le parfum" }));
+
+    expect(state.archiveProductMutate).toHaveBeenCalledWith(
+      { id: 42 },
       expect.objectContaining({ onSuccess: expect.any(Function), onError: expect.any(Function) }),
     );
   });
