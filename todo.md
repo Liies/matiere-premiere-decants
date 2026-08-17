@@ -6538,3 +6538,8 @@
 - [x] Auditer les sources d’images du catalogue et de la liste de souhaits
 - [x] Unifier les deux affichages sur la même source de visuel produit
 - [x] Couvrir, vérifier et publier la cohérence visuelle
+
+## Favoris — Navigation et partage
+- [x] Auditer la navigation catalogue-favoris et le modèle de stockage des favoris
+- [x] Ajouter une transition fluide et un partage de sélection par lien
+- [x] Couvrir, vérifier et publier les interactions catalogue-favoris

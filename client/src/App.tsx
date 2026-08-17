@@ -8,7 +8,7 @@ import { ThemeProvider } from "./contexts/ThemeContext";
 import InitialLoader from "./components/InitialLoader";
 import { getInitialAnchorTargetId, INITIAL_LOADER_SESSION_KEY, shouldShowInitialLoader } from "@shared/initial-loader";
 import { useCartSyncOnSignIn } from "@/hooks/useCartSyncOnSignIn";
-import { PAGE_TRANSITION_DURATION_MS, shouldUseInstantPageTransition } from "@shared/page-transition";
+import { isCollectionPageTransition, PAGE_TRANSITION_DURATION_MS, shouldUseInstantPageTransition } from "@shared/page-transition";
 const Home = lazy(() => import("./pages/Home"));
 const loadHomePremium = () => import("./pages/HomePremium");
 const HomePremium = lazy(loadHomePremium);
@@ -50,12 +50,15 @@ function PageTransition({ location, children }: { location: string; children: Re
   const [displayedChildren, setDisplayedChildren] = useState(children);
   const [displayedLocation, setDisplayedLocation] = useState(location);
   const [isLeaving, setIsLeaving] = useState(false);
+  const [isCollectionTransition, setIsCollectionTransition] = useState(false);
 
   useEffect(() => {
     if (location === displayedLocation) {
       setDisplayedChildren(children);
       return;
     }
+
+    const collectionTransition = isCollectionPageTransition(displayedLocation, location);
 
     const instant = prefersReducedMotion()
       || shouldUseInstantPageTransition(location)
@@ -65,9 +68,11 @@ function PageTransition({ location, children }: { location: string; children: Re
       setDisplayedChildren(children);
       setDisplayedLocation(location);
       setIsLeaving(false);
+      setIsCollectionTransition(false);
       return;
     }
 
+    setIsCollectionTransition(collectionTransition);
     setIsLeaving(true);
     const timer = window.setTimeout(() => {
       setDisplayedChildren(children);
@@ -80,7 +85,7 @@ function PageTransition({ location, children }: { location: string; children: Re
   }, [children, displayedLocation, location]);
 
   return (
-    <div className={isLeaving ? "page-transition page-transition-leaving" : "page-transition"}>
+    <div className={`page-transition${isLeaving ? " page-transition-leaving" : ""}${isCollectionTransition ? " page-transition-collection" : ""}`}>
       {displayedChildren}
     </div>
   );

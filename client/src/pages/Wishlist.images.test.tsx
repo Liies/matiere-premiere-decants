@@ -29,6 +29,7 @@ vi.mock("@shared/image-assets", () => ({
 vi.mock("@/components/Header", () => ({ default: () => <header>Navigation</header> }));
 vi.mock("@/components/Footer", () => ({ default: () => <footer>Pied de page</footer> }));
 vi.mock("wouter", () => ({ Link: ({ children }: { children: React.ReactNode }) => <>{children}</> }));
+vi.mock("sonner", () => ({ toast: { success: vi.fn(), error: vi.fn() } }));
 
 import Wishlist from "./Wishlist";
 

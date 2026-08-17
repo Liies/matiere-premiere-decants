@@ -1,4 +1,4 @@
-import { Heart, Leaf, X } from "lucide-react";
+import { Heart, Leaf, Share2, X } from "lucide-react";
 import { Link } from "wouter";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -7,18 +7,53 @@ import { Card } from "@/components/ui/card";
 import { trpc } from "@/lib/trpc";
 import { useWishlist } from "@/hooks/useWishlist";
 import { getProductImage } from "@shared/image-assets";
+import { createSharedWishlistPath, parseSharedWishlistIds } from "@shared/wishlist-share";
+import { toast } from "sonner";
 
 export default function Wishlist() {
   const { data: products, isLoading } = trpc.products.list.useQuery();
   const { wishlistIds, toggleWishlist } = useWishlist();
-  const wishedProducts = products?.filter((product) => wishlistIds.includes(product.id)) ?? [];
+  const sharedWishlistIds = parseSharedWishlistIds(window.location.search);
+  const isSharedSelection = sharedWishlistIds.length > 0;
+  const selectedIds = isSharedSelection ? sharedWishlistIds : wishlistIds;
+  const wishedProducts = products?.filter((product) => selectedIds.includes(product.id)) ?? [];
+
+  const shareWishlist = async () => {
+    const selectionIds = wishedProducts.map((product) => product.id);
+    const shareUrl = `${window.location.origin}${createSharedWishlistPath(selectionIds)}`;
+    const shareData = {
+      title: "Ma sélection Matière Première",
+      text: `Découvrez ma sélection de ${selectionIds.length} parfum${selectionIds.length > 1 ? "s" : ""} Matière Première.`,
+      url: shareUrl,
+    };
+
+    try {
+      if (navigator.share) {
+        await navigator.share(shareData);
+        toast.success("Sélection partagée.");
+        return;
+      }
+
+      if (navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(shareUrl);
+        toast.success("Lien de sélection copié.");
+        return;
+      }
+
+      toast.error("Le partage n’est pas disponible sur ce navigateur.");
+    } catch (error) {
+      if ((error as { name?: string }).name !== "AbortError") {
+        toast.error("Impossible de partager cette sélection.");
+      }
+    }
+  };
 
   return (
     <div className="flex min-h-screen flex-col bg-white">
       <Header />
       <main className="flex-1 py-10 sm:py-14">
         <div className="container">
-          <p className="mb-3 text-xs uppercase tracking-[0.25em] text-gray-500">Sélection personnelle</p>
+          <p className="mb-3 text-xs uppercase tracking-[0.25em] text-gray-500">{isSharedSelection ? "Sélection partagée" : "Sélection personnelle"}</p>
           <div className="mb-10 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
             <div>
               <h1 className="text-3xl font-light text-gray-900 sm:text-4xl">Liste de souhaits</h1>
@@ -26,9 +61,16 @@ export default function Wishlist() {
                 Gardez les fragrances que vous souhaitez découvrir ou retrouver.
               </p>
             </div>
-            <p className="text-sm text-gray-500" aria-live="polite">
-              {wishlistIds.length} parfum{wishlistIds.length > 1 ? "s" : ""} enregistré{wishlistIds.length > 1 ? "s" : ""}
-            </p>
+            <div className="flex flex-wrap items-center gap-3">
+              <p className="text-sm text-gray-500" aria-live="polite">
+                {wishedProducts.length} parfum{wishedProducts.length > 1 ? "s" : ""} {isSharedSelection ? "dans cette sélection" : `enregistré${wishedProducts.length > 1 ? "s" : ""}`}
+              </p>
+              {!isLoading && wishedProducts.length > 0 ? (
+                <Button type="button" variant="outline" onClick={shareWishlist} className="min-h-11 gap-2 border-gray-300 bg-white text-gray-800 hover:border-gray-900 hover:bg-stone-50">
+                  <Share2 className="h-4 w-4" aria-hidden="true" /> Partager la sélection
+                </Button>
+              ) : null}
+            </div>
           </div>
 
           {isLoading ? (

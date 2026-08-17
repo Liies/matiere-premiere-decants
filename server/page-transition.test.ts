@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { PAGE_TRANSITION_DURATION_MS, shouldUseInstantPageTransition } from "@shared/page-transition";
+import { isCollectionPageTransition, PAGE_TRANSITION_DURATION_MS, shouldUseInstantPageTransition } from "@shared/page-transition";
 
 describe("transitions de page", () => {
   it("conserve une navigation instantanée dans le panier et le checkout", () => {
@@ -13,5 +13,12 @@ describe("transitions de page", () => {
     expect(shouldUseInstantPageTransition("/products")).toBe(false);
     expect(shouldUseInstantPageTransition("/product/1")).toBe(false);
     expect(PAGE_TRANSITION_DURATION_MS).toBe(160);
+  });
+
+  it("identifie le passage entre catalogue et favoris pour une transition dédiée", () => {
+    expect(isCollectionPageTransition("/products", "/wishlist")).toBe(true);
+    expect(isCollectionPageTransition("/wishlist", "/products")).toBe(true);
+    expect(isCollectionPageTransition("/products", "/products")).toBe(false);
+    expect(isCollectionPageTransition("/wishlist", "/cart")).toBe(false);
   });
 });
