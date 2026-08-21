@@ -87,7 +87,7 @@ describe("intégration catalogue — panier et souhaits", () => {
     render(<Products />);
 
     const vanillaButton = screen.getByRole("button", { name: "Ajouter" });
-    expect(screen.getByRole("link", { name: "Voir le parfum" })).toBeTruthy();
+    expect(screen.getByRole("link", { name: "Découvrir le parfum" })).toBeTruthy();
     expect(screen.queryByLabelText("Quantité de Crystal Saffron")).toBeNull();
 
     fireEvent.click(vanillaButton);
@@ -257,9 +257,12 @@ describe("intégration catalogue — panier et souhaits", () => {
     expect(screen.queryByRole("button", { name: "Afficher les disponibles" })).toBeNull();
     const badge = screen.getByTestId("catalog-out-of-stock-badge-2");
     expect(badge.textContent).toContain("Indisponible");
-    expect(badge.className).toContain("bg-[#f7f4ed]/95");
-    expect(screen.getByTestId("catalog-out-of-stock-status-2").textContent).toContain("Indisponible actuellement");
-    expect(screen.getByRole("link", { name: "Voir le parfum" })).toBeTruthy();
+    expect(badge.className).toContain("bg-[#463d33]/95");
+    expect(badge.className).toContain("rounded-full");
+    expect(screen.getByTestId("catalog-out-of-stock-card-2").className).toContain("bg-[linear-gradient(145deg,#fffdf9_0%,#f4efe5_100%)]");
+    expect(screen.getByTestId("catalog-out-of-stock-panel-2").className).toContain("bg-white/70");
+    expect(screen.getByTestId("catalog-out-of-stock-status-2").textContent).toContain("Momentanément indisponible");
+    expect(screen.getByRole("link", { name: "Découvrir le parfum" })).toBeTruthy();
     expect(screen.getByText("2 parfums affichés")).toBeTruthy();
   });
 

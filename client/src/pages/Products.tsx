@@ -405,8 +405,11 @@ export default function Products() {
               {filteredProducts.map((product, index) => (
                 <Card
                   key={getCartFeedbackKey(product)}
-                  className={`catalog-product-card group/product-card h-full overflow-hidden transition-all duration-500 animate-fade-in hover:-translate-y-1 hover:shadow-xl motion-reduce:transform-none motion-reduce:transition-none ${
-                    isProductAvailable(product) ? "border-gray-200" : "border-[#d8d0c2] bg-[#fdfcf9]"
+                  data-testid={!isProductAvailable(product) ? `catalog-out-of-stock-card-${product.id}` : undefined}
+                  className={`catalog-product-card group/product-card h-full overflow-hidden transition-all duration-500 animate-fade-in motion-reduce:transform-none motion-reduce:transition-none ${
+                    isProductAvailable(product)
+                      ? "border-gray-200 hover:-translate-y-1 hover:shadow-xl"
+                      : "border-[#d7cfc0] bg-[linear-gradient(145deg,#fffdf9_0%,#f4efe5_100%)] shadow-[0_14px_38px_rgba(71,60,43,0.08)] hover:-translate-y-0.5 hover:border-[#b9ad99] hover:shadow-[0_18px_44px_rgba(71,60,43,0.12)]"
                   }`}
                   style={{ animationDelay: `${Math.min(index, 5) * 70}ms` }}
                   onMouseEnter={() => scheduleHoverFlip(product.id)}
@@ -426,9 +429,9 @@ export default function Products() {
                       {!isProductAvailable(product) && (
                         <span
                           data-testid={`catalog-out-of-stock-badge-${product.id}`}
-                          className="absolute left-3 top-3 z-20 inline-flex min-h-8 items-center gap-2 border border-[#cfc4b1] bg-[#f7f4ed]/95 px-3 text-[10px] font-medium uppercase tracking-[0.18em] text-[#635a4d] shadow-sm backdrop-blur-sm"
+                          className="absolute left-3 top-3 z-20 inline-flex min-h-8 items-center gap-2 rounded-full border border-white/45 bg-[#463d33]/95 px-3.5 text-[10px] font-medium uppercase tracking-[0.16em] text-[#fffaf0] shadow-[0_5px_16px_rgba(55,46,36,0.24)] backdrop-blur-sm"
                         >
-                          <span className="h-1.5 w-1.5 rounded-full bg-[#8b7b61]" aria-hidden="true" />
+                          <span className="h-1.5 w-1.5 rounded-full bg-[#e4cfa8] shadow-[0_0_0_3px_rgba(228,207,168,0.16)]" aria-hidden="true" />
                           Indisponible
                         </span>
                       )}
@@ -439,7 +442,7 @@ export default function Products() {
                         className="catalog-flip-card"
                       >
                         <div className="catalog-flip-card-inner">
-                          <a href={productPath(product)} className="catalog-flip-face catalog-flip-front luxury-image-frame product-bottle-frame flex h-56 w-full items-center justify-center overflow-hidden rounded-lg bg-gray-100 sm:h-64" aria-label={`Voir la fiche de ${product.name}`}>
+                          <a href={productPath(product)} className={`catalog-flip-face catalog-flip-front luxury-image-frame product-bottle-frame relative flex h-56 w-full items-center justify-center overflow-hidden rounded-lg sm:h-64 ${isProductAvailable(product) ? "bg-gray-100" : "bg-[#e9e3d8] after:pointer-events-none after:absolute after:inset-0 after:bg-[linear-gradient(180deg,rgba(75,65,53,0.04)_0%,rgba(75,65,53,0.18)_100%)]"}`} aria-label={`Voir la fiche de ${product.name}`}>
                             {(() => {
                               const image = getProductImage(product.id);
                               const imageSrc = product.imageUrl ?? image?.compressed;
@@ -450,7 +453,7 @@ export default function Products() {
                                   loading={index < 2 ? "eager" : "lazy"}
                                   fetchPriority={index < 2 ? "high" : "low"}
                                   decoding="async"
-                                  className="h-full w-full object-cover transition-transform duration-1000 ease-out group-hover/product-card:scale-[1.035] group-focus-within/product-card:scale-[1.035] motion-reduce:transform-none motion-reduce:transition-none"
+                                  className={`h-full w-full object-cover transition-transform duration-1000 ease-out group-hover/product-card:scale-[1.035] group-focus-within/product-card:scale-[1.035] motion-reduce:transform-none motion-reduce:transition-none ${!isProductAvailable(product) ? "saturate-[0.82]" : ""}`}
                                 />
                               ) : (
                                 <Leaf className="w-12 h-12 text-gray-300" aria-hidden="true" />
@@ -495,18 +498,23 @@ export default function Products() {
 
                     <p className="min-h-[3.75rem] text-sm text-gray-600 line-clamp-3">{product.description}</p>
 
-                    <div data-testid={`catalog-card-actions-${product.id}`} className="mt-auto flex flex-col gap-3 border-t border-gray-200 pt-4 sm:flex-row sm:items-end sm:justify-between sm:gap-4">
-                      <div className="shrink-0">
+                    <div data-testid={`catalog-card-actions-${product.id}`} className={`mt-auto flex flex-col gap-3 border-t pt-4 sm:flex-row sm:items-end sm:justify-between sm:gap-4 ${isProductAvailable(product) ? "border-gray-200" : "border-[#d8d0c3]"}`}>
+                      <div className="min-w-0 shrink-0">
                         <p data-testid={`catalog-price-${product.id}`} className="text-2xl font-light text-gray-900">
                           {formatPrice(getSelectedVariant(product)?.priceCents ?? product.price)}
                         </p>
                         {isProductAvailable(product) ? (
                           <p className="text-xs font-medium text-gray-500">✓ En stock</p>
                         ) : (
-                          <p data-testid={`catalog-out-of-stock-status-${product.id}`} className="mt-1 inline-flex items-center gap-2 text-xs font-medium text-[#6d6253]">
-                            <span className="h-1 w-1 rounded-full bg-[#8b7b61]" aria-hidden="true" />
-                            Indisponible actuellement
-                          </p>
+                          <div data-testid={`catalog-out-of-stock-panel-${product.id}`} className="mt-3 inline-flex min-h-11 items-center gap-3 rounded-lg border border-[#ded6c8] bg-white/70 px-3 py-2 text-left shadow-[inset_0_1px_0_rgba(255,255,255,0.8)]">
+                            <span className="flex h-6 w-6 items-center justify-center rounded-full border border-[#cfc3ad] bg-[#f4ede2]" aria-hidden="true">
+                              <span className="h-1.5 w-1.5 rounded-full bg-[#7d6c56]" />
+                            </span>
+                            <span>
+                              <span className="block text-[9px] font-medium uppercase tracking-[0.18em] text-[#857763]">Disponibilité</span>
+                              <span data-testid={`catalog-out-of-stock-status-${product.id}`} className="mt-0.5 block text-xs font-medium text-[#4e4539]">Momentanément indisponible</span>
+                            </span>
+                          </div>
                         )}
                       </div>
 
@@ -547,8 +555,9 @@ export default function Products() {
                           </div>
                         </div>
                       ) : (
-                        <a href={productPath(product)} className="inline-flex min-h-11 items-center justify-center border border-[#cfc4b1] bg-[#f7f4ed] px-4 text-sm text-[#50483d] transition-[background-color,border-color,color,transform] duration-200 [transition-timing-function:cubic-bezier(0.23,1,0.32,1)] hover:-translate-y-px hover:border-[#8b7b61] hover:bg-[#eee9df] hover:text-gray-950 active:scale-[0.97] motion-reduce:transform-none motion-reduce:transition-none">
-                          Voir le parfum
+                        <a href={productPath(product)} className="group/unavailable-action inline-flex min-h-11 items-center justify-center gap-3 rounded-full border border-[#6c5e4d] bg-[#4a4035] px-4 text-sm font-medium text-[#fffaf1] shadow-[0_5px_16px_rgba(65,54,42,0.16)] transition-[background-color,border-color,color,transform,box-shadow] duration-200 [transition-timing-function:cubic-bezier(0.23,1,0.32,1)] hover:-translate-y-px hover:border-[#4a4035] hover:bg-[#302a23] hover:shadow-[0_8px_20px_rgba(65,54,42,0.22)] active:scale-[0.97] motion-reduce:transform-none motion-reduce:transition-none">
+                          Découvrir le parfum
+                          <span className="text-base transition-transform duration-200 group-hover/unavailable-action:translate-x-0.5 motion-reduce:transform-none" aria-hidden="true">→</span>
                         </a>
                       )}
                     </div>

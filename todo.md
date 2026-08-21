@@ -6712,3 +6712,8 @@
 - [x] Identifier les ressources et régressions liées au module vidéo
 - [x] Retirer la section « Film officiel » et le code devenu non référencé
 - [x] Couvrir, vérifier et publier la fiche produit épurée
+
+## Catalogue — Indisponibilités premium
+- [x] Auditer les couleurs, la hiérarchie et les interactions actuelles des cartes indisponibles
+- [x] Moderniser la signalétique, les couleurs et la composition de l’état indisponible
+- [x] Couvrir, vérifier et publier le traitement premium des indisponibilités
