@@ -6637,3 +6637,7 @@
 ## Navigation — Survol du logo
 - [x] Ajouter une micro-animation au survol du logo Matière Première
 - [x] Couvrir, vérifier et publier l’animation du logo
+
+## Navigation — Survol des boutons de session
+- [x] Ajouter une micro-animation aux boutons Connexion et Déconnexion
+- [x] Couvrir, vérifier et publier les animations de session

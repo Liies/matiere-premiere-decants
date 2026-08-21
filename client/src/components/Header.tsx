@@ -26,6 +26,10 @@ const mobileNavigationLinkClass = (active: boolean) => `relative flex min-h-11 i
 
 const cartNavigationLinkClass = "group flex h-11 w-11 items-center justify-center rounded-full text-gray-600 transition-[background-color,color,transform] duration-200 [transition-timing-function:cubic-bezier(0.23,1,0.32,1)] hover:-translate-y-0.5 hover:bg-[#f1eee7] hover:text-gray-900 active:scale-[0.97] motion-reduce:transform-none motion-reduce:transition-none";
 
+const loginNavigationButtonClass = "inline-flex min-h-11 items-center border border-gray-900 px-3 py-2 text-xs text-gray-900 transition-[background-color,color,transform] duration-200 [transition-timing-function:cubic-bezier(0.23,1,0.32,1)] hover:-translate-y-px hover:bg-gray-900 hover:text-white active:scale-[0.97] motion-reduce:transform-none motion-reduce:transition-none";
+
+const logoutNavigationButtonClass = "relative inline-flex min-h-11 items-center overflow-hidden px-2 py-2 text-xs text-gray-600 transition-[color,transform] duration-200 [transition-timing-function:cubic-bezier(0.23,1,0.32,1)] after:absolute after:bottom-1 after:left-2 after:h-px after:w-[calc(100%-1rem)] after:origin-left after:scale-x-0 after:bg-gray-900 after:transition-transform after:duration-200 after:[transition-timing-function:cubic-bezier(0.23,1,0.32,1)] hover:-translate-y-px hover:text-gray-900 hover:after:scale-x-100 active:scale-[0.97] motion-reduce:transform-none motion-reduce:transition-none motion-reduce:after:transition-none";
+
 export default function Header() {
   const { isAuthenticated, user, logout } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -97,7 +101,7 @@ export default function Header() {
               )}
               <button
                 onClick={() => logout()}
-                className="hidden min-h-11 items-center px-2 py-2 text-xs text-gray-600 transition hover:text-gray-900 sm:flex"
+                className={`hidden sm:flex ${logoutNavigationButtonClass}`}
               >
                 Déconnexion
               </button>
@@ -105,7 +109,7 @@ export default function Header() {
           ) : (
             <a
               href={getLoginUrl()}
-              className="hidden min-h-11 items-center border border-gray-900 px-3 py-2 text-xs text-gray-900 transition hover:bg-gray-900 hover:text-white sm:flex"
+              className={`hidden sm:flex ${loginNavigationButtonClass}`}
             >
               Connexion
             </a>

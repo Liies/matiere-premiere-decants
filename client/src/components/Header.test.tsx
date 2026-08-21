@@ -5,11 +5,17 @@ import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import Header from "./Header";
 
+const authState = vi.hoisted(() => ({
+  isAuthenticated: false,
+  user: null as { role: "admin" | "user" } | null,
+  logout: vi.fn(),
+}));
+
 vi.mock("@/_core/hooks/useAuth", () => ({
   useAuth: () => ({
-    isAuthenticated: false,
-    user: null,
-    logout: vi.fn(),
+    isAuthenticated: authState.isAuthenticated,
+    user: authState.user,
+    logout: authState.logout,
   }),
 }));
 
@@ -20,6 +26,9 @@ describe("Header", () => {
 
   beforeEach(() => {
     window.history.replaceState({}, "", "/products");
+    authState.isAuthenticated = false;
+    authState.user = null;
+    vi.clearAllMocks();
   });
 
   it("présente la navigation uniforme sans menu Par familles", () => {
@@ -72,6 +81,25 @@ describe("Header", () => {
 
     const leaf = brand.querySelector("svg");
     expect(leaf?.className.baseVal).toContain("group-hover:rotate-[10deg]");
+  });
+
+  it("anime les actions Connexion et Déconnexion selon l’état de session", () => {
+    render(<Header />);
+
+    const loginLink = screen.getByRole("link", { name: "Connexion" });
+    expect(loginLink.className).toContain("hover:-translate-y-px");
+    expect(loginLink.className).toContain("active:scale-[0.97]");
+    expect(loginLink.className).toContain("motion-reduce:transform-none");
+
+    cleanup();
+    authState.isAuthenticated = true;
+    authState.user = { role: "user" };
+    render(<Header />);
+
+    const logoutButton = screen.getByRole("button", { name: "Déconnexion" });
+    expect(logoutButton.className).toContain("hover:-translate-y-px");
+    expect(logoutButton.className).toContain("hover:after:scale-x-100");
+    expect(logoutButton.className).toContain("motion-reduce:after:transition-none");
   });
 
   it("reprend les mêmes entrées dans le menu mobile", () => {
