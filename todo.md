@@ -6707,3 +6707,8 @@
 - [x] Identifier le rendu de la section d’avis lorsqu’aucun avis n’est publié
 - [x] Masquer entièrement la section vide sans affecter les avis approuvés
 - [x] Couvrir, vérifier et publier l’affichage conditionnel
+
+## Fiche parfum — Retrait du film officiel
+- [x] Identifier les ressources et régressions liées au module vidéo
+- [x] Retirer la section « Film officiel » et le code devenu non référencé
+- [x] Couvrir, vérifier et publier la fiche produit épurée
