@@ -9,3 +9,7 @@ La sélection de l’accord **Boisé** a été vérifiée sur le catalogue. Le f
 La fiche de **Vanilla Powder** affiche correctement le bouton « Ajouter au panier » pour le format 50 ml disponible. Le bouton conserve un cadrage stable et un contraste lisible ; sa confirmation améliorée combine une impulsion, un balayage lumineux et une coche animée après l’ajout réussi, avec un repli sans mouvement pour les utilisateurs qui le demandent.
 
 Le parcours de consultation confirme que le bouton est disponible sur la fiche Vanilla Powder ; la confirmation transitoire est également couverte par une régression de composant afin de garantir son affichage immédiatement après l’ajout.
+
+## Fiche produit — Mouvement du visuel au défilement
+
+Le flacon de **Vanilla Powder** a été vérifié au chargement de sa fiche : le cadrage reste stable et le mouvement est limité à une zone discrète. La nouvelle courbe accélère avec douceur au début du défilement, puis se stabilise, avec une dérive horizontale très légère, une translation verticale, un zoom contenu et une rotation imperceptible. Les préférences de réduction des mouvements conservent le visuel fixe.

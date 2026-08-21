@@ -285,7 +285,7 @@ export default function ProductDetail() {
               data-testid="product-visual-motion"
               className="luxury-image-frame group relative mx-auto aspect-square w-full max-w-xl overflow-hidden rounded-2xl bg-gray-50/80 shadow-sm transition-transform duration-200 ease-out motion-reduce:transition-none"
               style={{
-                transform: `translate3d(0, ${productVisualMotion.translateY}px, 0) scale(${productVisualMotion.scale}) rotate(${productVisualMotion.rotate}deg)`,
+                transform: `translate3d(${productVisualMotion.translateX}px, ${productVisualMotion.translateY}px, 0) scale(${productVisualMotion.scale}) rotate(${productVisualMotion.rotate}deg)`,
                 transformOrigin: "50% 42%",
                 willChange: "transform",
               }}

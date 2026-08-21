@@ -6608,3 +6608,7 @@
 ## Fiche produit — Confirmation d’ajout au panier
 - [x] Améliorer le retour visuel lors de l’ajout au panier
 - [x] Couvrir et publier l’animation améliorée
+
+## Fiche produit — Mouvement du visuel au défilement
+- [x] Affiner le parallax, le zoom et la rotation de l’image produit
+- [x] Couvrir et publier le mouvement de défilement amélioré
