@@ -59,6 +59,21 @@ describe("Header", () => {
     expect(cartIcon?.className.baseVal).toContain("group-hover:-rotate-6");
   });
 
+  it("anime le logo sans perturber son accès à l’accueil", () => {
+    render(<Header />);
+
+    const brandLink = screen.getByRole("link", { name: "Accueil — Matière Première" });
+    expect(brandLink.getAttribute("href")).toBe("/");
+
+    const brand = screen.getByTestId("header-brand");
+    expect(brand.className).toContain("group-hover:-translate-y-px");
+    expect(brand.className).toContain("group-active:scale-[0.99]");
+    expect(brand.className).toContain("motion-reduce:transform-none");
+
+    const leaf = brand.querySelector("svg");
+    expect(leaf?.className.baseVal).toContain("group-hover:rotate-[10deg]");
+  });
+
   it("reprend les mêmes entrées dans le menu mobile", () => {
     render(<Header />);
 

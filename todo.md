@@ -6633,3 +6633,7 @@
 ## Panier — Visuels des parfums
 - [x] Afficher le visuel de chaque parfum dans les lignes du panier
 - [x] Couvrir, vérifier et publier les lignes de panier enrichies
+
+## Navigation — Survol du logo
+- [x] Ajouter une micro-animation au survol du logo Matière Première
+- [x] Couvrir, vérifier et publier l’animation du logo

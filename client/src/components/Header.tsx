@@ -38,10 +38,10 @@ export default function Header() {
     <header className="sticky top-0 z-50 border-b border-gray-200 bg-white/95 backdrop-blur">
       <div className="container flex items-center justify-between gap-3 py-3 sm:py-4">
         {/* Logo */}
-        <Link href="/">
-          <div className="flex items-center gap-2 cursor-pointer hover:opacity-80 transition">
-            <Leaf className="h-5 w-5 shrink-0 text-gray-900 sm:h-6 sm:w-6" />
-            <h1 className="text-[0.95rem] font-light tracking-[0.12em] text-gray-900 sm:text-xl sm:tracking-wider">
+        <Link href="/" aria-label="Accueil — Matière Première" className="group inline-flex rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#756a58]/45 focus-visible:ring-offset-4">
+          <div data-testid="header-brand" className="flex items-center gap-2 transition-transform duration-200 [transition-timing-function:cubic-bezier(0.23,1,0.32,1)] group-hover:-translate-y-px group-active:scale-[0.99] motion-reduce:transform-none motion-reduce:transition-none">
+            <Leaf className="h-5 w-5 shrink-0 text-gray-900 transition-transform duration-200 group-hover:rotate-[10deg] group-hover:scale-110 motion-reduce:transform-none motion-reduce:transition-none sm:h-6 sm:w-6" aria-hidden="true" />
+            <h1 className="text-[0.95rem] font-light tracking-[0.12em] text-gray-900 transition-transform duration-200 group-hover:translate-x-0.5 motion-reduce:transform-none motion-reduce:transition-none sm:text-xl sm:tracking-wider">
               Matière Première
             </h1>
           </div>
