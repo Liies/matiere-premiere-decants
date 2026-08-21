@@ -6543,3 +6543,8 @@
 - [x] Auditer la navigation catalogue-favoris et le modèle de stockage des favoris
 - [x] Ajouter une transition fluide et un partage de sélection par lien
 - [x] Couvrir, vérifier et publier les interactions catalogue-favoris
+
+## Catalogue — Quantité des cartes
+- [x] Auditer l’affichage de quantité et les tests associés
+- [x] Retirer la quantité visible sans modifier la sélection de variante ni le stock
+- [x] Couvrir, vérifier et publier l’ajustement des cartes

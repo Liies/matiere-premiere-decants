@@ -177,22 +177,22 @@ describe("intégration catalogue — panier et souhaits", () => {
     });
   });
 
-  it("conserve des contrôles d’achat tactiles et compacts pour le format public unique", () => {
+  it("conserve un ajout unitaire compact sans afficher de quantité sur la carte", () => {
     render(<Products />);
 
     const grid = screen.getByTestId("catalog-products-grid");
     const actions = screen.getByTestId("catalog-card-actions-1");
     const vanillaCard = screen.getByTestId("catalog-card-body-1");
-    const quantity = screen.getByLabelText("Quantité de Vanilla Powder");
     const addButton = screen.getAllByRole("button", { name: "Ajouter" })[0]!;
 
     expect(grid.className).toContain("grid-cols-1");
     expect(grid.className).toContain("md:grid-cols-2");
     expect(actions.className).toContain("sm:items-end");
     expect(screen.queryByLabelText("Format de Vanilla Powder")).toBeNull();
+    expect(screen.queryByLabelText("Quantité de Vanilla Powder")).toBeNull();
     expect(within(vanillaCard).getByText("Extrait de Parfum · Décant 50 ml")).toBeTruthy();
-    expect(quantity.className).toContain("h-11");
     expect(addButton.className).toContain("min-h-11");
+    expect(addButton.className).toContain("w-full");
   });
 
   it("allège les filtres puisque le catalogue public est exclusivement proposé en 50 ml", () => {

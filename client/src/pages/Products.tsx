@@ -26,7 +26,6 @@ export default function Products() {
   const { addToCart: addToLocalCart } = useLocalCart();
   const { isWishlisted, toggleWishlist } = useWishlist();
   const addToCart = trpc.cart.addVariant.useMutation();
-  const [selectedQuantity, setSelectedQuantity] = useState<Record<number, number>>({});
   const [selectedVariantIds, setSelectedVariantIds] = useState<Record<number, number>>({});
   const [selectedFilters, setSelectedFilters] = useState<string[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
@@ -172,14 +171,13 @@ export default function Products() {
   };
 
   const handleAddToCart = (product: CatalogProduct) => {
-    const quantity = selectedQuantity[product.id] || 1;
+    const quantity = 1;
     const variant = getSelectedVariant(product);
     if (!variant || variant.stock < quantity) {
-      toast.error("Le format choisi n’est pas disponible dans cette quantité.");
+      toast.error("Le format choisi n’est plus disponible.");
       return;
     }
     const handleSuccessfulAddition = () => {
-      setSelectedQuantity((prev) => ({ ...prev, [product.id]: 1 }));
       confirmAddedProduct(product);
     };
 
@@ -524,26 +522,13 @@ export default function Products() {
                               </select>
                             </div>
                           )}
-                          <div className="flex w-full min-w-0 items-center gap-2 sm:justify-end">
-                            <label htmlFor={`quantity-${product.id}`} className="sr-only">Quantité de {product.name}</label>
-                            <input
-                              id={`quantity-${product.id}`}
-                              type="number"
-                              min="1"
-                              max={getSelectedVariant(product)?.stock ?? 0}
-                              value={selectedQuantity[product.id] || 1}
-                              onChange={(event) => setSelectedQuantity((prev) => ({
-                                ...prev,
-                                [product.id]: Math.max(1, parseInt(event.target.value, 10) || 1),
-                              }))}
-                              className="h-11 w-14 rounded border border-gray-200 px-2 text-center text-sm"
-                            />
+                          <div className="flex w-full min-w-0 items-center sm:justify-end">
                             <Button
                               type="button"
                               onClick={() => handleAddToCart(product)}
                               disabled={addToCart.isPending}
                               aria-live="polite"
-                              className={`relative min-h-11 min-w-0 flex-1 overflow-hidden bg-gray-900 text-white font-light whitespace-nowrap transition-all duration-500 touch-manipulation hover:-translate-y-0.5 hover:bg-gray-800 hover:shadow-lg lg:w-36 lg:flex-none lg:translate-y-1 lg:opacity-0 lg:group-hover/product-card:translate-y-0 lg:group-hover/product-card:opacity-100 lg:group-focus-within/product-card:translate-y-0 lg:group-focus-within/product-card:opacity-100 motion-reduce:transform-none motion-reduce:transition-none ${
+                              className={`relative min-h-11 w-full min-w-0 overflow-hidden bg-gray-900 text-white font-light whitespace-nowrap transition-all duration-500 touch-manipulation hover:-translate-y-0.5 hover:bg-gray-800 hover:shadow-lg lg:w-36 lg:translate-y-1 lg:opacity-0 lg:group-hover/product-card:translate-y-0 lg:group-hover/product-card:opacity-100 lg:group-focus-within/product-card:translate-y-0 lg:group-focus-within/product-card:opacity-100 motion-reduce:transform-none motion-reduce:transition-none ${
                                 isProductRecentlyAdded(product) ? "scale-[0.97] bg-gray-800" : ""
                               }`}
                             >
