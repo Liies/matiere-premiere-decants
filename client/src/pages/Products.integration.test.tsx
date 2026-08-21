@@ -227,8 +227,11 @@ describe("intégration catalogue — panier et souhaits", () => {
     expect(screen.getByRole("heading", { name: "Explorez la collection par accords." })).toBeTruthy();
     expect(screen.getByText("Collection complète")).toBeTruthy();
 
-    fireEvent.click(screen.getByRole("button", { name: "Filtrer par notes Boisé" }));
+    const woodyFilter = screen.getByRole("button", { name: "Filtrer par notes Boisé" });
+    expect(woodyFilter.className).toContain("olfactory-filter-chip");
+    fireEvent.click(woodyFilter);
 
+    expect(woodyFilter.getAttribute("data-state")).toBe("on");
     expect(screen.getByText("1 accord sélectionné")).toBeTruthy();
     expect(screen.getByText("2 parfums correspondants")).toBeTruthy();
 

@@ -6600,3 +6600,7 @@
 ## Footer — Réseaux sociaux
 - [x] Ajouter Snapchat aux réseaux sociaux affichés
 - [x] Vérifier et publier l’ajout de Snapchat
+
+## Catalogue — Animation de filtres olfactifs
+- [x] Ajouter un retour animé à la sélection d’une senteur
+- [x] Couvrir et publier l’animation des filtres

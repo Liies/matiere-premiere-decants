@@ -367,7 +367,7 @@ export default function Products() {
                       key={filter.id}
                       value={filter.id}
                       aria-label={`Filtrer par notes ${filter.label}`}
-                      className="group/filter inline-flex min-h-11 min-w-max flex-none gap-3 whitespace-nowrap border border-[#ded8ca] bg-white/75 px-3 py-2 text-xs font-medium uppercase tracking-[0.14em] text-[#5d5548] transition duration-200 hover:border-[#aa9d88] hover:bg-[#eeeae1] data-[state=on]:border-[#665d50] data-[state=on]:bg-[#665d50] data-[state=on]:text-white sm:px-4"
+                      className="olfactory-filter-chip group/filter inline-flex min-h-11 min-w-max flex-none gap-3 whitespace-nowrap border border-[#ded8ca] bg-white/75 px-3 py-2 text-xs font-medium uppercase tracking-[0.14em] text-[#5d5548] transition duration-200 hover:border-[#aa9d88] hover:bg-[#eeeae1] data-[state=on]:border-[#665d50] data-[state=on]:bg-[#665d50] data-[state=on]:text-white sm:px-4"
                     >
                       <span className="text-[10px] text-[#978b75] group-data-[state=on]/filter:text-[#e7dfcf]">{String(index + 1).padStart(2, "0")}</span>
                       <span>{filter.label}</span>
