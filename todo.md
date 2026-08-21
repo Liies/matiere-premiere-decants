@@ -6696,3 +6696,9 @@
 - [x] Ajouter une recherche instantanée par nom de parfum
 - [x] Recalculer la pagination et l’état vide depuis les résultats filtrés
 - [x] Couvrir, vérifier et publier la recherche des archives
+
+## Administration — Archives sécurisées et triées
+- [x] Auditer les dépendances de suppression et ajouter une procédure définitive sûre
+- [x] Ajouter une confirmation avant restauration et suppression définitive
+- [x] Trier les archives par date et par ordre alphabétique
+- [x] Couvrir, vérifier et publier les actions sécurisées et le tri

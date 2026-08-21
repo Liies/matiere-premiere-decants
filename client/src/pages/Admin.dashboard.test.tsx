@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 
 import React from "react";
-import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen, within } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 const state = vi.hoisted(() => ({
@@ -65,15 +65,16 @@ const state = vi.hoisted(() => ({
   ],
   lowStock: [{ id: 42, productId: 9, productName: "Vanilla Powder", sizeMl: 50, stock: 0 }],
   archivedProducts: [
-    { id: 77, name: "Crystal Safran", concentration: "extrait", isArchived: true },
-    { id: 78, name: "Archive 2", concentration: "edp", isArchived: true },
-    { id: 79, name: "Archive 3", concentration: "edp", isArchived: true },
-    { id: 80, name: "Archive 4", concentration: "edp", isArchived: true },
-    { id: 81, name: "Archive 5", concentration: "edp", isArchived: true },
-    { id: 82, name: "Archive 6", concentration: "edp", isArchived: true },
-    { id: 83, name: "Archive 7", concentration: "edp", isArchived: true },
+    { id: 77, name: "Crystal Safran", concentration: "extrait", isArchived: true, archivedAt: new Date("2026-08-03T12:00:00Z") },
+    { id: 78, name: "Archive 2", concentration: "edp", isArchived: true, archivedAt: new Date("2026-08-10T12:00:00Z") },
+    { id: 79, name: "Archive 3", concentration: "edp", isArchived: true, archivedAt: new Date("2026-08-09T12:00:00Z") },
+    { id: 80, name: "Archive 4", concentration: "edp", isArchived: true, archivedAt: new Date("2026-08-08T12:00:00Z") },
+    { id: 81, name: "Archive 5", concentration: "edp", isArchived: true, archivedAt: new Date("2026-08-07T12:00:00Z") },
+    { id: 82, name: "Archive 6", concentration: "edp", isArchived: true, archivedAt: new Date("2026-08-06T12:00:00Z") },
+    { id: 83, name: "Archive 7", concentration: "edp", isArchived: true, archivedAt: new Date("2026-08-01T12:00:00Z") },
   ],
   restoreProductMutate: vi.fn(),
+  deleteArchivedProductMutate: vi.fn(),
 }));
 
 vi.mock("@/lib/trpc", () => ({
@@ -88,6 +89,7 @@ vi.mock("@/lib/trpc", () => ({
     adminCatalog: {
       archived: { useQuery: () => ({ data: state.archivedProducts, isLoading: false }) },
       restore: { useMutation: () => ({ mutate: state.restoreProductMutate, isPending: false }) },
+      deletePermanently: { useMutation: () => ({ mutate: state.deleteArchivedProductMutate, isPending: false }) },
     },
     reviews: {
       pending: { useQuery: () => ({ data: [{ id: 1 }], isLoading: false }) },
@@ -115,6 +117,7 @@ describe("tableau de bord administrateur", () => {
     cleanup();
     vi.useRealTimers();
     state.restoreProductMutate.mockClear();
+    state.deleteArchivedProductMutate.mockClear();
   });
 
   it("affiche les indicateurs de commande et les alertes de stock réelles", () => {
@@ -176,8 +179,31 @@ describe("tableau de bord administrateur", () => {
     expect(screen.getByText("Crystal Safran")).toBeTruthy();
     expect(screen.getByText(/extrait de parfum/i)).toBeTruthy();
 
-    fireEvent.click(screen.getAllByRole("button", { name: "Restaurer" })[0]);
+    const crystalRow = screen.getByText("Crystal Safran").closest("li");
+    expect(crystalRow).toBeTruthy();
+    fireEvent.click(within(crystalRow!).getByRole("button", { name: "Restaurer" }));
+    expect(state.restoreProductMutate).not.toHaveBeenCalled();
+    expect(screen.getByRole("heading", { name: "Restaurer ce parfum dans le catalogue ?" })).toBeTruthy();
+    fireEvent.click(screen.getByRole("button", { name: "Restaurer le parfum" }));
     expect(state.restoreProductMutate).toHaveBeenCalledWith(
+      { id: 77 },
+      expect.objectContaining({ onSuccess: expect.any(Function), onError: expect.any(Function) }),
+    );
+  });
+
+  it("demande confirmation avant la suppression définitive et transmet uniquement l’archive ciblée", () => {
+    render(<Admin />);
+
+    fireEvent.click(screen.getByRole("tab", { name: "Catalogue" }));
+    const crystalRow = screen.getByText("Crystal Safran").closest("li");
+    expect(crystalRow).toBeTruthy();
+    fireEvent.click(within(crystalRow!).getByRole("button", { name: "Supprimer définitivement" }));
+
+    expect(state.deleteArchivedProductMutate).not.toHaveBeenCalled();
+    const confirmation = screen.getByRole("alertdialog");
+    expect(within(confirmation).getByRole("heading", { name: "Supprimer définitivement ce parfum ?" })).toBeTruthy();
+    fireEvent.click(within(confirmation).getByRole("button", { name: "Supprimer définitivement" }));
+    expect(state.deleteArchivedProductMutate).toHaveBeenCalledWith(
       { id: 77 },
       expect.objectContaining({ onSuccess: expect.any(Function), onError: expect.any(Function) }),
     );
@@ -214,5 +240,20 @@ describe("tableau de bord administrateur", () => {
     fireEvent.change(screen.getByLabelText("Rechercher dans les produits archivés"), { target: { value: "inconnu" } });
 
     expect(screen.getByText("Aucun parfum archivé ne correspond à « inconnu »." )).toBeTruthy();
+  });
+
+  it("trie les archives par date d’archivage ou par nom sans modifier le filtre courant", () => {
+    render(<Admin />);
+
+    fireEvent.click(screen.getByRole("tab", { name: "Catalogue" }));
+    const archiveList = screen.getByText("Archive 2").closest("ul");
+    expect(archiveList).toBeTruthy();
+    expect(within(archiveList!).getAllByRole("listitem")[0].textContent).toContain("Archive 2");
+
+    fireEvent.change(screen.getByLabelText("Trier les produits archivés"), { target: { value: "archived_asc" } });
+    expect(within(archiveList!).getAllByRole("listitem")[0].textContent).toContain("Archive 7");
+
+    fireEvent.change(screen.getByLabelText("Trier les produits archivés"), { target: { value: "name_desc" } });
+    expect(within(archiveList!).getAllByRole("listitem")[0].textContent).toContain("Crystal Safran");
   });
 });

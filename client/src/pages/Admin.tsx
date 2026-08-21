@@ -1,6 +1,7 @@
 import DashboardLayout from "@/components/DashboardLayout";
 import Footer from "@/components/Footer";
 import Header from "@/components/Header";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { AdminOrderStatusChart } from "@/components/AdminOrderStatusChart";
@@ -8,13 +9,15 @@ import { AdminRevenueChart } from "@/components/AdminRevenueChart";
 import { trpc } from "@/lib/trpc";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { getOrderStatusSlices, getRevenueSeries, type DashboardOrderStatus } from "@shared/admin-dashboard-analytics";
-import { AlertTriangle, ArchiveRestore, ArrowUpRight, CheckCircle2, CircleDollarSign, ClipboardList, PackageCheck, ReceiptText, RotateCcw, Search, Truck, X } from "lucide-react";
+import { AlertTriangle, ArchiveRestore, ArrowUpRight, CheckCircle2, CircleDollarSign, ClipboardList, PackageCheck, ReceiptText, RotateCcw, Search, Trash2, Truck, X } from "lucide-react";
 import { toast } from "sonner";
 import { useMemo, useState } from "react";
 
 type OrderStatusType = "awaiting_payment" | "pending" | "paid" | "processing" | "shipped" | "delivered" | "cancelled";
 type OrderFilter = "all" | "to_fulfill" | "payment_pending" | "shipping";
 type AdminTab = "overview" | "orders" | "catalog" | "trust";
+type ArchiveSort = "archived_desc" | "archived_asc" | "name_asc" | "name_desc";
+type PendingArchiveAction = { type: "restore" | "delete"; id: number; name: string } | null;
 
 const statuses: OrderStatusType[] = ["awaiting_payment", "pending", "paid", "processing", "shipped", "delivered", "cancelled"];
 const statusLabels: Record<OrderStatusType, string> = {
@@ -52,6 +55,14 @@ function normalizeArchiveSearch(value: string): string {
   return value.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLocaleLowerCase("fr-FR").trim();
 }
 
+function archiveTimestamp(product: { archivedAt?: Date | string | null; updatedAt?: Date | string | null }): number {
+  const timestamp = product.archivedAt ?? product.updatedAt;
+  const value = timestamp ? new Date(timestamp).getTime() : 0;
+  return Number.isFinite(value) ? value : 0;
+}
+
+const archiveDateFormatter = new Intl.DateTimeFormat("fr-FR", { day: "numeric", month: "short", year: "numeric" });
+
 export default function Admin() {
   const { user, isAuthenticated } = useAuth();
   const { data: orders, isLoading, refetch } = trpc.orders.getAllOrders.useQuery(undefined, {
@@ -69,18 +80,30 @@ export default function Admin() {
   const trpcUtils = trpc.useUtils();
   const updateStatus = trpc.orders.updateStatus.useMutation();
   const restoreProduct = trpc.adminCatalog.restore.useMutation();
+  const deleteArchivedProduct = trpc.adminCatalog.deletePermanently.useMutation();
   const [selectedStatus, setSelectedStatus] = useState<Record<number, OrderStatusType | undefined>>({});
   const [orderFilter, setOrderFilter] = useState<OrderFilter>("all");
   const [activeTab, setActiveTab] = useState<AdminTab>("overview");
   const [archivePage, setArchivePage] = useState(1);
   const [archiveQuery, setArchiveQuery] = useState("");
+  const [archiveSort, setArchiveSort] = useState<ArchiveSort>("archived_desc");
+  const [pendingArchiveAction, setPendingArchiveAction] = useState<PendingArchiveAction>(null);
 
   const archivePagination = useMemo(() => {
     const normalizedQuery = normalizeArchiveSearch(archiveQuery);
     const matchingProducts = (archivedProducts ?? []).filter((product) => (
       normalizeArchiveSearch(product.name).includes(normalizedQuery)
     ));
-    const total = matchingProducts.length;
+    const sortedProducts = [...matchingProducts].sort((left, right) => {
+      if (archiveSort === "name_asc") return left.name.localeCompare(right.name, "fr", { sensitivity: "base" });
+      if (archiveSort === "name_desc") return right.name.localeCompare(left.name, "fr", { sensitivity: "base" });
+      const direction = archiveSort === "archived_asc" ? 1 : -1;
+      const timestampDifference = archiveTimestamp(left) - archiveTimestamp(right);
+      return timestampDifference === 0
+        ? left.name.localeCompare(right.name, "fr", { sensitivity: "base" })
+        : timestampDifference * direction;
+    });
+    const total = sortedProducts.length;
     const pageCount = Math.max(1, Math.ceil(total / ARCHIVE_PAGE_SIZE));
     const currentPage = Math.min(archivePage, pageCount);
     const start = (currentPage - 1) * ARCHIVE_PAGE_SIZE;
@@ -92,9 +115,9 @@ export default function Admin() {
       total,
       start,
       end,
-      products: matchingProducts.slice(start, end),
+      products: sortedProducts.slice(start, end),
     };
-  }, [archivePage, archiveQuery, archivedProducts]);
+  }, [archivePage, archiveQuery, archiveSort, archivedProducts]);
 
   const dashboard = useMemo(() => {
     const allOrders = orders ?? [];
@@ -146,19 +169,47 @@ export default function Admin() {
     );
   };
 
-  const handleRestoreProduct = (productId: number, productName: string) => {
+  const invalidateArchiveData = () => {
+    void trpcUtils.adminCatalog.archived.invalidate();
+    void trpcUtils.adminCatalog.list.invalidate();
+    void trpcUtils.catalog.list.invalidate();
+  };
+
+  const restoreArchivedProduct = (productId: number, productName: string) => {
     restoreProduct.mutate(
       { id: productId },
       {
         onSuccess: () => {
-          void trpcUtils.adminCatalog.archived.invalidate();
-          void trpcUtils.adminCatalog.list.invalidate();
-          void trpcUtils.catalog.list.invalidate();
+          invalidateArchiveData();
           toast.success(`${productName} a été restauré dans le catalogue.`);
+          setPendingArchiveAction(null);
         },
         onError: (error) => toast.error(error.message || "Impossible de restaurer ce parfum."),
       },
     );
+  };
+
+  const permanentlyDeleteArchivedProduct = (productId: number, productName: string) => {
+    deleteArchivedProduct.mutate(
+      { id: productId },
+      {
+        onSuccess: () => {
+          invalidateArchiveData();
+          toast.success(`${productName} a été supprimé définitivement.`);
+          setPendingArchiveAction(null);
+        },
+        onError: (error) => toast.error(error.message || "La suppression définitive est impossible pour ce parfum."),
+      },
+    );
+  };
+
+  const confirmArchiveAction = () => {
+    if (!pendingArchiveAction) return;
+    if (pendingArchiveAction.type === "restore") {
+      restoreArchivedProduct(pendingArchiveAction.id, pendingArchiveAction.name);
+      return;
+    }
+    permanentlyDeleteArchivedProduct(pendingArchiveAction.id, pendingArchiveAction.name);
   };
 
   if (!isAuthenticated || user?.role !== "admin") {
@@ -353,7 +404,7 @@ export default function Admin() {
                   </div>
                 ) : (
                   <>
-                    <div className="mt-5">
+                    <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
                       <label htmlFor="archived-product-search" className="sr-only">Rechercher dans les produits archivés</label>
                       <div className="relative max-w-md">
                         <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" aria-hidden="true" />
@@ -371,8 +422,17 @@ export default function Admin() {
                           </button>
                         )}
                       </div>
-                      <p className="mt-2 text-sm text-gray-600" aria-live="polite">{archivePagination.total} résultat{archivePagination.total === 1 ? "" : "s"}{archiveQuery ? " trouvé" : " dans les archives"}{archiveQuery && archivePagination.total !== 1 ? "s" : ""}</p>
+                      <div className="w-full sm:w-52">
+                        <label htmlFor="archived-product-sort" className="mb-2 block text-xs font-medium uppercase tracking-[0.14em] text-gray-500">Trier par</label>
+                        <select id="archived-product-sort" aria-label="Trier les produits archivés" value={archiveSort} onChange={(event) => { setArchiveSort(event.target.value as ArchiveSort); setArchivePage(1); }} className="min-h-11 w-full border border-gray-300 bg-white px-3 text-sm text-gray-900 outline-none transition focus:border-gray-900">
+                          <option value="archived_desc">Date d’archivage — récent</option>
+                          <option value="archived_asc">Date d’archivage — ancien</option>
+                          <option value="name_asc">Nom — A à Z</option>
+                          <option value="name_desc">Nom — Z à A</option>
+                        </select>
+                      </div>
                     </div>
+                    <p className="mt-2 text-sm text-gray-600" aria-live="polite">{archivePagination.total} résultat{archivePagination.total === 1 ? "" : "s"}{archiveQuery ? " trouvé" : " dans les archives"}{archiveQuery && archivePagination.total !== 1 ? "s" : ""}</p>
                     {archivePagination.total === 0 ? (
                       <div className="flex gap-3 py-8 text-sm text-gray-600">
                         <Search className="mt-0.5 h-4 w-4 shrink-0 text-gray-500" aria-hidden="true" />
@@ -386,18 +446,18 @@ export default function Admin() {
                               <div>
                                 <p className="text-sm font-medium text-gray-900">{product.name}</p>
                                 <p className="mt-1 text-xs text-gray-500">{product.concentration === "extrait" ? "Extrait de Parfum" : "Eau de Parfum"} · Retiré du catalogue public</p>
+                                <p className="mt-1 text-xs text-gray-500">Archivé le {product.archivedAt ? archiveDateFormatter.format(new Date(product.archivedAt)) : "—"}</p>
                               </div>
-                              <Button
-                                type="button"
-                                size="sm"
-                                variant="outline"
-                                disabled={restoreProduct.isPending}
-                                onClick={() => handleRestoreProduct(product.id, product.name)}
-                                className="min-h-11 shrink-0 border-gray-300 text-gray-900 hover:border-gray-900"
-                              >
-                                <RotateCcw className="mr-2 h-4 w-4" aria-hidden="true" />
-                                Restaurer
-                              </Button>
+                              <div className="flex flex-wrap gap-2">
+                                <Button type="button" size="sm" variant="outline" disabled={restoreProduct.isPending || deleteArchivedProduct.isPending} onClick={() => setPendingArchiveAction({ type: "restore", id: product.id, name: product.name })} className="min-h-11 shrink-0 border-gray-300 text-gray-900 hover:border-gray-900">
+                                  <RotateCcw className="mr-2 h-4 w-4" aria-hidden="true" />
+                                  Restaurer
+                                </Button>
+                                <Button type="button" size="sm" variant="outline" disabled={restoreProduct.isPending || deleteArchivedProduct.isPending} onClick={() => setPendingArchiveAction({ type: "delete", id: product.id, name: product.name })} className="min-h-11 shrink-0 border-rose-200 text-rose-700 hover:border-rose-500 hover:bg-rose-50 hover:text-rose-800">
+                                  <Trash2 className="mr-2 h-4 w-4" aria-hidden="true" />
+                                  Supprimer définitivement
+                                </Button>
+                              </div>
                             </li>
                           ))}
                         </ul>
@@ -529,6 +589,24 @@ export default function Admin() {
           </>
         )}
       </section>
+      <AlertDialog open={pendingArchiveAction !== null} onOpenChange={(open) => { if (!open) setPendingArchiveAction(null); }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{pendingArchiveAction?.type === "delete" ? "Supprimer définitivement ce parfum ?" : "Restaurer ce parfum dans le catalogue ?"}</AlertDialogTitle>
+            <AlertDialogDescription>
+              {pendingArchiveAction?.type === "delete"
+                ? `« ${pendingArchiveAction.name} » sera supprimé définitivement si aucune donnée historique ou d’inventaire ne le référence. Cette action ne peut pas être annulée.`
+                : `« ${pendingArchiveAction?.name} » redeviendra visible dans le catalogue public.`}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Annuler</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmArchiveAction} className={pendingArchiveAction?.type === "delete" ? "bg-rose-700 text-white hover:bg-rose-800" : "bg-gray-900 text-white hover:bg-gray-800"}>
+              {pendingArchiveAction?.type === "delete" ? "Supprimer définitivement" : "Restaurer le parfum"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </DashboardLayout>
   );
 }

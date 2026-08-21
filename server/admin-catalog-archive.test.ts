@@ -4,6 +4,7 @@ const mocks = vi.hoisted(() => ({
   getProductById: vi.fn(),
   getArchivedProducts: vi.fn(),
   setProductArchived: vi.fn(),
+  deleteArchivedProduct: vi.fn(),
 }));
 
 vi.mock("./db", async (importOriginal) => ({
@@ -11,6 +12,7 @@ vi.mock("./db", async (importOriginal) => ({
   getProductById: mocks.getProductById,
   getArchivedProducts: mocks.getArchivedProducts,
   setProductArchived: mocks.setProductArchived,
+  deleteArchivedProduct: mocks.deleteArchivedProduct,
 }));
 
 import { appRouter } from "./routers";
@@ -39,6 +41,7 @@ describe("adminCatalog — archivage réversible", () => {
     mocks.getProductById.mockResolvedValue({ id: 42, name: "Radical Rose" });
     mocks.getArchivedProducts.mockResolvedValue([{ id: 42, name: "Radical Rose", isArchived: true }]);
     mocks.setProductArchived.mockResolvedValue(undefined);
+    mocks.deleteArchivedProduct.mockResolvedValue({ deleted: true });
   });
 
   it("archive un parfum pour un administrateur sans suppression physique", async () => {
@@ -67,5 +70,21 @@ describe("adminCatalog — archivage réversible", () => {
     mocks.getProductById.mockResolvedValue(undefined);
     await expect(createCaller("admin").adminCatalog.archive({ id: 999 })).rejects.toThrow("Parfum introuvable");
     expect(mocks.setProductArchived).not.toHaveBeenCalled();
+  });
+
+  it("supprime définitivement une archive sans dépendance pour un administrateur", async () => {
+    await expect(createCaller("admin").adminCatalog.deletePermanently({ id: 42 })).resolves.toEqual({ success: true });
+    expect(mocks.deleteArchivedProduct).toHaveBeenCalledWith(42);
+  });
+
+  it("bloque la suppression définitive lorsqu’une commande conserve l’historique du parfum", async () => {
+    mocks.deleteArchivedProduct.mockResolvedValue({ deleted: false, reason: "orders" });
+
+    await expect(createCaller("admin").adminCatalog.deletePermanently({ id: 42 })).rejects.toThrow("lié à des commandes");
+  });
+
+  it("refuse la suppression définitive à un utilisateur non administrateur", async () => {
+    await expect(createCaller("user").adminCatalog.deletePermanently({ id: 42 })).rejects.toThrow("Accès refusé");
+    expect(mocks.deleteArchivedProduct).not.toHaveBeenCalled();
   });
 });

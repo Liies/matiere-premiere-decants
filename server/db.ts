@@ -110,7 +110,7 @@ export async function getAllProducts() {
 export async function getArchivedProducts() {
   const db = await getDb();
   if (!db) return [];
-  return db.select().from(products).where(eq(products.isArchived, true));
+  return db.select().from(products).where(eq(products.isArchived, true)).orderBy(desc(products.archivedAt), asc(products.name));
 }
 
 export async function getCatalogProducts(brandSlug: string = PUBLIC_BRAND_SLUG, search?: string) {
@@ -273,7 +273,48 @@ export async function updateProductCatalog(id: number, values: ProductCatalogUpd
 export async function setProductArchived(id: number, isArchived: boolean) {
   const db = await getDb();
   if (!db) throw new Error("La mise à jour du catalogue est indisponible");
-  await db.update(products).set({ isArchived }).where(eq(products.id, id));
+  await db.update(products).set({ isArchived, archivedAt: isArchived ? new Date() : null }).where(eq(products.id, id));
+}
+
+export type ArchivedProductDeletionResult =
+  | { deleted: true }
+  | { deleted: false; reason: "not_found" | "not_archived" | "orders" | "reviews" | "source_bottles" | "stock_movements" };
+
+/**
+ * Supprime un parfum archivé uniquement lorsqu’aucun élément historique ou inventaire ne le référence.
+ * Les lignes de panier temporaires sont retirées dans la transaction ; les commandes, avis, flacons et
+ * mouvements de stock bloquent en revanche la suppression pour préserver les données métier et comptables.
+ */
+export async function deleteArchivedProduct(id: number): Promise<ArchivedProductDeletionResult> {
+  const db = await getDb();
+  if (!db) throw new Error("La mise à jour du catalogue est indisponible");
+
+  return db.transaction(async (tx) => {
+    const [product] = await tx.select().from(products).where(eq(products.id, id)).limit(1);
+    if (!product) return { deleted: false, reason: "not_found" };
+    if (!product.isArchived) return { deleted: false, reason: "not_archived" };
+
+    const [orderReference] = await tx.select({ id: orderItems.id }).from(orderItems).where(eq(orderItems.productId, id)).limit(1);
+    if (orderReference) return { deleted: false, reason: "orders" };
+
+    const [reviewReference] = await tx.select({ id: productReviews.id }).from(productReviews).where(eq(productReviews.productId, id)).limit(1);
+    if (reviewReference) return { deleted: false, reason: "reviews" };
+
+    const [sourceBottleReference] = await tx.select({ id: sourceBottles.id }).from(sourceBottles).where(eq(sourceBottles.productId, id)).limit(1);
+    if (sourceBottleReference) return { deleted: false, reason: "source_bottles" };
+
+    const productVariants = await tx.select({ id: variants.id }).from(variants).where(eq(variants.productId, id));
+    const variantIds = productVariants.map((variant) => variant.id);
+    if (variantIds.length > 0) {
+      const [stockMovementReference] = await tx.select({ id: stockMovements.id }).from(stockMovements).where(inArray(stockMovements.variantId, variantIds)).limit(1);
+      if (stockMovementReference) return { deleted: false, reason: "stock_movements" };
+    }
+
+    await tx.delete(cartItems).where(eq(cartItems.productId, id));
+    if (variantIds.length > 0) await tx.delete(variants).where(eq(variants.productId, id));
+    await tx.delete(products).where(eq(products.id, id));
+    return { deleted: true };
+  });
 }
 
 export async function createCatalogVariant(values: {

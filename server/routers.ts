@@ -6,6 +6,7 @@ import { systemRouter } from "./_core/systemRouter";
 import { publicProcedure, protectedProcedure, router } from "./_core/trpc";
 import {
   createCatalogVariant,
+  deleteArchivedProduct,
   getAllProducts,
   getArchivedProducts,
   getBrands,
@@ -285,6 +286,24 @@ export const appRouter = router({
       await setProductArchived(input.id, false);
       invalidateAdvisorCatalogCache();
       return { success: true } as const;
+    }),
+    deletePermanently: protectedProcedure.input(z.object({ id: z.number().int().positive() })).mutation(async ({ input, ctx }) => {
+      requireAdmin(ctx.user);
+      const result = await deleteArchivedProduct(input.id);
+      if (result.deleted) {
+        invalidateAdvisorCatalogCache();
+        return { success: true } as const;
+      }
+
+      const messageByReason = {
+        not_found: "Parfum introuvable",
+        not_archived: "Seuls les parfums archivés peuvent être supprimés définitivement",
+        orders: "Ce parfum est lié à des commandes et doit être conservé",
+        reviews: "Ce parfum est lié à des avis clients et doit être conservé",
+        source_bottles: "Ce parfum est lié à des flacons source et doit être conservé",
+        stock_movements: "Ce parfum est lié à des mouvements de stock et doit être conservé",
+      } as const;
+      throw new TRPCError({ code: result.reason === "not_found" ? "NOT_FOUND" : "CONFLICT", message: messageByReason[result.reason] });
     }),
   }),
 

@@ -62,6 +62,7 @@ export const products = mysqlTable("products", {
   releaseYear: int("releaseYear"),
   status: mysqlEnum("status", ["available", "out_of_stock", "discontinued", "coming_soon"]).default("available").notNull(),
   isArchived: boolean("isArchived").default(false).notNull(),
+  archivedAt: timestamp("archivedAt"),
   legalNotice: text("legalNotice"),
   heroScore: int("heroScore").default(0).notNull(),
   description: text("description"),
@@ -80,6 +81,7 @@ export const products = mysqlTable("products", {
   index("products_brand_slug_idx").on(table.brandId, table.slug),
   index("products_status_idx").on(table.status),
   index("products_is_archived_idx").on(table.isArchived),
+  index("products_archived_at_idx").on(table.archivedAt),
 ]);
 
 export type Product = typeof products.$inferSelect;
