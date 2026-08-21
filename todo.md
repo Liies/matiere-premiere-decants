@@ -6621,3 +6621,7 @@
 ## Panier — Indicateur du nombre d’articles
 - [x] Afficher un indicateur de quantité élégant en tête du panier
 - [x] Couvrir, vérifier et publier l’indicateur de quantité
+
+## Navigation — Survol de l’icône panier
+- [x] Ajouter une micro-animation au survol de l’icône panier
+- [x] Couvrir, vérifier et publier l’animation de navigation

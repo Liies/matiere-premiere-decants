@@ -24,6 +24,8 @@ const mobileNavigationLinkClass = (active: boolean) => `relative flex min-h-11 i
     : "text-gray-600 before:scale-y-0 hover:bg-gray-50 hover:text-gray-900"
 }`;
 
+const cartNavigationLinkClass = "group flex h-11 w-11 items-center justify-center rounded-full text-gray-600 transition-[background-color,color,transform] duration-200 [transition-timing-function:cubic-bezier(0.23,1,0.32,1)] hover:-translate-y-0.5 hover:bg-[#f1eee7] hover:text-gray-900 active:scale-[0.97] motion-reduce:transform-none motion-reduce:transition-none";
+
 export default function Header() {
   const { isAuthenticated, user, logout } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -64,9 +66,9 @@ export default function Header() {
           <Link
             href="/cart"
             aria-label="Ouvrir le panier"
-            className="flex h-11 w-11 items-center justify-center rounded-full text-gray-600 transition hover:bg-gray-100 hover:text-gray-900"
+            className={cartNavigationLinkClass}
           >
-            <ShoppingCart className="h-5 w-5" aria-hidden="true" />
+            <ShoppingCart className="h-5 w-5 transition-transform duration-200 group-hover:scale-110 group-hover:-rotate-6 group-active:scale-95 motion-reduce:transform-none motion-reduce:transition-none" aria-hidden="true" />
           </Link>
           <Link
             href="/wishlist"
