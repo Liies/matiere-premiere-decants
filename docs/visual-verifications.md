@@ -19,3 +19,7 @@ Le flacon de **Vanilla Powder** a été vérifié au chargement de sa fiche : le
 Sur la fiche **Vanilla Powder**, le module « Film officiel » apparaît sous les informations du parfum. Le bouton « Lire le film officiel » est présent avant le lecteur, ce qui évite tout chargement du contenu Instagram sans action explicite. Le lien vers la publication officielle `@matierepremiereparfums` est également visible.
 
 Le déclencheur vidéo conserve une mise en page verticale cohérente avec les reels officiels et reste séparé de l’action d’achat. Le test de composant confirme que le lecteur Instagram n’est ajouté au DOM qu’après activation explicite.
+
+## Panier — Indicateur d’articles
+
+L’en-tête du panier affiche un libellé « Votre sélection », le titre principal et un compteur en pastille aligné à droite sur écran large. Le compteur présente l’icône de sac, le total et le libellé grammaticalement adapté ; l’état vide affiche correctement « 0 article » sans déséquilibrer la mise en page.

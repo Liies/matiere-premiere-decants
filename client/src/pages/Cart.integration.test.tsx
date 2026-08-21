@@ -68,6 +68,8 @@ describe("intégration panier invité", () => {
     render(<Cart />);
 
     expect(screen.getByText("Vanilla Powder")).toBeTruthy();
+    expect(screen.getByTestId("cart-item-count").textContent).toContain("2 articles");
+    expect(screen.getByTestId("cart-item-count").getAttribute("aria-label")).toBe("2 articles dans votre panier");
     expect(screen.getAllByText("240,00 €")).toHaveLength(2);
     expect(screen.getByRole("link", { name: "Procéder au paiement" }).getAttribute("href")).toBe("/checkout");
   });
@@ -86,6 +88,8 @@ describe("intégration panier invité", () => {
     render(<Cart />);
 
     expect(screen.getByText("Votre panier est vide")).toBeTruthy();
+    expect(screen.getByTestId("cart-item-count").textContent).toContain("0 article");
+    expect(screen.getByTestId("cart-item-count").getAttribute("aria-label")).toBe("0 article dans votre panier");
     expect(screen.getByRole("link", { name: "Continuer vos achats" }).getAttribute("href")).toBe("/products");
     expect(screen.queryByRole("link", { name: "Procéder au paiement" })).toBeNull();
   });

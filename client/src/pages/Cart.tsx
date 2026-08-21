@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import Header from "@/components/Header";
 import { Link } from "wouter";
-import { Trash2, Plus, Minus } from "lucide-react";
+import { Trash2, Plus, Minus, ShoppingBag } from "lucide-react";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { useLocalCart } from "@/hooks/useLocalCart";
 import { toast } from "sonner";
@@ -67,6 +67,8 @@ export default function Cart() {
         0
       )
     : getTotalPrice();
+  const totalItemCount = (displayItems ?? []).reduce((count, item) => count + item.quantity, 0);
+  const cartItemLabel = totalItemCount > 1 ? "articles" : "article";
 
   return (
     <div className="min-h-screen flex flex-col bg-white">
@@ -76,7 +78,25 @@ export default function Cart() {
               <main className="flex-1 py-8 sm:py-12">
 
         <div className="container max-w-4xl">
-          <h2 className="mb-6 text-3xl font-light text-gray-900 sm:mb-8 sm:text-4xl">Votre Panier</h2>
+          <div className="mb-6 flex flex-col gap-4 border-b border-stone-200 pb-6 sm:mb-8 sm:flex-row sm:items-end sm:justify-between sm:pb-8">
+            <div>
+              <p className="text-xs font-medium uppercase tracking-[0.2em] text-stone-500">Votre sélection</p>
+              <h2 className="mt-2 text-3xl font-light tracking-tight text-gray-900 sm:text-4xl">Votre Panier</h2>
+            </div>
+            <div
+              data-testid="cart-item-count"
+              aria-label={`${totalItemCount} ${cartItemLabel} dans votre panier`}
+              className="inline-flex w-fit items-center gap-3 rounded-full border border-stone-200 bg-stone-50 px-4 py-2 text-sm text-stone-700 shadow-sm"
+            >
+              <span className="flex h-7 w-7 items-center justify-center rounded-full bg-gray-900 text-white" aria-hidden="true">
+                <ShoppingBag className="h-3.5 w-3.5" />
+              </span>
+              <span>
+                <span className="font-medium text-gray-900" aria-live="polite">{totalItemCount}</span>{" "}
+                {cartItemLabel}
+              </span>
+            </div>
+          </div>
 
           {isLoading && isAuthenticated ? (
             <p className="text-gray-600">Chargement du panier...</p>

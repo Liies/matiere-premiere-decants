@@ -6617,3 +6617,7 @@
 ## Fiche produit — Mouvement du visuel au défilement
 - [x] Affiner le parallax, le zoom et la rotation de l’image produit
 - [x] Couvrir et publier le mouvement de défilement amélioré
+
+## Panier — Indicateur du nombre d’articles
+- [x] Afficher un indicateur de quantité élégant en tête du panier
+- [x] Couvrir, vérifier et publier l’indicateur de quantité
