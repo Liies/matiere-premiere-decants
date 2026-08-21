@@ -33,7 +33,7 @@ vi.mock("sonner", () => ({ toast: mocks.toast }));
 
 import Wishlist from "./Wishlist";
 
-describe("liste de souhaits — partage", () => {
+describe("liste de favoris — partage", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     Object.defineProperty(navigator, "share", { configurable: true, value: mocks.share });

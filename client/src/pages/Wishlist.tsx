@@ -56,7 +56,7 @@ export default function Wishlist() {
           <p className="mb-3 text-xs uppercase tracking-[0.25em] text-gray-500">{isSharedSelection ? "Sélection partagée" : "Sélection personnelle"}</p>
           <div className="mb-10 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
             <div>
-              <h1 className="text-3xl font-light text-gray-900 sm:text-4xl">Liste de souhaits</h1>
+              <h1 className="text-3xl font-light text-gray-900 sm:text-4xl">Liste de favoris</h1>
               <p className="mt-2 text-sm leading-6 text-gray-600 sm:text-base">
                 Gardez les fragrances que vous souhaitez découvrir ou retrouver.
               </p>
@@ -99,7 +99,7 @@ export default function Wishlist() {
                       <button
                         type="button"
                         onClick={() => toggleWishlist(product.id)}
-                        aria-label={`Retirer ${product.name} de la liste de souhaits`}
+                        aria-label={`Retirer ${product.name} de la liste de favoris`}
                         className="wishlist-heart-button absolute right-7 top-7 z-20 flex h-10 w-10 items-center justify-center rounded-full bg-white/90 text-red-500 shadow-sm transition hover:bg-white"
                       >
                         <Heart className="wishlist-heart-pop h-5 w-5 fill-current" aria-hidden="true" />

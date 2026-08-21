@@ -6670,3 +6670,8 @@
 - [x] Déplacer le module « Besoin d’un repère ? » après la grille des parfums
 - [x] Confirmer visuellement que le module d’aide apparaît après la dernière carte parfum
 - [x] Couvrir, vérifier et publier le nettoyage et la nouvelle hiérarchie
+
+## Terminologie — Liste de favoris
+- [x] Identifier les libellés utilisateur relatifs à la liste de souhaits
+- [x] Remplacer les libellés visibles par « Liste de favoris »
+- [x] Couvrir, vérifier et publier l’uniformisation

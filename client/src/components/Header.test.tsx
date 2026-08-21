@@ -105,11 +105,13 @@ describe("Header", () => {
   it("reprend les mêmes entrées dans le menu mobile", () => {
     render(<Header />);
 
+    expect(screen.getByRole("link", { name: "Ouvrir la liste de favoris" }).getAttribute("href")).toBe("/wishlist");
     fireEvent.click(screen.getByRole("button", { name: "Ouvrir le menu" }));
 
     expect(screen.getAllByText("Accueil")).toHaveLength(2);
     expect(screen.getAllByText("Catalogue")).toHaveLength(2);
     expect(screen.getAllByText("Contact")).toHaveLength(2);
+    expect(screen.getByText("Liste de favoris")).toBeTruthy();
     expect(document.querySelectorAll('[aria-current="page"]')).toHaveLength(2);
   });
 });

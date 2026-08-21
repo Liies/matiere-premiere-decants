@@ -124,10 +124,10 @@ describe("intégration catalogue — panier et souhaits", () => {
     render(<Products />);
 
     const vanillaHeart = screen.getByRole("button", {
-      name: "Ajouter Vanilla Powder à la liste de souhaits",
+      name: "Ajouter Vanilla Powder à la liste de favoris",
     });
     const saffronHeart = screen.getByRole("button", {
-      name: "Ajouter Crystal Saffron à la liste de souhaits",
+      name: "Ajouter Crystal Saffron à la liste de favoris",
     });
 
     fireEvent.click(vanillaHeart);

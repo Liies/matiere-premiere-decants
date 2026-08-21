@@ -33,7 +33,7 @@ vi.mock("sonner", () => ({ toast: { success: vi.fn(), error: vi.fn() } }));
 
 import Wishlist from "./Wishlist";
 
-describe("liste de souhaits — visuels produit", () => {
+describe("liste de favoris — visuels produit", () => {
   beforeEach(() => {
     window.localStorage.setItem(WISHLIST_STORAGE_KEY, JSON.stringify([30017]));
   });
@@ -46,6 +46,7 @@ describe("liste de souhaits — visuels produit", () => {
   it("privilégie le visuel produit actuel, comme le catalogue", () => {
     render(<Wishlist />);
 
+    expect(screen.getByRole("heading", { name: "Liste de favoris" })).toBeTruthy();
     expect(screen.getByRole("img", { name: "Vanilla Powder" }).getAttribute("src"))
       .toBe("/manus-storage/vanilla-powder-extrait_a69128dc.jpg");
   });

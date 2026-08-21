@@ -417,7 +417,7 @@ export default function Products() {
                       <button
                         type="button"
                         onClick={() => handleToggleWishlist(product)}
-                        aria-label={isWishlisted(product.id) ? `Retirer ${product.name} de la liste de souhaits` : `Ajouter ${product.name} à la liste de souhaits`}
+                        aria-label={isWishlisted(product.id) ? `Retirer ${product.name} de la liste de favoris` : `Ajouter ${product.name} à la liste de favoris`}
                         aria-pressed={isWishlisted(product.id)}
                         className={`wishlist-heart-button absolute right-3 top-3 z-20 flex h-11 w-11 items-center justify-center rounded-full bg-white/90 shadow-sm transition hover:bg-white ${isWishlisted(product.id) ? "text-red-500" : "text-gray-500 hover:text-red-500"}`}
                       >
