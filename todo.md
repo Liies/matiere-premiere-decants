@@ -6649,3 +6649,7 @@
 ## Accueil — Survol du bouton d’exploration
 - [x] Harmoniser le survol de Commencer l’Exploration avec le CTA principal
 - [x] Couvrir, vérifier et publier l’interaction du bouton
+
+## Catalogue — Signal de rupture de stock
+- [x] Ajouter un signal premium aux parfums indisponibles
+- [x] Couvrir, vérifier et publier l’affichage de rupture

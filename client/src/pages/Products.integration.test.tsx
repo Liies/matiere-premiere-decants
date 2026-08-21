@@ -240,11 +240,14 @@ describe("intégration catalogue — panier et souhaits", () => {
     expect(screen.getByText("2 parfums affichés")).toBeTruthy();
   });
 
-  it("affiche une rupture claire sans contrôle d’achat pour un parfum temporairement indisponible", () => {
+  it("affiche un signal de rupture premium sans contrôle d’achat pour un parfum temporairement indisponible", () => {
     render(<Products />);
 
     expect(screen.queryByRole("button", { name: "Afficher les disponibles" })).toBeNull();
-    expect(screen.getByText("Rupture")).toBeTruthy();
+    const badge = screen.getByTestId("catalog-out-of-stock-badge-2");
+    expect(badge.textContent).toContain("Indisponible");
+    expect(badge.className).toContain("bg-[#f7f4ed]/95");
+    expect(screen.getByTestId("catalog-out-of-stock-status-2").textContent).toContain("Indisponible actuellement");
     expect(screen.getByRole("link", { name: "Voir le parfum" })).toBeTruthy();
     expect(screen.getByText("2 parfums affichés")).toBeTruthy();
   });

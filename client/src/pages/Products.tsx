@@ -416,7 +416,9 @@ export default function Products() {
               {filteredProducts.map((product, index) => (
                 <Card
                   key={getCartFeedbackKey(product)}
-                  className="catalog-product-card group/product-card h-full overflow-hidden border-gray-200 transition-all duration-500 animate-fade-in hover:-translate-y-1 hover:shadow-xl motion-reduce:transform-none motion-reduce:transition-none"
+                  className={`catalog-product-card group/product-card h-full overflow-hidden transition-all duration-500 animate-fade-in hover:-translate-y-1 hover:shadow-xl motion-reduce:transform-none motion-reduce:transition-none ${
+                    isProductAvailable(product) ? "border-gray-200" : "border-[#d8d0c2] bg-[#fdfcf9]"
+                  }`}
                   style={{ animationDelay: `${Math.min(index, 5) * 70}ms` }}
                   onMouseEnter={() => scheduleHoverFlip(product.id)}
                   onMouseLeave={() => cancelHoverFlip(product.id)}
@@ -432,6 +434,15 @@ export default function Products() {
                       >
                         <Heart className={`h-5 w-5 ${isWishlisted(product.id) ? "fill-current" : ""} ${wishlistAnimationKey === getCartFeedbackKey(product) ? "wishlist-heart-pop" : ""}`} aria-hidden="true" />
                       </button>
+                      {!isProductAvailable(product) && (
+                        <span
+                          data-testid={`catalog-out-of-stock-badge-${product.id}`}
+                          className="absolute left-3 top-3 z-20 inline-flex min-h-8 items-center gap-2 border border-[#cfc4b1] bg-[#f7f4ed]/95 px-3 text-[10px] font-medium uppercase tracking-[0.18em] text-[#635a4d] shadow-sm backdrop-blur-sm"
+                        >
+                          <span className="h-1.5 w-1.5 rounded-full bg-[#8b7b61]" aria-hidden="true" />
+                          Indisponible
+                        </span>
+                      )}
                       <div
                         data-testid={`catalog-flip-card-${product.id}`}
                         data-flipped={flippedProductId === product.id}
@@ -500,9 +511,14 @@ export default function Products() {
                         <p data-testid={`catalog-price-${product.id}`} className="text-2xl font-light text-gray-900">
                           {formatPrice(getSelectedVariant(product)?.priceCents ?? product.price)}
                         </p>
-                        <p className="text-xs text-gray-500 font-medium">
-                          {isProductAvailable(product) ? "✓ En stock" : "Rupture"}
-                        </p>
+                        {isProductAvailable(product) ? (
+                          <p className="text-xs font-medium text-gray-500">✓ En stock</p>
+                        ) : (
+                          <p data-testid={`catalog-out-of-stock-status-${product.id}`} className="mt-1 inline-flex items-center gap-2 text-xs font-medium text-[#6d6253]">
+                            <span className="h-1 w-1 rounded-full bg-[#8b7b61]" aria-hidden="true" />
+                            Indisponible actuellement
+                          </p>
+                        )}
                       </div>
 
                       {isProductAvailable(product) ? (
@@ -542,7 +558,7 @@ export default function Products() {
                           </div>
                         </div>
                       ) : (
-                        <a href={productPath(product)} className="inline-flex min-h-11 items-center justify-center rounded border border-gray-300 bg-white px-4 text-sm text-gray-800 transition hover:border-gray-900 hover:text-gray-950">
+                        <a href={productPath(product)} className="inline-flex min-h-11 items-center justify-center border border-[#cfc4b1] bg-[#f7f4ed] px-4 text-sm text-[#50483d] transition-[background-color,border-color,color,transform] duration-200 [transition-timing-function:cubic-bezier(0.23,1,0.32,1)] hover:-translate-y-px hover:border-[#8b7b61] hover:bg-[#eee9df] hover:text-gray-950 active:scale-[0.97] motion-reduce:transform-none motion-reduce:transition-none">
                           Voir le parfum
                         </a>
                       )}
