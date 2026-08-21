@@ -6625,3 +6625,7 @@
 ## Navigation — Survol de l’icône panier
 - [x] Ajouter une micro-animation au survol de l’icône panier
 - [x] Couvrir, vérifier et publier l’animation de navigation
+
+## Quiz olfactif — Visuels des recommandations
+- [x] Afficher les images des parfums recommandés par le quiz
+- [x] Couvrir, vérifier et publier les résultats enrichis

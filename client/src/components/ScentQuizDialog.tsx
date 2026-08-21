@@ -1,7 +1,8 @@
 import { Link } from "wouter";
-import { ArrowRight, RotateCcw, Sparkles } from "lucide-react";
+import { ArrowRight, Leaf, RotateCcw, Sparkles } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { trpc } from "@/lib/trpc";
 import {
   Dialog,
   DialogContent,
@@ -14,6 +15,7 @@ import {
   SCENT_QUIZ_QUESTIONS,
   type ScentQuizAnswers,
 } from "@shared/scent-quiz";
+import { getProductImage } from "@shared/image-assets";
 
 type ScentQuizDialogProps = {
   open: boolean;
@@ -22,13 +24,31 @@ type ScentQuizDialogProps = {
 
 const quizStepCount = SCENT_QUIZ_QUESTIONS.length;
 
+type QuizCatalogProduct = {
+  id: number;
+  name: string;
+  slug: string;
+  imageUrl: string | null;
+};
+
+const normalizeQuizKey = (value: string) => value.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+
+const quizProductImage = (product: QuizCatalogProduct | undefined) =>
+  product?.imageUrl ?? (product ? getProductImage(product.id)?.compressed : null);
+
 export default function ScentQuizDialog({ open, onOpenChange }: ScentQuizDialogProps) {
   const [answers, setAnswers] = useState<ScentQuizAnswers>({});
   const [step, setStep] = useState(0);
   const [showResult, setShowResult] = useState(false);
+  const { data: products } = trpc.products.list.useQuery(undefined, { enabled: open });
   const question = SCENT_QUIZ_QUESTIONS[step];
   const selection = question ? answers[question.id] : undefined;
   const result = showResult ? getScentQuizRecommendation(answers) : null;
+  const findCatalogProduct = (name: string, slug: string) =>
+    (products as QuizCatalogProduct[] | undefined)?.find((product) => product.slug === slug)
+    ?? (products as QuizCatalogProduct[] | undefined)?.find((product) => normalizeQuizKey(product.name) === normalizeQuizKey(name));
+  const recommendationProduct = result ? findCatalogProduct(result.recommendation.name, result.recommendation.slug) : undefined;
+  const recommendationImage = quizProductImage(recommendationProduct);
 
   const resetQuiz = () => {
     setAnswers({});
@@ -59,12 +79,30 @@ export default function ScentQuizDialog({ open, onOpenChange }: ScentQuizDialogP
           <div className="space-y-6" data-testid="scent-quiz-result">
             <DialogHeader className="pr-8 text-left">
               <p className="text-xs font-medium uppercase tracking-[0.2em] text-amber-700">Votre affinité olfactive</p>
-              <DialogTitle className="text-3xl font-light tracking-tight text-gray-950 sm:text-4xl">
-                {result.recommendation.name}
-              </DialogTitle>
-              <DialogDescription className="text-base leading-7 text-gray-600">
-                {result.recommendation.reason}
-              </DialogDescription>
+              <div className="mt-4 grid gap-5 sm:grid-cols-[10rem_1fr] sm:items-center">
+                <div className="flex aspect-square overflow-hidden rounded-2xl border border-stone-200 bg-stone-50">
+                  {recommendationImage ? (
+                    <img
+                      data-testid="scent-quiz-recommendation-image"
+                      src={recommendationImage}
+                      alt={`Flacon ${result.recommendation.name}`}
+                      className="h-full w-full object-cover"
+                      loading="eager"
+                      decoding="async"
+                    />
+                  ) : (
+                    <Leaf className="m-auto h-10 w-10 text-stone-300" aria-hidden="true" />
+                  )}
+                </div>
+                <div>
+                  <DialogTitle className="text-3xl font-light tracking-tight text-gray-950 sm:text-4xl">
+                    {result.recommendation.name}
+                  </DialogTitle>
+                  <DialogDescription className="mt-3 text-base leading-7 text-gray-600">
+                    {result.recommendation.reason}
+                  </DialogDescription>
+                </div>
+              </div>
             </DialogHeader>
 
             <div className="rounded-2xl border border-stone-200 bg-stone-50 p-5">
@@ -76,15 +114,27 @@ export default function ScentQuizDialog({ open, onOpenChange }: ScentQuizDialogP
             <div>
               <p className="text-xs font-medium uppercase tracking-[0.16em] text-gray-500">À explorer aussi</p>
               <div className="mt-3 grid gap-2 sm:grid-cols-2">
-                {result.alternatives.map((alternative) => (
-                  <Link
-                    key={alternative.slug}
-                    href={`/parfum/matiere-premiere/${alternative.slug}`}
-                    className="rounded-xl border border-stone-200 px-4 py-3 text-left text-sm text-gray-700 transition-colors hover:border-gray-900 hover:text-gray-950"
-                  >
-                    {alternative.name}
-                  </Link>
-                ))}
+                {result.alternatives.map((alternative) => {
+                  const alternativeProduct = findCatalogProduct(alternative.name, alternative.slug);
+                  const alternativeImage = quizProductImage(alternativeProduct);
+                  const alternativePath = alternativeProduct?.slug ?? alternative.slug;
+                  return (
+                    <Link
+                      key={alternative.slug}
+                      href={`/parfum/matiere-premiere/${alternativePath}`}
+                      className="group flex min-h-20 items-center gap-3 rounded-xl border border-stone-200 p-2 text-left text-sm text-gray-700 transition-colors hover:border-gray-900 hover:text-gray-950"
+                    >
+                      <span className="flex h-14 w-14 shrink-0 overflow-hidden rounded-lg bg-stone-50">
+                        {alternativeImage ? (
+                          <img src={alternativeImage} alt={`Flacon ${alternative.name}`} className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.04] motion-reduce:transition-none" loading="lazy" decoding="async" />
+                        ) : (
+                          <Leaf className="m-auto h-5 w-5 text-stone-300" aria-hidden="true" />
+                        )}
+                      </span>
+                      <span className="font-medium">{alternative.name}</span>
+                    </Link>
+                  );
+                })}
               </div>
             </div>
 
@@ -93,7 +143,7 @@ export default function ScentQuizDialog({ open, onOpenChange }: ScentQuizDialogP
                 <RotateCcw className="mr-2 h-4 w-4" aria-hidden="true" />
                 Recommencer
               </Button>
-              <Link href={`/parfum/matiere-premiere/${result.recommendation.slug}`}>
+              <Link href={`/parfum/matiere-premiere/${recommendationProduct?.slug ?? result.recommendation.slug}`}>
                 <Button type="button" className="min-h-11 w-full gap-2 bg-gray-950 px-5 text-white hover:bg-gray-800 sm:w-auto">
                   Découvrir ce parfum
                   <ArrowRight className="h-4 w-4" aria-hidden="true" />

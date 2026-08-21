@@ -7,12 +7,28 @@ import HomePremium, {
   HOME_COLLECTION_EDITORIAL_IMAGE,
 } from "./HomePremium";
 
+const state = vi.hoisted(() => ({
+  products: [
+    { id: 1, name: "Cologne Cédrat", slug: "cologne-cedrat", imageUrl: "/manus-storage/cologne-cedrat-quiz.jpg" },
+    { id: 2, name: "Néroli Oranger", slug: "neroli-oranger", imageUrl: "/manus-storage/neroli-oranger-quiz.jpg" },
+    { id: 3, name: "Vanille Powder", slug: "vanilla-powder", imageUrl: "/manus-storage/vanilla-powder-quiz.jpg" },
+  ],
+}));
+
 vi.mock("@/_core/hooks/useAuth", () => ({
   useAuth: () => ({ isAuthenticated: false, user: null }),
 }));
 
 vi.mock("@/components/Header", () => ({ default: () => <header>Navigation</header> }));
 vi.mock("@/components/Footer", () => ({ default: () => <footer>Pied de page</footer> }));
+vi.mock("@/lib/trpc", () => ({
+  trpc: {
+    products: {
+      list: { useQuery: () => ({ data: state.products }) },
+    },
+  },
+}));
+vi.mock("@shared/image-assets", () => ({ getProductImage: () => null }));
 vi.mock("wouter", () => ({
   Link: ({ children, href }: { children: React.ReactNode; href: string }) => <a href={href}>{children}</a>,
 }));
@@ -107,6 +123,8 @@ describe("accueil premium — visuels et quiz", () => {
 
     expect(screen.getByTestId("scent-quiz-result")).toBeTruthy();
     expect(screen.getByRole("heading", { name: "Cologne Cédrat" })).toBeTruthy();
+    expect(screen.getByTestId("scent-quiz-recommendation-image").getAttribute("src")).toBe("/manus-storage/cologne-cedrat-quiz.jpg");
+    expect(screen.getByAltText("Flacon Néroli Oranger").getAttribute("src")).toBe("/manus-storage/neroli-oranger-quiz.jpg");
     expect(screen.getByRole("link", { name: "Découvrir ce parfum" }).getAttribute("href")).toBe(
       "/parfum/matiere-premiere/cologne-cedrat",
     );
