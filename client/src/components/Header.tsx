@@ -39,8 +39,9 @@ export default function Header() {
             <Link
               key={item.href}
               href={item.href}
-              className={`text-sm transition ${
-                isActive(item.href) ? "font-medium text-gray-900" : "text-gray-600 hover:text-gray-900"
+              aria-current={isActive(item.href) ? "page" : undefined}
+              className={`relative inline-flex min-h-11 items-center text-sm transition-colors duration-200 after:absolute after:bottom-1 after:left-0 after:h-[2px] after:w-full after:origin-left after:rounded-full after:bg-[#756a58] after:transition-transform after:duration-500 after:[transition-timing-function:cubic-bezier(0.23,1,0.32,1)] motion-reduce:after:transition-none ${
+                isActive(item.href) ? "font-medium text-gray-900 after:scale-x-100 after:shadow-[0_1px_8px_rgba(117,106,88,0.38)]" : "text-gray-600 after:scale-x-0 hover:text-gray-900 hover:after:scale-x-100 hover:after:bg-gray-300"
               }`}
             >
               {item.label}
@@ -121,8 +122,9 @@ export default function Header() {
                 key={item.href}
                 href={item.href}
                 onClick={closeMobileMenu}
-                className={`flex min-h-11 items-center rounded-lg px-3 text-sm transition ${
-                  isActive(item.href) ? "bg-gray-100 font-medium text-gray-900" : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                aria-current={isActive(item.href) ? "page" : undefined}
+                className={`relative flex min-h-11 items-center overflow-hidden rounded-lg px-3 text-sm transition-colors duration-200 before:absolute before:inset-y-2 before:left-0 before:w-0.5 before:origin-center before:rounded-full before:bg-[#756a58] before:transition-transform before:duration-500 before:[transition-timing-function:cubic-bezier(0.23,1,0.32,1)] motion-reduce:before:transition-none ${
+                  isActive(item.href) ? "bg-[#f1eee7] font-medium text-gray-900 before:scale-y-100 before:shadow-[0_0_8px_rgba(117,106,88,0.34)]" : "text-gray-600 before:scale-y-0 hover:bg-gray-50 hover:text-gray-900"
                 }`}
               >
                 {item.label}

@@ -33,6 +33,19 @@ describe("Header", () => {
     expect(screen.getByText("Contact")).toBeTruthy();
   });
 
+  it("marque la page active avec un indicateur animé dans la navigation", () => {
+    render(<Header />);
+
+    const catalogueLink = screen.getByRole("link", { name: "Catalogue" });
+    expect(catalogueLink.getAttribute("aria-current")).toBe("page");
+    expect(catalogueLink.className).toContain("after:scale-x-100");
+    expect(catalogueLink.className).toContain("after:duration-500");
+
+    const accueilLink = screen.getByRole("link", { name: "Accueil" });
+    expect(accueilLink.getAttribute("aria-current")).toBeNull();
+    expect(accueilLink.className).toContain("after:scale-x-0");
+  });
+
   it("reprend les mêmes entrées dans le menu mobile", () => {
     render(<Header />);
 
@@ -41,5 +54,6 @@ describe("Header", () => {
     expect(screen.getAllByText("Accueil")).toHaveLength(2);
     expect(screen.getAllByText("Catalogue")).toHaveLength(2);
     expect(screen.getAllByText("Contact")).toHaveLength(2);
+    expect(document.querySelectorAll('[aria-current="page"]')).toHaveLength(2);
   });
 });

@@ -15,6 +15,7 @@ import { getProductStory } from '@shared/product-stories';
 import { formatSize, getDefaultVariant, isVariantAvailable } from '@shared/variants';
 import { useWishlist } from '@/hooks/useWishlist';
 import { useAuth } from '@/_core/hooks/useAuth';
+import { getProductVisualMotion } from '@shared/product-visual-motion';
 
 function ProductImage({
   fallbackUrl,
@@ -64,6 +65,7 @@ export default function ProductDetail() {
   const [isWishlistAnimating, setIsWishlistAnimating] = useState(false);
   const olfactoryNotesRef = useRef<HTMLDivElement | null>(null);
   const [areOlfactoryNotesRevealed, setAreOlfactoryNotesRevealed] = useState(false);
+  const productVisualMotion = getProductVisualMotion(scrollY);
 
   const { addToCart } = useLocalCart();
   const { isAuthenticated } = useAuth();
@@ -101,9 +103,29 @@ export default function ProductDetail() {
   ).slice(0, 3);
 
   useEffect(() => {
-    const handleScroll = () => setScrollY(window.scrollY);
+    if (window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) return;
+
+    let animationFrame: number | null = null;
+    const scheduleFrame = typeof window.requestAnimationFrame === "function"
+      ? window.requestAnimationFrame.bind(window)
+      : (callback: FrameRequestCallback) => window.setTimeout(callback, 0);
+    const cancelFrame = typeof window.cancelAnimationFrame === "function"
+      ? window.cancelAnimationFrame.bind(window)
+      : window.clearTimeout.bind(window);
+    const handleScroll = () => {
+      if (animationFrame !== null) return;
+      animationFrame = scheduleFrame(() => {
+        setScrollY(window.scrollY);
+        animationFrame = null;
+      });
+    };
+
+    handleScroll();
     window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      if (animationFrame !== null) cancelFrame(animationFrame);
+    };
   }, []);
 
   useEffect(() => {
@@ -254,9 +276,12 @@ export default function ProductDetail() {
           {/* Product Image Gallery / Sticky Visual */}
           <div className="lg:col-span-6 lg:sticky lg:top-28">
             <div
-              className="luxury-image-frame group relative mx-auto aspect-square w-full max-w-xl overflow-hidden rounded-2xl bg-gray-50/80 shadow-sm transition-transform duration-700"
+              data-testid="product-visual-motion"
+              className="luxury-image-frame group relative mx-auto aspect-square w-full max-w-xl overflow-hidden rounded-2xl bg-gray-50/80 shadow-sm transition-transform duration-200 ease-out motion-reduce:transition-none"
               style={{
-                transform: `scale(${1 + scrollY * 0.00008})`,
+                transform: `translate3d(0, ${productVisualMotion.translateY}px, 0) scale(${productVisualMotion.scale}) rotate(${productVisualMotion.rotate}deg)`,
+                transformOrigin: "50% 42%",
+                willChange: "transform",
               }}
             >
               <ProductImage

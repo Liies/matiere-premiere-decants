@@ -6558,3 +6558,13 @@
 - [x] Auditer les couleurs actuelles du module de filtres
 - [x] Réharmoniser les états inactifs, survolés et sélectionnés avec la DA du site
 - [x] Couvrir, vérifier et publier la nouvelle palette des filtres
+
+## Navigation — Sélection animée
+- [x] Auditer les états actifs du menu desktop et mobile
+- [x] Ajouter un indicateur animé sur l’entrée de navigation sélectionnée
+- [x] Couvrir, vérifier et publier l’animation de navigation
+
+## Animations — Fiche produit et navigation
+- [x] Auditer le mouvement du visuel produit au défilement et l’indicateur actif du menu
+- [x] Renforcer les animations de défilement et de sélection de navigation
+- [x] Couvrir, vérifier et publier les animations améliorées
