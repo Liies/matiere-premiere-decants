@@ -199,4 +199,20 @@ describe("tableau de bord administrateur", () => {
     expect(screen.getByText("Page 2 sur 2")).toBeTruthy();
     expect((screen.getByRole("button", { name: "Suivant" }) as HTMLButtonElement).disabled).toBe(true);
   });
+
+  it("recherche un parfum archivé et recale la pagination sur les résultats trouvés", () => {
+    render(<Admin />);
+
+    fireEvent.click(screen.getByRole("tab", { name: "Catalogue" }));
+    fireEvent.change(screen.getByLabelText("Rechercher dans les produits archivés"), { target: { value: "safran" } });
+
+    expect(screen.getByText("Crystal Safran")).toBeTruthy();
+    expect(screen.queryByText("Archive 2")).toBeNull();
+    expect(screen.getByText("1 résultat trouvé")).toBeTruthy();
+    expect(screen.queryByRole("navigation", { name: "Pagination des produits archivés" })).toBeNull();
+
+    fireEvent.change(screen.getByLabelText("Rechercher dans les produits archivés"), { target: { value: "inconnu" } });
+
+    expect(screen.getByText("Aucun parfum archivé ne correspond à « inconnu »." )).toBeTruthy();
+  });
 });

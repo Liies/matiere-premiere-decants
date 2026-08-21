@@ -6691,3 +6691,8 @@
 - [x] Limiter la liste des produits archivés à six références par page
 - [x] Ajouter des contrôles de pagination accessibles et conserver l’action de restauration
 - [x] Couvrir, vérifier et publier la pagination des archives
+
+## Administration — Recherche dans les archives
+- [x] Ajouter une recherche instantanée par nom de parfum
+- [x] Recalculer la pagination et l’état vide depuis les résultats filtrés
+- [x] Couvrir, vérifier et publier la recherche des archives

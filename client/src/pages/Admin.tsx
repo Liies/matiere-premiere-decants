@@ -8,7 +8,7 @@ import { AdminRevenueChart } from "@/components/AdminRevenueChart";
 import { trpc } from "@/lib/trpc";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { getOrderStatusSlices, getRevenueSeries, type DashboardOrderStatus } from "@shared/admin-dashboard-analytics";
-import { AlertTriangle, ArchiveRestore, ArrowUpRight, CheckCircle2, CircleDollarSign, ClipboardList, PackageCheck, ReceiptText, RotateCcw, Truck } from "lucide-react";
+import { AlertTriangle, ArchiveRestore, ArrowUpRight, CheckCircle2, CircleDollarSign, ClipboardList, PackageCheck, ReceiptText, RotateCcw, Search, Truck, X } from "lucide-react";
 import { toast } from "sonner";
 import { useMemo, useState } from "react";
 
@@ -48,6 +48,10 @@ const adminTabs: Array<{ id: AdminTab; label: string; description: string }> = [
   { id: "trust", label: "Confiance client", description: "Les avis vérifiés à modérer" },
 ];
 
+function normalizeArchiveSearch(value: string): string {
+  return value.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLocaleLowerCase("fr-FR").trim();
+}
+
 export default function Admin() {
   const { user, isAuthenticated } = useAuth();
   const { data: orders, isLoading, refetch } = trpc.orders.getAllOrders.useQuery(undefined, {
@@ -69,9 +73,14 @@ export default function Admin() {
   const [orderFilter, setOrderFilter] = useState<OrderFilter>("all");
   const [activeTab, setActiveTab] = useState<AdminTab>("overview");
   const [archivePage, setArchivePage] = useState(1);
+  const [archiveQuery, setArchiveQuery] = useState("");
 
   const archivePagination = useMemo(() => {
-    const total = archivedProducts?.length ?? 0;
+    const normalizedQuery = normalizeArchiveSearch(archiveQuery);
+    const matchingProducts = (archivedProducts ?? []).filter((product) => (
+      normalizeArchiveSearch(product.name).includes(normalizedQuery)
+    ));
+    const total = matchingProducts.length;
     const pageCount = Math.max(1, Math.ceil(total / ARCHIVE_PAGE_SIZE));
     const currentPage = Math.min(archivePage, pageCount);
     const start = (currentPage - 1) * ARCHIVE_PAGE_SIZE;
@@ -83,9 +92,9 @@ export default function Admin() {
       total,
       start,
       end,
-      products: (archivedProducts ?? []).slice(start, end),
+      products: matchingProducts.slice(start, end),
     };
-  }, [archivePage, archivedProducts]);
+  }, [archivePage, archiveQuery, archivedProducts]);
 
   const dashboard = useMemo(() => {
     const allOrders = orders ?? [];
@@ -344,55 +353,66 @@ export default function Admin() {
                   </div>
                 ) : (
                   <>
-                  <ul className="divide-y divide-gray-100">
-                    {archivePagination.products.map((product) => (
-                      <li key={product.id} className="flex flex-col gap-3 py-4 sm:flex-row sm:items-center sm:justify-between">
-                        <div>
-                          <p className="text-sm font-medium text-gray-900">{product.name}</p>
-                          <p className="mt-1 text-xs text-gray-500">{product.concentration === "extrait" ? "Extrait de Parfum" : "Eau de Parfum"} · Retiré du catalogue public</p>
-                        </div>
-                        <Button
-                          type="button"
-                          size="sm"
-                          variant="outline"
-                          disabled={restoreProduct.isPending}
-                          onClick={() => handleRestoreProduct(product.id, product.name)}
-                          className="min-h-11 shrink-0 border-gray-300 text-gray-900 hover:border-gray-900"
-                        >
-                          <RotateCcw className="mr-2 h-4 w-4" aria-hidden="true" />
-                          Restaurer
-                        </Button>
-                      </li>
-                    ))}
-                  </ul>
-                  {archivePagination.pageCount > 1 && (
-                    <div className="mt-5 flex flex-col gap-3 border-t border-gray-200 pt-4 sm:flex-row sm:items-center sm:justify-between">
-                      <p className="text-sm text-gray-600" aria-live="polite">Affichage de {archivePagination.start + 1} à {archivePagination.end} sur {archivePagination.total} archives</p>
-                      <nav aria-label="Pagination des produits archivés" className="flex items-center gap-2">
-                        <Button
-                          type="button"
-                          size="sm"
-                          variant="outline"
-                          disabled={archivePagination.currentPage === 1}
-                          onClick={() => setArchivePage((page) => Math.max(1, page - 1))}
-                          className="min-h-11 border-gray-300 bg-white"
-                        >
-                          Précédent
-                        </Button>
-                        <span className="min-w-20 text-center text-sm text-gray-600">Page {archivePagination.currentPage} sur {archivePagination.pageCount}</span>
-                        <Button
-                          type="button"
-                          size="sm"
-                          variant="outline"
-                          disabled={archivePagination.currentPage === archivePagination.pageCount}
-                          onClick={() => setArchivePage((page) => Math.min(archivePagination.pageCount, page + 1))}
-                          className="min-h-11 border-gray-300 bg-white"
-                        >
-                          Suivant
-                        </Button>
-                      </nav>
+                    <div className="mt-5">
+                      <label htmlFor="archived-product-search" className="sr-only">Rechercher dans les produits archivés</label>
+                      <div className="relative max-w-md">
+                        <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" aria-hidden="true" />
+                        <input
+                          id="archived-product-search"
+                          type="search"
+                          value={archiveQuery}
+                          onChange={(event) => { setArchiveQuery(event.target.value); setArchivePage(1); }}
+                          placeholder="Rechercher un parfum archivé"
+                          className="min-h-11 w-full border border-gray-300 bg-white py-2 pl-10 pr-10 text-sm text-gray-900 outline-none transition placeholder:text-gray-400 focus:border-gray-900"
+                        />
+                        {archiveQuery && (
+                          <button type="button" onClick={() => { setArchiveQuery(""); setArchivePage(1); }} className="absolute right-2 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center text-gray-500 transition hover:text-gray-900" aria-label="Effacer la recherche">
+                            <X className="h-4 w-4" aria-hidden="true" />
+                          </button>
+                        )}
+                      </div>
+                      <p className="mt-2 text-sm text-gray-600" aria-live="polite">{archivePagination.total} résultat{archivePagination.total === 1 ? "" : "s"}{archiveQuery ? " trouvé" : " dans les archives"}{archiveQuery && archivePagination.total !== 1 ? "s" : ""}</p>
                     </div>
-                  )}
+                    {archivePagination.total === 0 ? (
+                      <div className="flex gap-3 py-8 text-sm text-gray-600">
+                        <Search className="mt-0.5 h-4 w-4 shrink-0 text-gray-500" aria-hidden="true" />
+                        <p>Aucun parfum archivé ne correspond à « {archiveQuery} ».</p>
+                      </div>
+                    ) : (
+                      <>
+                        <ul className="divide-y divide-gray-100">
+                          {archivePagination.products.map((product) => (
+                            <li key={product.id} className="flex flex-col gap-3 py-4 sm:flex-row sm:items-center sm:justify-between">
+                              <div>
+                                <p className="text-sm font-medium text-gray-900">{product.name}</p>
+                                <p className="mt-1 text-xs text-gray-500">{product.concentration === "extrait" ? "Extrait de Parfum" : "Eau de Parfum"} · Retiré du catalogue public</p>
+                              </div>
+                              <Button
+                                type="button"
+                                size="sm"
+                                variant="outline"
+                                disabled={restoreProduct.isPending}
+                                onClick={() => handleRestoreProduct(product.id, product.name)}
+                                className="min-h-11 shrink-0 border-gray-300 text-gray-900 hover:border-gray-900"
+                              >
+                                <RotateCcw className="mr-2 h-4 w-4" aria-hidden="true" />
+                                Restaurer
+                              </Button>
+                            </li>
+                          ))}
+                        </ul>
+                        {archivePagination.pageCount > 1 && (
+                          <div className="mt-5 flex flex-col gap-3 border-t border-gray-200 pt-4 sm:flex-row sm:items-center sm:justify-between">
+                            <p className="text-sm text-gray-600" aria-live="polite">Affichage de {archivePagination.start + 1} à {archivePagination.end} sur {archivePagination.total} archives</p>
+                            <nav aria-label="Pagination des produits archivés" className="flex items-center gap-2">
+                              <Button type="button" size="sm" variant="outline" disabled={archivePagination.currentPage === 1} onClick={() => setArchivePage((page) => Math.max(1, page - 1))} className="min-h-11 border-gray-300 bg-white">Précédent</Button>
+                              <span className="min-w-20 text-center text-sm text-gray-600">Page {archivePagination.currentPage} sur {archivePagination.pageCount}</span>
+                              <Button type="button" size="sm" variant="outline" disabled={archivePagination.currentPage === archivePagination.pageCount} onClick={() => setArchivePage((page) => Math.min(archivePagination.pageCount, page + 1))} className="min-h-11 border-gray-300 bg-white">Suivant</Button>
+                            </nav>
+                          </div>
+                        )}
+                      </>
+                    )}
                   </>
                 )}
               </Card>
