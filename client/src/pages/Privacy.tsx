@@ -1,10 +1,7 @@
-import { useAuth } from "@/_core/hooks/useAuth";
 import Footer from "@/components/Footer";
 import Header from "@/components/Header";
 
 export default function Privacy() {
-  const { isAuthenticated } = useAuth();
-
   return (
     <div className="min-h-screen bg-white">
       <Header />

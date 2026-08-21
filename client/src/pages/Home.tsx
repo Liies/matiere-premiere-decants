@@ -1,4 +1,3 @@
-import { useAuth } from "@/_core/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import Header from "@/components/Header";
 import { Link } from "wouter";
@@ -6,8 +5,6 @@ import { ArrowRight, Sparkles, Droplet, Package } from "lucide-react";
 import { imageAssets } from "@shared/image-assets";
 
 export default function Home() {
-  const { user, isAuthenticated } = useAuth();
-
   return (
     <div className="min-h-screen flex flex-col bg-white">
       <Header />

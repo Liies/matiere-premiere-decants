@@ -6663,3 +6663,10 @@
 - [x] Retrouver et adapter la présentation historique des parfumeurs
 - [x] Ajouter la biographie et les créations marquantes à la page À propos
 - [x] Couvrir, vérifier et publier la nouvelle section
+
+## Maintenance — Code mort et hiérarchie du catalogue
+- [x] Auditer les modules, exports et dépendances sans référence active
+- [x] Supprimer uniquement le code mort confirmé
+- [x] Déplacer le module « Besoin d’un repère ? » après la grille des parfums
+- [x] Confirmer visuellement que le module d’aide apparaît après la dernière carte parfum
+- [x] Couvrir, vérifier et publier le nettoyage et la nouvelle hiérarchie

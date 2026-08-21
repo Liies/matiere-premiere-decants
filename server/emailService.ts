@@ -1,5 +1,3 @@
-import { ENV } from "./_core/env";
-
 export interface OrderEmailData {
   orderNumber: string;
   customerName: string;

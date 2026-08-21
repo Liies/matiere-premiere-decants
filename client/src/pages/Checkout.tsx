@@ -4,7 +4,7 @@ import { Card } from "@/components/ui/card";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Link } from "wouter";
-import { CheckCircle, ExternalLink, Loader2, ShieldCheck } from "lucide-react";
+import { CheckCircle, Loader2, ShieldCheck } from "lucide-react";
 import { useAuth } from "@/_core/hooks/useAuth";
 import AddressAutocomplete from "@/components/AddressAutocomplete";
 import DeliveryLocationMap from "@/components/DeliveryLocationMap";

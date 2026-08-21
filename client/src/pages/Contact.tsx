@@ -1,15 +1,12 @@
 import { useState } from "react";
-import { useAuth } from "@/_core/hooks/useAuth";
 import { trpc } from "@/lib/trpc";
 import { Button } from "@/components/ui/button";
 import Footer from "@/components/Footer";
 import Header from "@/components/Header";
-import { Link } from "wouter";
 import { Mail, Phone, MapPin } from "lucide-react";
 import { toast } from "sonner";
 
 export default function Contact() {
-  const { isAuthenticated } = useAuth();
   const submitContact = trpc.contact.submit.useMutation();
   const [formData, setFormData] = useState({
     name: "",

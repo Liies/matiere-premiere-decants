@@ -1,12 +1,10 @@
 import { useState } from "react";
-import { useAuth } from "@/_core/hooks/useAuth";
 import Footer from "@/components/Footer";
 import Header from "@/components/Header";
 import { Link } from "wouter";
 import { ChevronDown } from "lucide-react";
 
 export default function FAQ() {
-  const { isAuthenticated } = useAuth();
   const [openItems, setOpenItems] = useState<Record<number, boolean>>({});
 
   const toggleItem = (index: number) => {

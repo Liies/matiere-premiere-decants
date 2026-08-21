@@ -218,6 +218,17 @@ describe("intégration catalogue — panier et souhaits", () => {
     expect(screen.queryByRole("option", { name: /2 ml/ })).toBeNull();
   });
 
+  it("place le module d’aide après les parfums pour privilégier la découverte du catalogue", () => {
+    render(<Products />);
+
+    const grid = screen.getByTestId("catalog-products-grid");
+    const advisorCallout = screen.getByTestId("catalog-advisor-callout");
+
+    expect(grid.compareDocumentPosition(advisorCallout) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(within(advisorCallout).getByText("Besoin d'un repère ?")).toBeTruthy();
+    expect(within(advisorCallout).getByRole("link", { name: "Trouver mon parfum" }).getAttribute("href")).toBe("/conseil");
+  });
+
   it("présente les filtres dans une palette minérale claire et conserve leur remise à zéro", () => {
     render(<Products />);
 

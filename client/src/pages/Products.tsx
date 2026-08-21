@@ -296,17 +296,6 @@ export default function Products() {
             </div>
           </section>
 
-          <section className="mb-8 flex flex-col gap-4 rounded-2xl border border-gray-200 bg-gray-50/70 p-5 sm:flex-row sm:items-center sm:justify-between sm:p-6">
-            <div>
-              <p className="text-xs font-medium uppercase tracking-[0.16em] text-gray-500">Besoin d'un repère ?</p>
-              <h2 className="mt-1 text-xl font-light text-gray-900">Décrivez vos envies, nous vous guidons.</h2>
-              <p className="mt-1 text-sm text-gray-600">Recevez une sélection issue des parfums réellement disponibles.</p>
-            </div>
-            <a href="/conseil" className="inline-flex min-h-11 shrink-0 items-center justify-center rounded-md bg-gray-900 px-5 py-3 text-sm font-medium text-white transition hover:bg-gray-800">
-              Trouver mon parfum
-            </a>
-          </section>
-
           <section
             id="catalog-filters"
             aria-labelledby="olfactory-filter-title"
@@ -568,6 +557,17 @@ export default function Products() {
               ))}
             </div>
           )}
+
+          <section data-testid="catalog-advisor-callout" className="mt-12 flex flex-col gap-4 rounded-2xl border border-gray-200 bg-gray-50/70 p-5 sm:flex-row sm:items-center sm:justify-between sm:p-6">
+            <div>
+              <p className="text-xs font-medium uppercase tracking-[0.16em] text-gray-500">Besoin d'un repère ?</p>
+              <h2 className="mt-1 text-xl font-light text-gray-900">Décrivez vos envies, nous vous guidons.</h2>
+              <p className="mt-1 text-sm text-gray-600">Recevez une sélection issue des parfums réellement disponibles.</p>
+            </div>
+            <a href="/conseil" className="inline-flex min-h-11 shrink-0 items-center justify-center rounded-md bg-gray-900 px-5 py-3 text-sm font-medium text-white transition hover:bg-gray-800">
+              Trouver mon parfum
+            </a>
+          </section>
         </div>
       </main>
 

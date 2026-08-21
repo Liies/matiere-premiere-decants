@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { DEFAULT_SITE_NAME, DEFAULT_SITE_URL } from "@shared/seo";
+import { DEFAULT_SITE_NAME } from "@shared/seo";
 
 interface SEOProps {
   title: string;

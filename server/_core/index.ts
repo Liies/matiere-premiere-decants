@@ -42,7 +42,7 @@ async function startServer() {
   // Dynamic Sitemap XML & Legacy Product Redirects
   app.get("/sitemap.xml", async (req, res) => {
     try {
-      const { getCatalogProducts, getDb } = await import("../db");
+      const { getCatalogProducts } = await import("../db");
       const catalog = (await getCatalogProducts()) as any[];
       const domain = `${req.protocol}://${req.get("host") || "matiere50ml-okjlk7qk.manus.space"}`;
 

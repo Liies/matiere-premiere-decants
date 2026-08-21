@@ -1,4 +1,3 @@
-import { useAuth } from "@/_core/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import Footer from "@/components/Footer";
 import Header from "@/components/Header";
@@ -7,8 +6,6 @@ import { ArrowRight } from "lucide-react";
 import { MASTER_PERFUMER_PROFILE } from "@shared/perfumer-profile";
 
 export default function About() {
-  const { isAuthenticated } = useAuth();
-
   return (
     <div className="min-h-screen bg-white">
       <Header />
