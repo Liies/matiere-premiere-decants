@@ -2,6 +2,7 @@ import { lazy, Suspense, useState } from "react";
 import { Button } from "@/components/ui/button";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import ScrollReveal from "@/components/ScrollReveal";
 import { Link } from "wouter";
 import { ArrowRight } from "lucide-react";
 
@@ -54,7 +55,7 @@ export default function HomePremium() {
 
         <section className="bg-stone-50 px-4 py-14 sm:py-20">
           <div className="container mx-auto grid max-w-5xl items-center gap-10 md:grid-cols-[0.9fr_1.1fr] md:gap-16">
-            <div>
+            <ScrollReveal className="min-w-0" delayMs={20}>
               <p className="text-xs font-medium uppercase tracking-[0.2em] text-gray-500">La collection</p>
               <h2 className="mt-4 text-3xl font-light leading-tight text-gray-900 sm:text-5xl">Dix signatures à explorer.</h2>
               <p className="mt-5 max-w-md text-base font-light leading-7 text-gray-600">
@@ -64,8 +65,9 @@ export default function HomePremium() {
                 Voir les 10 parfums
                 <ArrowRight className="h-4 w-4" aria-hidden="true" />
               </Link>
-            </div>
-            <div className="overflow-hidden rounded-2xl bg-white shadow-[0_18px_50px_rgba(38,29,21,0.10)]">
+            </ScrollReveal>
+            <ScrollReveal className="min-w-0" delayMs={110}>
+              <div className="overflow-hidden rounded-2xl bg-white shadow-[0_18px_50px_rgba(38,29,21,0.10)]">
               <img
                 src={HOME_COLLECTION_EDITORIAL_IMAGE}
                 alt="Six flacons Matière Première présentés sur des socles minéraux"
@@ -74,12 +76,13 @@ export default function HomePremium() {
                 fetchPriority="low"
                 decoding="async"
               />
-            </div>
+              </div>
+            </ScrollReveal>
           </div>
         </section>
 
         <section className="bg-gray-900 px-4 py-14 text-white sm:py-20">
-          <div className="container mx-auto max-w-2xl text-center">
+          <ScrollReveal className="container mx-auto max-w-2xl text-center" delayMs={40}>
             <p className="text-xs font-medium uppercase tracking-[0.2em] text-gray-400">Un doute ?</p>
             <h2 className="mt-4 text-3xl font-light sm:text-4xl">Trouvez votre parfum.</h2>
             <p className="mx-auto mt-4 max-w-lg text-sm font-light leading-6 text-gray-300 sm:text-base">
@@ -89,7 +92,7 @@ export default function HomePremium() {
               Commencer l’Exploration
               <ArrowRight className="h-4 w-4" aria-hidden="true" />
             </Button>
-          </div>
+          </ScrollReveal>
         </section>
       </main>
 

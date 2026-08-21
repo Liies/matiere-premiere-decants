@@ -721,6 +721,18 @@
     animation: heroCopyReveal 800ms cubic-bezier(0.22, 1, 0.36, 1) both;
   }
 
+  .scroll-reveal {
+    opacity: 0;
+    transform: translate3d(0, 22px, 0) scale(0.985);
+    transition: opacity 520ms cubic-bezier(0.23, 1, 0.32, 1) var(--scroll-reveal-delay, 0ms), transform 520ms cubic-bezier(0.23, 1, 0.32, 1) var(--scroll-reveal-delay, 0ms);
+    will-change: opacity, transform;
+  }
+
+  .scroll-reveal--visible {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+
   .wishlist-heart-pop {
     animation: wishlistHeartPop 520ms cubic-bezier(0.22, 1, 0.36, 1) both;
   }
@@ -737,6 +749,7 @@
   .hero-bottle-reveal,
   .hero-bottle-halo,
   .hero-copy-reveal,
+  .scroll-reveal,
   .wishlist-heart-pop,
   .olfactory-filter-chip[data-state="on"] {
     animation: none !important;

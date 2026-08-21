@@ -6641,3 +6641,7 @@
 ## Navigation — Survol des boutons de session
 - [x] Ajouter une micro-animation aux boutons Connexion et Déconnexion
 - [x] Couvrir, vérifier et publier les animations de session
+
+## Accueil — Révélations au défilement
+- [x] Ajouter des apparitions progressives aux sections clés de l’accueil
+- [x] Couvrir, vérifier et publier les animations de défilement
