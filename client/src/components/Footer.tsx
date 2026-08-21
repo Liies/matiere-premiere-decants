@@ -1,5 +1,7 @@
 import { Link } from "wouter";
 
+const SOCIAL_NETWORKS = ["Instagram", "Facebook", "Snapchat"] as const;
+
 export default function Footer() {
   return (
     <footer className="border-t border-gray-200 py-12 px-4 bg-gray-50">
@@ -58,16 +60,13 @@ export default function Footer() {
           <div>
             <h3 className="text-sm font-light text-gray-900 mb-4">Suivez-nous</h3>
             <ul className="space-y-2 text-sm text-gray-600 font-light">
-              <li>
-                <a href="#" className="hover:text-gray-900 transition">
-                  Instagram
-                </a>
-              </li>
-              <li>
-                <a href="#" className="hover:text-gray-900 transition">
-                  Facebook
-                </a>
-              </li>
+              {SOCIAL_NETWORKS.map((network) => (
+                <li key={network}>
+                  <a href="#" className="hover:text-gray-900 transition">
+                    {network}
+                  </a>
+                </li>
+              ))}
             </ul>
           </div>
         </div>

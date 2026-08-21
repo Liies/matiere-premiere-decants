@@ -6596,3 +6596,7 @@
 - [x] Héberger l’image de collection fournie dans les assets du site
 - [x] Remplacer le visuel de collection de la page d’accueil
 - [x] Vérifier et publier la mise à jour du visuel d’accueil
+
+## Footer — Réseaux sociaux
+- [x] Ajouter Snapchat aux réseaux sociaux affichés
+- [x] Vérifier et publier l’ajout de Snapchat
