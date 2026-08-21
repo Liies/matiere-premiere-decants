@@ -96,7 +96,7 @@ export default function ProductDetail() {
   const isLoading = stableMatch ? isLoadingStable : isLoadingLegacy;
 
   const { data: allProducts } = trpc.products.list.useQuery();
-  const { data: publishedReviews, isLoading: areReviewsLoading } = trpc.reviews.listPublished.useQuery(
+  const { data: publishedReviews } = trpc.reviews.listPublished.useQuery(
     { productId: product?.id ?? 0 },
     { enabled: Boolean(product?.id) },
   );
@@ -105,6 +105,7 @@ export default function ProductDetail() {
     { enabled: isAuthenticated && Boolean(product?.id) },
   );
   const createReview = trpc.reviews.create.useMutation();
+  const hasPublishedReviews = (publishedReviews?.length ?? 0) > 0;
   const similarProducts = allProducts?.filter(
     (p: any) => p.id !== product?.id && p.brandId === product?.brandId
   ).slice(0, 3);
@@ -500,7 +501,7 @@ export default function ProductDetail() {
 
         <OfficialFragranceVideo productName={product.name} productSlug={product.slug} />
 
-        <section
+        {hasPublishedReviews && <section
           aria-labelledby="product-reviews-title"
           className="mt-16 rounded-2xl border border-gray-200 bg-stone-50/60 px-6 py-10 sm:mt-20 sm:px-10"
         >
@@ -515,31 +516,23 @@ export default function ProductDetail() {
             Avis authentiques · Commandes vérifiées
           </p>
 
-          {areReviewsLoading ? (
-            <p className="mt-8 text-center text-sm text-gray-500">Chargement des avis authentifiés…</p>
-          ) : publishedReviews && publishedReviews.length > 0 ? (
-            <div className="mx-auto mt-8 grid max-w-4xl gap-4 text-left sm:grid-cols-2">
-              {publishedReviews.map((review) => (
-                <article key={review.id} className="rounded-xl border border-stone-200 bg-white p-5 shadow-sm">
-                  <div className="flex items-start justify-between gap-4">
-                    <div>
-                      <p className="text-sm font-medium text-gray-900">{review.authorName}</p>
-                      <p className="mt-1 text-xs font-medium uppercase tracking-[0.14em] text-emerald-700">Achat vérifié</p>
-                    </div>
-                    <p className="text-sm tracking-[0.08em] text-amber-700" aria-label={`${review.rating} étoiles sur 5`}>
-                      {"★".repeat(review.rating)}<span className="text-stone-300">{"★".repeat(5 - review.rating)}</span>
-                    </p>
+          <div className="mx-auto mt-8 grid max-w-4xl gap-4 text-left sm:grid-cols-2">
+            {publishedReviews!.map((review) => (
+              <article key={review.id} className="rounded-xl border border-stone-200 bg-white p-5 shadow-sm">
+                <div className="flex items-start justify-between gap-4">
+                  <div>
+                    <p className="text-sm font-medium text-gray-900">{review.authorName}</p>
+                    <p className="mt-1 text-xs font-medium uppercase tracking-[0.14em] text-emerald-700">Achat vérifié</p>
                   </div>
-                  {review.title && <h3 className="mt-5 text-base font-medium text-gray-900">{review.title}</h3>}
-                  <p className="mt-3 text-sm leading-6 text-gray-600">{review.body}</p>
-                </article>
-              ))}
-            </div>
-          ) : (
-            <p className="mx-auto mt-8 max-w-xl text-center text-sm leading-6 text-gray-600">
-              Aucun avis approuvé n’est encore disponible pour ce parfum. Les premiers retours apparaîtront ici après achat vérifié et modération.
-            </p>
-          )}
+                  <p className="text-sm tracking-[0.08em] text-amber-700" aria-label={`${review.rating} étoiles sur 5`}>
+                    {"★".repeat(review.rating)}<span className="text-stone-300">{"★".repeat(5 - review.rating)}</span>
+                  </p>
+                </div>
+                {review.title && <h3 className="mt-5 text-base font-medium text-gray-900">{review.title}</h3>}
+                <p className="mt-3 text-sm leading-6 text-gray-600">{review.body}</p>
+              </article>
+            ))}
+          </div>
 
           {isAuthenticated && reviewEligibility?.canSubmit && (
             <form onSubmit={handleReviewSubmit} className="mx-auto mt-10 max-w-2xl border-t border-stone-200 pt-8 text-left">
@@ -592,7 +585,7 @@ export default function ProductDetail() {
           {!isAuthenticated && (
             <p className="mx-auto mt-8 max-w-xl text-center text-sm leading-6 text-gray-600">Après votre achat, connectez-vous au compte utilisé lors de la commande pour déposer un avis vérifié.</p>
           )}
-        </section>
+        </section>}
 
         {/* Similar Products */}
         {similarProducts && similarProducts.length > 0 && (

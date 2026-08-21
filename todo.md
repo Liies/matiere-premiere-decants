@@ -6702,3 +6702,8 @@
 - [x] Ajouter une confirmation avant restauration et suppression définitive
 - [x] Trier les archives par date et par ordre alphabétique
 - [x] Couvrir, vérifier et publier les actions sécurisées et le tri
+
+## Fiche parfum — Avis approuvés uniquement
+- [x] Identifier le rendu de la section d’avis lorsqu’aucun avis n’est publié
+- [x] Masquer entièrement la section vide sans affecter les avis approuvés
+- [x] Couvrir, vérifier et publier l’affichage conditionnel

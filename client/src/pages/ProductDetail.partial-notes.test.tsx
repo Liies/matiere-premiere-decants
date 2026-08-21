@@ -79,8 +79,10 @@ describe("fiche de parfum à pyramide partielle", () => {
     expect(screen.getByText("Le contraste noir et blanc")).toBeTruthy();
     expect(screen.getByText("Absolue de vanille · Madagascar")).toBeTruthy();
     expect(screen.getByRole("link", { name: /source : matière première/i })).toBeTruthy();
-    expect(screen.getByRole("heading", { name: /avis clients/i })).toBeTruthy();
-    expect(screen.getByText(/uniquement après un achat vérifié/i)).toBeTruthy();
-    expect(screen.getByText(/aucun avis approuvé n’est encore disponible/i)).toBeTruthy();
+    expect(screen.queryByRole("heading", { name: /avis clients/i })).toBeNull();
+    expect(screen.queryByText(/votre expérience compte/i)).toBeNull();
+    expect(screen.queryByText(/uniquement après un achat vérifié/i)).toBeNull();
+    expect(screen.queryByText(/aucun avis approuvé n’est encore disponible/i)).toBeNull();
+    expect(screen.queryByText(/vous pourrez partager votre expérience après l’achat vérifié/i)).toBeNull();
   });
 });
