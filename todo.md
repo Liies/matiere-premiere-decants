@@ -6544,6 +6544,11 @@
 - [x] Ajouter une transition fluide et un partage de sélection par lien
 - [x] Couvrir, vérifier et publier les interactions catalogue-favoris
 
+## Maintenance — Nettoyage du dépôt
+- [x] Supprimer la page de démonstration et les composants UI devenus non référencés
+- [x] Archiver les rapports de validation historiques à la racine du dépôt
+- [x] Vérifier le build, les tests et publier le nettoyage du dépôt
+
 ## Fiche produit — Vidéos officielles Matière Première
 - [x] Identifier les vidéos officielles disponibles pour les parfums du catalogue
 - [x] Intégrer un lecteur différé sous les fiches produit
