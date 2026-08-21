@@ -21,11 +21,15 @@ function ProductImage({
   fallbackUrl,
   alt,
   className,
+  loading = "lazy",
+  fetchPriority,
 }: {
   productId?: number;
   fallbackUrl?: string | null;
   alt: string;
   className: string;
+  loading?: "lazy" | "eager";
+  fetchPriority?: "high" | "low" | "auto";
 }) {
   const [hasError, setHasError] = useState(false);
   const src = fallbackUrl?.startsWith('/manus-storage/') ? fallbackUrl : null;
@@ -43,7 +47,9 @@ function ProductImage({
       src={src}
       alt={alt}
       className={className}
-      loading="lazy"
+      loading={loading}
+      fetchPriority={fetchPriority}
+      decoding="async"
       onError={() => setHasError(true)}
     />
   );
@@ -288,6 +294,8 @@ export default function ProductDetail() {
                 fallbackUrl={product.imageUrl}
                 alt={product.name}
                 className="h-full w-full object-cover transition-transform duration-1000 group-hover:scale-[1.03]"
+                loading="eager"
+                fetchPriority="high"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
             </div>

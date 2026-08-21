@@ -447,7 +447,9 @@ export default function Products() {
                                 <img
                                   src={imageSrc}
                                   alt={product.name}
-                                  loading="lazy"
+                                  loading={index < 2 ? "eager" : "lazy"}
+                                  fetchPriority={index < 2 ? "high" : "low"}
+                                  decoding="async"
                                   className="h-full w-full object-cover transition-transform duration-1000 ease-out group-hover/product-card:scale-[1.035] group-focus-within/product-card:scale-[1.035] motion-reduce:transform-none motion-reduce:transition-none"
                                 />
                               ) : (

@@ -6568,3 +6568,8 @@
 - [x] Auditer le mouvement du visuel produit au défilement et l’indicateur actif du menu
 - [x] Renforcer les animations de défilement et de sélection de navigation
 - [x] Couvrir, vérifier et publier les animations améliorées
+
+## Performance — Chargement et rendu
+- [x] Auditer les coûts de bundle, de chargement et de rendu
+- [x] Appliquer les optimisations de chargement et de rendu à fort impact
+- [x] Mesurer, couvrir et publier les optimisations de performance

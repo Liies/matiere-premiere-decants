@@ -15,11 +15,31 @@ export default function DeliveryLocationMap({ address, city, postalCode, country
   const map = useRef<google.maps.Map | null>(null);
   const marker = useRef<google.maps.Marker | null>(null);
   const [status, setStatus] = useState<"loading" | "ready" | "unavailable">("loading");
+  const [isMapVisible, setIsMapVisible] = useState(false);
   const formattedAddress = [address, postalCode, city, country].filter(Boolean).join(", ");
 
   useEffect(() => {
+    const container = mapContainer.current;
+    if (!container || !formattedAddress) return;
+
+    if (!("IntersectionObserver" in window)) {
+      setIsMapVisible(true);
+      return;
+    }
+
+    setIsMapVisible(false);
+    const observer = new IntersectionObserver(([entry]) => {
+      if (!entry.isIntersecting) return;
+      setIsMapVisible(true);
+      observer.disconnect();
+    }, { rootMargin: "180px 0px" });
+    observer.observe(container);
+    return () => observer.disconnect();
+  }, [formattedAddress]);
+
+  useEffect(() => {
     let active = true;
-    if (!mapContainer.current || !formattedAddress) return;
+    if (!mapContainer.current || !formattedAddress || !isMapVisible) return;
 
     void loadGoogleMaps()
       .then((googleMaps) => {
@@ -58,7 +78,7 @@ export default function DeliveryLocationMap({ address, city, postalCode, country
     return () => {
       active = false;
     };
-  }, [formattedAddress]);
+  }, [formattedAddress, isMapVisible]);
 
   return (
     <section aria-labelledby="delivery-map-title" className="overflow-hidden rounded border border-stone-200 bg-stone-50">
