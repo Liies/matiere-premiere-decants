@@ -16,6 +16,7 @@ import { formatSize, getDefaultVariant, isVariantAvailable } from '@shared/varia
 import { useWishlist } from '@/hooks/useWishlist';
 import { useAuth } from '@/_core/hooks/useAuth';
 import { getProductVisualMotion } from '@shared/product-visual-motion';
+import { OfficialFragranceVideo } from '@/components/OfficialFragranceVideo';
 
 function ProductImage({
   fallbackUrl,
@@ -496,6 +497,8 @@ export default function ProductDetail() {
             </div>
           </div>
         </div>
+
+        <OfficialFragranceVideo productName={product.name} productSlug={product.slug} />
 
         <section
           aria-labelledby="product-reviews-title"

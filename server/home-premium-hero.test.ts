@@ -24,8 +24,8 @@ describe("hero de l’accueil premium", () => {
   });
 
   it("utilise une unique composition éditoriale pour la collection", () => {
-    expect(homePremiumSource).toContain("matiere-premiere-ten-bottles-editorial_30095232.jpg");
-    expect(homePremiumSource).toContain("Dix flacons de la collection Matière Première, composition éditoriale");
+    expect(homePremiumSource).toContain("matiere-premiere-collection-hero_6296f243.png");
+    expect(homePremiumSource).toContain("Six flacons Matière Première présentés sur des socles minéraux");
   });
 
   it("ne réserve plus une hauteur plein écran sous le visuel hero", () => {

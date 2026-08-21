@@ -6544,6 +6544,11 @@
 - [x] Ajouter une transition fluide et un partage de sélection par lien
 - [x] Couvrir, vérifier et publier les interactions catalogue-favoris
 
+## Fiche produit — Vidéos officielles Matière Première
+- [x] Identifier les vidéos officielles disponibles pour les parfums du catalogue
+- [x] Intégrer un lecteur différé sous les fiches produit
+- [x] Couvrir, vérifier et publier l’intégration vidéo
+
 ## Catalogue — Quantité des cartes
 - [x] Auditer l’affichage de quantité et les tests associés
 - [x] Retirer la quantité visible sans modifier la sélection de variante ni le stock
