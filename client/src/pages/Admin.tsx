@@ -30,6 +30,7 @@ const paidStatuses = new Set<OrderStatusType>(["paid", "processing", "shipped", 
 const fulfillmentStatuses = new Set<OrderStatusType>(["paid", "processing"]);
 const paymentPendingStatuses = new Set<OrderStatusType>(["awaiting_payment", "pending"]);
 const THIRTY_DAYS_MS = 30 * 24 * 60 * 60 * 1000;
+const ARCHIVE_PAGE_SIZE = 6;
 const euro = new Intl.NumberFormat("fr-FR", { style: "currency", currency: "EUR" });
 const statusTone: Record<OrderStatusType, string> = {
   awaiting_payment: "border-amber-200 bg-amber-50 text-amber-800",
@@ -67,6 +68,24 @@ export default function Admin() {
   const [selectedStatus, setSelectedStatus] = useState<Record<number, OrderStatusType | undefined>>({});
   const [orderFilter, setOrderFilter] = useState<OrderFilter>("all");
   const [activeTab, setActiveTab] = useState<AdminTab>("overview");
+  const [archivePage, setArchivePage] = useState(1);
+
+  const archivePagination = useMemo(() => {
+    const total = archivedProducts?.length ?? 0;
+    const pageCount = Math.max(1, Math.ceil(total / ARCHIVE_PAGE_SIZE));
+    const currentPage = Math.min(archivePage, pageCount);
+    const start = (currentPage - 1) * ARCHIVE_PAGE_SIZE;
+    const end = Math.min(start + ARCHIVE_PAGE_SIZE, total);
+
+    return {
+      currentPage,
+      pageCount,
+      total,
+      start,
+      end,
+      products: (archivedProducts ?? []).slice(start, end),
+    };
+  }, [archivePage, archivedProducts]);
 
   const dashboard = useMemo(() => {
     const allOrders = orders ?? [];
@@ -324,8 +343,9 @@ export default function Admin() {
                     <p>Aucun parfum n’est actuellement archivé.</p>
                   </div>
                 ) : (
+                  <>
                   <ul className="divide-y divide-gray-100">
-                    {archivedProducts.map((product) => (
+                    {archivePagination.products.map((product) => (
                       <li key={product.id} className="flex flex-col gap-3 py-4 sm:flex-row sm:items-center sm:justify-between">
                         <div>
                           <p className="text-sm font-medium text-gray-900">{product.name}</p>
@@ -345,6 +365,35 @@ export default function Admin() {
                       </li>
                     ))}
                   </ul>
+                  {archivePagination.pageCount > 1 && (
+                    <div className="mt-5 flex flex-col gap-3 border-t border-gray-200 pt-4 sm:flex-row sm:items-center sm:justify-between">
+                      <p className="text-sm text-gray-600" aria-live="polite">Affichage de {archivePagination.start + 1} à {archivePagination.end} sur {archivePagination.total} archives</p>
+                      <nav aria-label="Pagination des produits archivés" className="flex items-center gap-2">
+                        <Button
+                          type="button"
+                          size="sm"
+                          variant="outline"
+                          disabled={archivePagination.currentPage === 1}
+                          onClick={() => setArchivePage((page) => Math.max(1, page - 1))}
+                          className="min-h-11 border-gray-300 bg-white"
+                        >
+                          Précédent
+                        </Button>
+                        <span className="min-w-20 text-center text-sm text-gray-600">Page {archivePagination.currentPage} sur {archivePagination.pageCount}</span>
+                        <Button
+                          type="button"
+                          size="sm"
+                          variant="outline"
+                          disabled={archivePagination.currentPage === archivePagination.pageCount}
+                          onClick={() => setArchivePage((page) => Math.min(archivePagination.pageCount, page + 1))}
+                          className="min-h-11 border-gray-300 bg-white"
+                        >
+                          Suivant
+                        </Button>
+                      </nav>
+                    </div>
+                  )}
+                  </>
                 )}
               </Card>
             </section>

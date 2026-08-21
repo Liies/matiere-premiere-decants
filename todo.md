@@ -6686,3 +6686,8 @@
 - [x] Ajouter des graphiques de chiffre d’affaires et de statut réellement calculés depuis les commandes
 - [x] Répartir les commandes, le catalogue et la confiance client dans des vues simples
 - [x] Couvrir, vérifier et publier le dashboard focalisé
+
+## Administration — Archives paginées
+- [x] Limiter la liste des produits archivés à six références par page
+- [x] Ajouter des contrôles de pagination accessibles et conserver l’action de restauration
+- [x] Couvrir, vérifier et publier la pagination des archives

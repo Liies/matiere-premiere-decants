@@ -64,7 +64,15 @@ const state = vi.hoisted(() => ({
     },
   ],
   lowStock: [{ id: 42, productId: 9, productName: "Vanilla Powder", sizeMl: 50, stock: 0 }],
-  archivedProducts: [{ id: 77, name: "Crystal Safran", concentration: "extrait", isArchived: true }],
+  archivedProducts: [
+    { id: 77, name: "Crystal Safran", concentration: "extrait", isArchived: true },
+    { id: 78, name: "Archive 2", concentration: "edp", isArchived: true },
+    { id: 79, name: "Archive 3", concentration: "edp", isArchived: true },
+    { id: 80, name: "Archive 4", concentration: "edp", isArchived: true },
+    { id: 81, name: "Archive 5", concentration: "edp", isArchived: true },
+    { id: 82, name: "Archive 6", concentration: "edp", isArchived: true },
+    { id: 83, name: "Archive 7", concentration: "edp", isArchived: true },
+  ],
   restoreProductMutate: vi.fn(),
 }));
 
@@ -168,10 +176,27 @@ describe("tableau de bord administrateur", () => {
     expect(screen.getByText("Crystal Safran")).toBeTruthy();
     expect(screen.getByText(/extrait de parfum/i)).toBeTruthy();
 
-    fireEvent.click(screen.getByRole("button", { name: "Restaurer" }));
+    fireEvent.click(screen.getAllByRole("button", { name: "Restaurer" })[0]);
     expect(state.restoreProductMutate).toHaveBeenCalledWith(
       { id: 77 },
       expect.objectContaining({ onSuccess: expect.any(Function), onError: expect.any(Function) }),
     );
+  });
+
+  it("limite les archives à six références et permet de naviguer sans allonger la page", () => {
+    render(<Admin />);
+
+    fireEvent.click(screen.getByRole("tab", { name: "Catalogue" }));
+
+    expect(screen.getByText("Archive 6")).toBeTruthy();
+    expect(screen.queryByText("Archive 7")).toBeNull();
+    expect(screen.getByText("Affichage de 1 à 6 sur 7 archives")).toBeTruthy();
+
+    fireEvent.click(screen.getByRole("button", { name: "Suivant" }));
+
+    expect(screen.getByText("Archive 7")).toBeTruthy();
+    expect(screen.queryByText("Crystal Safran")).toBeNull();
+    expect(screen.getByText("Page 2 sur 2")).toBeTruthy();
+    expect((screen.getByRole("button", { name: "Suivant" }) as HTMLButtonElement).disabled).toBe(true);
   });
 });
