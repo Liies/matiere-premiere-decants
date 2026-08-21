@@ -6548,3 +6548,8 @@
 - [x] Auditer l’affichage de quantité et les tests associés
 - [x] Retirer la quantité visible sans modifier la sélection de variante ni le stock
 - [x] Couvrir, vérifier et publier l’ajustement des cartes
+
+## Catalogue — Carte olfactive sans défilement
+- [x] Auditer le verso olfactif et son comportement de défilement
+- [x] Retirer le défilement interne en préservant la lisibilité des notes
+- [x] Couvrir, vérifier et publier l’ajustement du verso olfactif
