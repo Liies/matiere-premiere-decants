@@ -7,7 +7,7 @@ import { ArrowRight } from "lucide-react";
 
 const ScentQuizDialog = lazy(() => import("@/components/ScentQuizDialog"));
 
-export const HOME_COLLECTION_EDITORIAL_IMAGE = "/manus-storage/matiere-premiere-ten-bottles-editorial_30095232.jpg";
+export const HOME_COLLECTION_EDITORIAL_IMAGE = "/manus-storage/matiere-premiere-collection-hero_6296f243.png";
 
 export default function HomePremium() {
   const [isScentQuizOpen, setIsScentQuizOpen] = useState(false);
@@ -68,8 +68,8 @@ export default function HomePremium() {
             <div className="overflow-hidden rounded-2xl bg-white shadow-[0_18px_50px_rgba(38,29,21,0.10)]">
               <img
                 src={HOME_COLLECTION_EDITORIAL_IMAGE}
-                alt="Dix flacons de la collection Matière Première, composition éditoriale"
-                className="aspect-[4/3] w-full object-cover"
+                alt="Six flacons Matière Première présentés sur des socles minéraux"
+                className="aspect-[66/85] w-full object-contain"
                 loading="lazy"
                 fetchPriority="low"
                 decoding="async"

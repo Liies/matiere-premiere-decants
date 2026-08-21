@@ -41,7 +41,7 @@ describe("accueil premium — visuels et quiz", () => {
   it("présente la collection avec un seul visuel éditorial", () => {
     render(<HomePremium />);
 
-    expect(screen.getByAltText("Dix flacons de la collection Matière Première, composition éditoriale").getAttribute("src")).toBe(
+    expect(screen.getByAltText("Six flacons Matière Première présentés sur des socles minéraux").getAttribute("src")).toBe(
       HOME_COLLECTION_EDITORIAL_IMAGE,
     );
     expect(screen.queryByText("Notre Histoire")).toBeNull();

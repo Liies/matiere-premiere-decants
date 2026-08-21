@@ -6591,3 +6591,8 @@
 - [x] Refactoriser les modules ciblés avec des noms et responsabilités plus clairs
 - [x] Renforcer les régressions et documenter les conventions clean code
 - [x] Valider et publier l’amélioration de qualité
+
+## Accueil — Visuel de collection fourni
+- [x] Héberger l’image de collection fournie dans les assets du site
+- [x] Remplacer le visuel de collection de la page d’accueil
+- [x] Vérifier et publier la mise à jour du visuel d’accueil
