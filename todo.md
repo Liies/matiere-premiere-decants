@@ -6553,3 +6553,8 @@
 - [x] Auditer le verso olfactif et son comportement de défilement
 - [x] Retirer le défilement interne en préservant la lisibilité des notes
 - [x] Couvrir, vérifier et publier l’ajustement du verso olfactif
+
+## Catalogue — Palette des filtres
+- [x] Auditer les couleurs actuelles du module de filtres
+- [x] Réharmoniser les états inactifs, survolés et sélectionnés avec la DA du site
+- [x] Couvrir, vérifier et publier la nouvelle palette des filtres

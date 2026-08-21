@@ -205,11 +205,12 @@ describe("intégration catalogue — panier et souhaits", () => {
     expect(screen.queryByRole("option", { name: /2 ml/ })).toBeNull();
   });
 
-  it("présente les filtres comme un module olfactif et conserve leur remise à zéro", () => {
+  it("présente les filtres dans une palette minérale claire et conserve leur remise à zéro", () => {
     render(<Products />);
 
     const filterModule = screen.getByTestId("catalog-olfactory-filters");
-    expect(filterModule.className).toContain("bg-[#181814]");
+    expect(filterModule.className).toContain("bg-[#f8f7f3]");
+    expect(filterModule.className).toContain("rounded-2xl");
     expect(screen.getByRole("heading", { name: "Explorez la collection par accords." })).toBeTruthy();
     expect(screen.getByText("Collection complète")).toBeTruthy();
 

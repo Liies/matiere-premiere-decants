@@ -311,29 +311,29 @@ export default function Products() {
             id="catalog-filters"
             aria-labelledby="olfactory-filter-title"
             data-testid="catalog-olfactory-filters"
-            className="relative mb-12 scroll-mt-24 overflow-hidden border border-[#c9bd9c]/40 bg-[#181814] p-5 text-[#f7f3ea] shadow-[0_18px_50px_rgba(24,24,20,0.12)] sm:p-7 md:p-8 animate-slide-up"
+            className="relative mb-12 scroll-mt-24 overflow-hidden rounded-2xl border border-[#ded8ca] bg-[#f8f7f3] p-5 text-gray-900 shadow-[0_18px_50px_rgba(46,39,29,0.08)] sm:p-7 md:p-8 animate-slide-up"
           >
-            <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#dacb9d] to-transparent" />
+            <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#c9bd9c] to-transparent" />
             <div className="relative">
               <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
                 <div className="max-w-2xl">
-                  <div className="mb-3 flex items-center gap-3 text-[#d9c994]">
+                  <div className="mb-3 flex items-center gap-3 text-[#756a58]">
                     <span className="h-px w-8 bg-current" />
                     <SlidersHorizontal className="h-4 w-4" aria-hidden="true" />
                     <p className="text-[10px] font-medium uppercase tracking-[0.24em]">Navigation olfactive</p>
                   </div>
-                  <h3 id="olfactory-filter-title" className="text-2xl font-light tracking-[-0.02em] text-[#f7f3ea] sm:text-3xl">
+                  <h3 id="olfactory-filter-title" className="text-2xl font-light tracking-[-0.02em] text-gray-900 sm:text-3xl">
                     Explorez la collection par accords.
                   </h3>
-                  <p className="mt-3 max-w-xl text-sm leading-6 text-[#d6d0c2]">
+                  <p className="mt-3 max-w-xl text-sm leading-6 text-gray-600">
                     Composez librement votre sélection à partir des matières qui vous attirent.
                   </p>
                 </div>
 
-                <div className="flex min-w-[12rem] items-center justify-between gap-5 border-l border-[#c9bd9c]/35 pl-5 lg:justify-end">
+                <div className="flex min-w-[12rem] items-center justify-between gap-5 border-l border-[#ded8ca] pl-5 lg:justify-end">
                   <div>
-                    <p className="text-[10px] font-medium uppercase tracking-[0.2em] text-[#b8b09e]">Votre sélection</p>
-                    <p className="mt-1 text-sm text-[#f7f3ea]" aria-live="polite">
+                    <p className="text-[10px] font-medium uppercase tracking-[0.2em] text-gray-500">Votre sélection</p>
+                    <p className="mt-1 text-sm text-gray-900" aria-live="polite">
                       {selectedFilters.length > 0
                         ? `${selectedFilters.length} accord${selectedFilters.length > 1 ? "s" : ""} sélectionné${selectedFilters.length > 1 ? "s" : ""}`
                         : "Collection complète"}
@@ -344,7 +344,7 @@ export default function Products() {
                       type="button"
                       onClick={() => setSelectedFilters([])}
                       aria-label="Réinitialiser les filtres olfactifs"
-                      className="inline-flex min-h-11 shrink-0 items-center gap-2 border border-[#c9bd9c]/55 px-3 text-xs uppercase tracking-[0.15em] text-[#f1e8cf] transition duration-200 hover:border-[#f1e8cf] hover:bg-[#f1e8cf] hover:text-[#181814] active:scale-[0.97] motion-reduce:transform-none"
+                      className="inline-flex min-h-11 shrink-0 items-center gap-2 border border-[#cfc6b5] bg-white px-3 text-xs uppercase tracking-[0.15em] text-[#5d5548] transition duration-200 hover:border-[#756a58] hover:bg-[#eeeae1] hover:text-gray-900 active:scale-[0.97] motion-reduce:transform-none"
                     >
                       <X className="h-3.5 w-3.5" aria-hidden="true" />
                       Effacer
@@ -353,7 +353,7 @@ export default function Products() {
                 </div>
               </div>
 
-              <div className="mt-7 border-y border-[#c9bd9c]/30 py-4 sm:py-5">
+              <div className="mt-7 border-y border-[#ded8ca] py-4 sm:py-5">
                 <ToggleGroup
                   type="multiple"
                   value={selectedFilters}
@@ -367,22 +367,22 @@ export default function Products() {
                       key={filter.id}
                       value={filter.id}
                       aria-label={`Filtrer par notes ${filter.label}`}
-                      className="group/filter inline-flex min-h-11 min-w-max flex-none gap-3 whitespace-nowrap border border-[#c9bd9c]/40 bg-transparent px-3 py-2 text-xs font-medium uppercase tracking-[0.14em] text-[#eee8da] transition duration-200 hover:border-[#e5d9b9] hover:bg-white/5 data-[state=on]:border-[#d8c58e] data-[state=on]:bg-[#d8c58e] data-[state=on]:text-[#1b1b16] sm:px-4"
+                      className="group/filter inline-flex min-h-11 min-w-max flex-none gap-3 whitespace-nowrap border border-[#ded8ca] bg-white/75 px-3 py-2 text-xs font-medium uppercase tracking-[0.14em] text-[#5d5548] transition duration-200 hover:border-[#aa9d88] hover:bg-[#eeeae1] data-[state=on]:border-[#665d50] data-[state=on]:bg-[#665d50] data-[state=on]:text-white sm:px-4"
                     >
-                      <span className="text-[10px] text-[#c5b989] group-data-[state=on]/filter:text-[#57503a]">{String(index + 1).padStart(2, "0")}</span>
+                      <span className="text-[10px] text-[#978b75] group-data-[state=on]/filter:text-[#e7dfcf]">{String(index + 1).padStart(2, "0")}</span>
                       <span>{filter.label}</span>
                     </ToggleGroupItem>
                   ))}
                 </ToggleGroup>
               </div>
 
-              <div className="mt-4 flex flex-col gap-2 text-xs text-[#c4bcaa] sm:flex-row sm:items-center sm:justify-between">
+              <div className="mt-4 flex flex-col gap-2 text-xs text-gray-500 sm:flex-row sm:items-center sm:justify-between">
                 <p aria-live="polite">
                   {searchQuery || selectedFilters.length > 0
                     ? `${filteredProducts.length} parfum${filteredProducts.length > 1 ? "s" : ""} correspondant${filteredProducts.length > 1 ? "s" : ""}`
                     : `${products?.length ?? 0} parfums affichés`}
                 </p>
-                <p className="text-[10px] uppercase tracking-[0.18em] text-[#9e9685]">Association libre · une ou plusieurs notes</p>
+                <p className="text-[10px] uppercase tracking-[0.18em] text-[#8c8272]">Association libre · une ou plusieurs notes</p>
               </div>
             </div>
           </section>
