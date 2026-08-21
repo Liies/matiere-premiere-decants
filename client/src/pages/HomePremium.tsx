@@ -88,7 +88,7 @@ export default function HomePremium() {
             <p className="mx-auto mt-4 max-w-lg text-sm font-light leading-6 text-gray-300 sm:text-base">
               Quelques questions suffisent pour orienter votre découverte.
             </p>
-            <Button type="button" onClick={() => setIsScentQuizOpen(true)} className="mt-7 min-h-11 gap-2 bg-white px-6 text-sm text-gray-900 hover:bg-gray-100">
+            <Button type="button" onClick={() => setIsScentQuizOpen(true)} className="mt-7 min-h-11 gap-2 bg-white px-6 text-sm text-gray-900 transition-[background-color,color,transform] duration-200 [transition-timing-function:cubic-bezier(0.23,1,0.32,1)] hover:-translate-y-0.5 hover:bg-gray-100 active:scale-[0.97] motion-reduce:transform-none motion-reduce:transition-none">
               Commencer l’Exploration
               <ArrowRight className="h-4 w-4" aria-hidden="true" />
             </Button>

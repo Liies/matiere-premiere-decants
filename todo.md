@@ -6645,3 +6645,7 @@
 ## Accueil — Révélations au défilement
 - [x] Ajouter des apparitions progressives aux sections clés de l’accueil
 - [x] Couvrir, vérifier et publier les animations de défilement
+
+## Accueil — Survol du bouton d’exploration
+- [x] Harmoniser le survol de Commencer l’Exploration avec le CTA principal
+- [x] Couvrir, vérifier et publier l’interaction du bouton

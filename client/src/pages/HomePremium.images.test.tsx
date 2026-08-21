@@ -81,6 +81,15 @@ describe("accueil premium — visuels et quiz", () => {
     expect(screen.getByRole("link", { name: "Voir les 10 parfums" }).getAttribute("href")).toBe("/products");
   });
 
+  it("harmonise le survol du bouton d’exploration avec le CTA principal", () => {
+    render(<HomePremium />);
+
+    const quizButton = screen.getByRole("button", { name: /Commencer l[’']Exploration/ });
+    expect(quizButton.className).toContain("hover:-translate-y-0.5");
+    expect(quizButton.className).toContain("active:scale-[0.97]");
+    expect(quizButton.className).toContain("motion-reduce:transform-none");
+  });
+
   it("ouvre le quiz de recommandation depuis le CTA Commencer l’Exploration", async () => {
     render(<HomePremium />);
 
