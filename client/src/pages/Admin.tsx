@@ -3,14 +3,18 @@ import Footer from "@/components/Footer";
 import Header from "@/components/Header";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { AdminOrderStatusChart } from "@/components/AdminOrderStatusChart";
+import { AdminRevenueChart } from "@/components/AdminRevenueChart";
 import { trpc } from "@/lib/trpc";
 import { useAuth } from "@/_core/hooks/useAuth";
+import { getOrderStatusSlices, getRevenueSeries, type DashboardOrderStatus } from "@shared/admin-dashboard-analytics";
 import { AlertTriangle, ArchiveRestore, ArrowUpRight, CheckCircle2, CircleDollarSign, ClipboardList, PackageCheck, ReceiptText, RotateCcw, Truck } from "lucide-react";
 import { toast } from "sonner";
 import { useMemo, useState } from "react";
 
 type OrderStatusType = "awaiting_payment" | "pending" | "paid" | "processing" | "shipped" | "delivered" | "cancelled";
 type OrderFilter = "all" | "to_fulfill" | "payment_pending" | "shipping";
+type AdminTab = "overview" | "orders" | "catalog" | "trust";
 
 const statuses: OrderStatusType[] = ["awaiting_payment", "pending", "paid", "processing", "shipped", "delivered", "cancelled"];
 const statusLabels: Record<OrderStatusType, string> = {
@@ -36,6 +40,12 @@ const statusTone: Record<OrderStatusType, string> = {
   delivered: "border-stone-200 bg-stone-50 text-stone-700",
   cancelled: "border-rose-200 bg-rose-50 text-rose-800",
 };
+const adminTabs: Array<{ id: AdminTab; label: string; description: string }> = [
+  { id: "overview", label: "Vue d’ensemble", description: "Les priorités et tendances essentielles" },
+  { id: "orders", label: "Commandes", description: "Le suivi et les actions de préparation" },
+  { id: "catalog", label: "Catalogue", description: "Les archives et la disponibilité produit" },
+  { id: "trust", label: "Confiance client", description: "Les avis vérifiés à modérer" },
+];
 
 export default function Admin() {
   const { user, isAuthenticated } = useAuth();
@@ -56,6 +66,7 @@ export default function Admin() {
   const restoreProduct = trpc.adminCatalog.restore.useMutation();
   const [selectedStatus, setSelectedStatus] = useState<Record<number, OrderStatusType | undefined>>({});
   const [orderFilter, setOrderFilter] = useState<OrderFilter>("all");
+  const [activeTab, setActiveTab] = useState<AdminTab>("overview");
 
   const dashboard = useMemo(() => {
     const allOrders = orders ?? [];
@@ -76,7 +87,21 @@ export default function Admin() {
       if (orderFilter === "shipping") return order.status === "shipped";
       return true;
     });
-    return { revenue, averageBasket, toFulfill, paymentPending, shipping, filteredOrders };
+    const chartOrders = allOrders.map((order) => ({
+      status: order.status as DashboardOrderStatus,
+      totalAmount: order.totalAmount,
+      createdAt: order.createdAt,
+    }));
+    return {
+      revenue,
+      averageBasket,
+      toFulfill,
+      paymentPending,
+      shipping,
+      filteredOrders,
+      revenueSeries: getRevenueSeries(chartOrders),
+      orderStatusSlices: getOrderStatusSlices(chartOrders),
+    };
   }, [orders, orderFilter]);
 
   const handleStatusChange = (orderId: number, status: OrderStatusType) => {
@@ -140,10 +165,34 @@ export default function Admin() {
           </a>
         </div>
 
+        <nav aria-label="Sections du pilotage" className="border-b border-gray-200">
+          <div role="tablist" aria-label="Sections du tableau de bord" className="flex gap-1 overflow-x-auto pb-px">
+            {adminTabs.map((tab) => {
+              const selected = activeTab === tab.id;
+              return (
+                <button
+                  key={tab.id}
+                  id={`admin-tab-${tab.id}`}
+                  type="button"
+                  role="tab"
+                  aria-selected={selected}
+                  aria-controls={`admin-panel-${tab.id}`}
+                  onClick={() => setActiveTab(tab.id)}
+                  className={`min-h-11 shrink-0 border-b-2 px-3 text-sm transition sm:px-4 ${selected ? "border-gray-900 text-gray-900" : "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-900"}`}
+                >
+                  {tab.label}
+                </button>
+              );
+            })}
+          </div>
+        </nav>
+
         {isLoading ? (
           <p className="text-gray-600">Chargement des commandes…</p>
         ) : (
           <>
+            {activeTab === "overview" && (
+              <section id="admin-panel-overview" role="tabpanel" aria-labelledby="admin-tab-overview" className="space-y-6">
             <section aria-label="Indicateurs de la boutique" className="grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
               <Card className="border-stone-200 bg-stone-50/60 p-5">
                 <div className="flex items-start justify-between gap-3">
@@ -187,6 +236,11 @@ export default function Admin() {
               </Card>
             </section>
 
+            <section className="grid gap-6 lg:grid-cols-[minmax(0,1.2fr)_minmax(18rem,0.8fr)]">
+              <AdminRevenueChart series={dashboard.revenueSeries} />
+              <AdminOrderStatusChart slices={dashboard.orderStatusSlices} labels={statusLabels} />
+            </section>
+
             <section className="grid gap-6 lg:grid-cols-[minmax(0,1.3fr)_minmax(18rem,0.7fr)]">
               <Card className="p-5 sm:p-6">
                 <div className="flex flex-col gap-3 border-b border-gray-200 pb-4 sm:flex-row sm:items-end sm:justify-between">
@@ -223,10 +277,10 @@ export default function Admin() {
                 <h2 className="mt-2 text-xl font-light text-gray-900">À traiter maintenant</h2>
                 <p className="mt-2 text-sm leading-6 text-gray-600">Chaque action ouvre la vue correspondante pour vous concentrer sur une seule priorité.</p>
                 <div className="mt-5 grid gap-2 sm:grid-cols-2">
-                  <button type="button" onClick={() => setOrderFilter("to_fulfill")} className="flex min-h-16 items-center justify-between gap-3 rounded-xl border border-amber-200 bg-white px-4 text-left transition hover:border-amber-400 hover:bg-amber-50">
+                  <button type="button" onClick={() => { setOrderFilter("to_fulfill"); setActiveTab("orders"); }} className="flex min-h-16 items-center justify-between gap-3 rounded-xl border border-amber-200 bg-white px-4 text-left transition hover:border-amber-400 hover:bg-amber-50">
                     <span><span className="block text-lg font-light text-gray-900">{dashboard.toFulfill.length}</span><span className="text-xs text-gray-600">à préparer</span></span><PackageCheck className="h-4 w-4 text-amber-700" aria-hidden="true" />
                   </button>
-                  <button type="button" onClick={() => setOrderFilter("payment_pending")} className="flex min-h-16 items-center justify-between gap-3 rounded-xl border border-rose-200 bg-white px-4 text-left transition hover:border-rose-400 hover:bg-rose-50">
+                  <button type="button" onClick={() => { setOrderFilter("payment_pending"); setActiveTab("orders"); }} className="flex min-h-16 items-center justify-between gap-3 rounded-xl border border-rose-200 bg-white px-4 text-left transition hover:border-rose-400 hover:bg-rose-50">
                     <span><span className="block text-lg font-light text-gray-900">{dashboard.paymentPending.length}</span><span className="text-xs text-gray-600">paiement{dashboard.paymentPending.length === 1 ? "" : "s"} à confirmer</span></span><CircleDollarSign className="h-4 w-4 text-rose-700" aria-hidden="true" />
                   </button>
                   <a href="/admin/catalogue" className="flex min-h-16 items-center justify-between gap-3 rounded-xl border border-rose-200 bg-white px-4 text-left transition hover:border-rose-400 hover:bg-rose-50">
@@ -238,7 +292,16 @@ export default function Admin() {
                 </div>
               </Card>
             </section>
+              </section>
+            )}
 
+            {activeTab === "catalog" && (
+            <section id="admin-panel-catalog" role="tabpanel" aria-labelledby="admin-tab-catalog" aria-describedby="admin-tab-catalog-description" className="space-y-6">
+              <div>
+                <p className="text-xs font-medium uppercase tracking-[0.18em] text-gray-500">Catalogue</p>
+                <h2 className="mt-2 text-2xl font-light text-gray-900">Disponibilité et archives</h2>
+                <p id="admin-tab-catalog-description" className="mt-2 max-w-2xl text-sm text-gray-600">Gardez le catalogue public concentré sur les références actives ; les parfums retirés restent restaurables à tout moment.</p>
+              </div>
             <section aria-labelledby="admin-archives-title">
               <Card className="p-5 sm:p-6">
                 <div className="flex flex-col gap-3 border-b border-gray-200 pb-4 sm:flex-row sm:items-end sm:justify-between">
@@ -285,8 +348,11 @@ export default function Admin() {
                 )}
               </Card>
             </section>
+            </section>
+            )}
 
-            <section aria-labelledby="admin-orders-title" className="space-y-4">
+            {activeTab === "orders" && (
+            <section id="admin-panel-orders" role="tabpanel" aria-labelledby="admin-tab-orders" className="space-y-4">
                 <div className="flex flex-col gap-4 border-b border-gray-200 pb-4 sm:flex-row sm:items-end sm:justify-between">
                 <div>
                   <p className="text-xs font-medium uppercase tracking-[0.18em] text-gray-500">Commandes</p>
@@ -371,6 +437,26 @@ export default function Admin() {
                 </div>
               )}
             </section>
+            )}
+
+            {activeTab === "trust" && (
+              <section id="admin-panel-trust" role="tabpanel" aria-labelledby="admin-tab-trust" className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(17rem,0.55fr)]">
+                <Card className="border-stone-200 bg-stone-50/60 p-6 sm:p-8">
+                  <p className="text-xs font-medium uppercase tracking-[0.18em] text-gray-500">Confiance client</p>
+                  <h2 className="mt-2 text-2xl font-light text-gray-900">Avis vérifiés à modérer</h2>
+                  <p className="mt-3 max-w-xl text-sm leading-6 text-gray-600">Seuls les avis issus d’une commande confirmée sont proposés. La modération reste séparée du flux de commandes pour éviter les erreurs d’attention.</p>
+                  <a href="/admin/catalogue" className="mt-6 inline-flex min-h-11 items-center justify-center gap-2 border border-gray-900 bg-gray-900 px-4 text-sm text-white transition hover:bg-gray-800">
+                    Ouvrir la modération
+                    <ArrowUpRight className="h-4 w-4" aria-hidden="true" />
+                  </a>
+                </Card>
+                <Card className="p-6 sm:p-8">
+                  <p className="text-xs font-medium uppercase tracking-[0.18em] text-gray-500">En attente</p>
+                  <p className="mt-4 text-4xl font-light text-gray-900">{pendingReviews?.length ?? 0}</p>
+                  <p className="mt-2 text-sm leading-6 text-gray-600">avis à examiner avant publication.</p>
+                </Card>
+              </section>
+            )}
           </>
         )}
       </section>

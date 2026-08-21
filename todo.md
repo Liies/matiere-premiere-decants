@@ -6680,3 +6680,9 @@
 - [x] Auditer l’interface, les indicateurs et les actions d’administration existants
 - [x] Clarifier la hiérarchie visuelle du tableau de bord et des raccourcis de gestion
 - [x] Couvrir, vérifier et publier la nouvelle expérience d’administration
+
+## Administration — Tableau de bord focalisé
+- [x] Concevoir une navigation par onglets avec une information progressive
+- [x] Ajouter des graphiques de chiffre d’affaires et de statut réellement calculés depuis les commandes
+- [x] Répartir les commandes, le catalogue et la confiance client dans des vues simples
+- [x] Couvrir, vérifier et publier le dashboard focalisé

@@ -121,32 +121,49 @@ describe("tableau de bord administrateur", () => {
     expect(screen.getByText("avis à modérer")).toBeTruthy();
     expect(screen.getAllByText(/stock à surveiller/i).length).toBeGreaterThan(0);
     expect(screen.getByTestId("admin-priority-queue")).toBeTruthy();
-    expect(screen.getByTestId("order-status-MP-PAID").textContent).toContain("Payée");
+    expect(screen.getByTestId("admin-revenue-chart")).toBeTruthy();
+    expect(screen.getByTestId("admin-order-status-chart")).toBeTruthy();
+    expect(screen.getByRole("tab", { name: "Vue d’ensemble" }).getAttribute("aria-selected")).toBe("true");
   });
 
   it("filtre les commandes sur les actions de préparation", () => {
     render(<Admin />);
 
-    fireEvent.click(screen.getByRole("button", { name: "À préparer" }));
+    fireEvent.click(screen.getByRole("button", { name: /à préparer/ }));
 
     expect(screen.getByText("MP-PAID")).toBeTruthy();
     expect(screen.queryByText("MP-SHIPPED")).toBeNull();
+    expect(screen.getByRole("tab", { name: "Commandes" }).getAttribute("aria-selected")).toBe("true");
     expect(screen.getByRole("button", { name: "À préparer" }).getAttribute("aria-pressed")).toBe("true");
   });
 
   it("filtre les commandes nécessitant une confirmation de paiement", () => {
     render(<Admin />);
 
-    fireEvent.click(screen.getByRole("button", { name: "Paiements en attente" }));
+    fireEvent.click(screen.getByRole("button", { name: /paiement à confirmer/ }));
 
     expect(screen.getByText("MP-PENDING")).toBeTruthy();
     expect(screen.queryByText("MP-PAID")).toBeNull();
     expect(screen.queryByText("MP-SHIPPED")).toBeNull();
   });
 
+  it("sépare la confiance client du pilotage opérationnel pour limiter la densité d’information", () => {
+    render(<Admin />);
+
+    expect(screen.queryByRole("heading", { name: "Suivi des commandes" })).toBeNull();
+    expect(screen.queryByRole("heading", { name: "Avis vérifiés à modérer" })).toBeNull();
+
+    fireEvent.click(screen.getByRole("tab", { name: "Confiance client" }));
+
+    expect(screen.getByRole("heading", { name: "Avis vérifiés à modérer" })).toBeTruthy();
+    expect(screen.getByText("1")).toBeTruthy();
+    expect(screen.queryByRole("heading", { name: "Suivi des commandes" })).toBeNull();
+  });
+
   it("affiche les archives et déclenche une restauration depuis le tableau de bord", () => {
     render(<Admin />);
 
+    fireEvent.click(screen.getByRole("tab", { name: "Catalogue" }));
     expect(screen.getByRole("heading", { name: "Produits archivés" })).toBeTruthy();
     expect(screen.getByText("Crystal Safran")).toBeTruthy();
     expect(screen.getByText(/extrait de parfum/i)).toBeTruthy();
