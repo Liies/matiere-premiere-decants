@@ -6604,3 +6604,7 @@
 ## Catalogue — Animation de filtres olfactifs
 - [x] Ajouter un retour animé à la sélection d’une senteur
 - [x] Couvrir et publier l’animation des filtres
+
+## Fiche produit — Confirmation d’ajout au panier
+- [x] Améliorer le retour visuel lors de l’ajout au panier
+- [x] Couvrir et publier l’animation améliorée

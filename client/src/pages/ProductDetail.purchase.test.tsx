@@ -1,7 +1,7 @@
 /** @vitest-environment jsdom */
 
 import React from "react";
-import { cleanup, render, screen } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 const product = {
@@ -121,7 +121,20 @@ describe("fiche de parfum — format public unique", () => {
     expect(screen.getByText("Livraison")).toBeTruthy();
     expect(screen.queryByText("Contenance disponible")).toBeNull();
     expect(screen.queryByRole("button", { name: /2 ml/ })).toBeNull();
-    expect(screen.getByRole("button", { name: "Ajouter au panier" }).getAttribute("disabled")).toBeNull();
+    const addToCartButton = screen.getByRole("button", { name: "Ajouter au panier" });
+    expect(addToCartButton.getAttribute("disabled")).toBeNull();
+    expect(addToCartButton.className).toContain("overflow-hidden");
+  });
+
+  it("affiche le retour de confirmation animé immédiatement après un ajout invité", () => {
+    render(<ProductDetail />);
+
+    fireEvent.click(screen.getByRole("button", { name: "Ajouter au panier" }));
+
+    const confirmedButton = screen.getByRole("button", { name: "Ajouté au panier" });
+    expect(confirmedButton.className).toContain("product-cart-success-state");
+    expect(confirmedButton.querySelector(".product-cart-success-sweep")).toBeTruthy();
+    expect(confirmedButton.querySelector(".product-cart-success-check")).toBeTruthy();
   });
 
   it.each(productImageFixtures.map((fixture) => [fixture.name, fixture] as const))("rend une image exploitable pour la fiche %s", (_productName, productFixture) => {

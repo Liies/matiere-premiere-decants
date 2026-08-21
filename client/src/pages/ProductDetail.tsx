@@ -462,13 +462,15 @@ export default function ProductDetail() {
                   aria-live="polite"
                   aria-atomic="true"
                   className={`relative min-h-12 w-full flex-1 overflow-hidden rounded-xl bg-gray-900 py-3 text-white font-light tracking-wide transition-all duration-300 hover:bg-gray-800 hover:shadow-lg sm:w-auto ${
-                    showAddedFeedback ? "cart-success-state bg-emerald-700 hover:bg-emerald-700" : ""
+                    showAddedFeedback ? "product-cart-success-state bg-emerald-700 hover:bg-emerald-700" : ""
                   }`}
                 >
-                  {showAddedFeedback && <span className="cart-added-ripple" aria-hidden="true" />}
+                  {showAddedFeedback && <span className="product-cart-success-sweep" aria-hidden="true" />}
                   {showAddedFeedback ? (
-                    <span className="cart-success-content relative z-10 inline-flex items-center gap-2">
-                      <CircleCheck className="h-5 w-5" aria-hidden="true" />
+                    <span className="product-cart-success-content relative z-10 inline-flex items-center gap-2">
+                      <span className="product-cart-success-check" aria-hidden="true">
+                        <CircleCheck className="h-5 w-5" />
+                      </span>
                       Ajouté au panier
                     </span>
                   ) : (
@@ -639,36 +641,58 @@ export default function ProductDetail() {
         .cart-icon-bounce {
           animation: cartIconBounce 0.4s ease-in-out;
         }
-        @keyframes cartRipple {
-          0% { transform: scale(0); opacity: 0.35; }
-          100% { transform: scale(2.5); opacity: 0; }
+        @keyframes productCartSuccessState {
+          0% { transform: translateY(1px) scale(0.975); }
+          52% { transform: translateY(-1px) scale(1.018); }
+          100% { transform: translateY(0) scale(1); }
         }
-        .cart-added-ripple {
+
+        @keyframes productCartSuccessSweep {
+          0% { opacity: 0; transform: translateX(-135%) skewX(-18deg); }
+          28% { opacity: 0.42; }
+          100% { opacity: 0; transform: translateX(170%) skewX(-18deg); }
+        }
+
+        @keyframes productCartSuccessContent {
+          0% { opacity: 0; transform: translateY(5px) scale(0.96); }
+          100% { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        @keyframes productCartSuccessCheck {
+          0% { opacity: 0; transform: scale(0.48) rotate(-14deg); }
+          62% { opacity: 1; transform: scale(1.16) rotate(3deg); }
+          100% { opacity: 1; transform: scale(1) rotate(0); }
+        }
+
+        .product-cart-success-state {
+          box-shadow: 0 14px 30px rgba(5, 90, 60, 0.24);
+          animation: productCartSuccessState 440ms cubic-bezier(0.23, 1, 0.32, 1) both;
+        }
+
+        .product-cart-success-sweep {
           position: absolute;
           inset: 0;
-          background: rgba(255, 255, 255, 0.25);
-          border-radius: inherit;
-          animation: cartRipple 0.6s ease-out;
+          width: 40%;
+          background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.52), transparent);
+          pointer-events: none;
+          animation: productCartSuccessSweep 660ms cubic-bezier(0.22, 1, 0.36, 1) both;
         }
-        @keyframes cartSuccessPulse {
-          0% { transform: scale(1); }
-          35% { transform: scale(1.025); }
-          100% { transform: scale(1); }
+
+        .product-cart-success-content {
+          animation: productCartSuccessContent 300ms cubic-bezier(0.23, 1, 0.32, 1) 55ms both;
         }
-        .cart-success-state {
-          animation: cartSuccessPulse 480ms cubic-bezier(0.23, 1, 0.32, 1);
-        }
-        @keyframes cartSuccessContent {
-          from { opacity: 0; transform: translateY(4px) scale(0.96); }
-          to { opacity: 1; transform: translateY(0) scale(1); }
-        }
-        .cart-success-content {
-          animation: cartSuccessContent 260ms cubic-bezier(0.23, 1, 0.32, 1) both;
+
+        .product-cart-success-check {
+          display: inline-flex;
+          animation: productCartSuccessCheck 420ms cubic-bezier(0.23, 1, 0.32, 1) 80ms both;
         }
         @media (prefers-reduced-motion: reduce) {
-          .cart-success-state,
-          .cart-success-content {
-            animation: none;
+          .product-cart-success-state,
+          .product-cart-success-sweep,
+          .product-cart-success-content,
+          .product-cart-success-check {
+            animation: none !important;
+            transform: none !important;
           }
         }
         @keyframes wishlistPop {
