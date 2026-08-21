@@ -164,6 +164,19 @@ describe("intégration catalogue — panier et souhaits", () => {
     expect(screen.getByTestId("catalog-card-actions-1").className).toContain("mt-auto");
   });
 
+  it("priorise les visuels des premières cartes sans charger agressivement toute la collection", () => {
+    render(<Products />);
+
+    const vanillaImage = screen.getByRole("img", { name: "Vanilla Powder" });
+    const saffronImage = screen.getByRole("img", { name: "Crystal Saffron" });
+
+    expect(vanillaImage.getAttribute("loading")).toBe("eager");
+    expect(vanillaImage.getAttribute("fetchpriority")).toBe("high");
+    expect(vanillaImage.getAttribute("decoding")).toBe("async");
+    expect(saffronImage.getAttribute("loading")).toBe("eager");
+    expect(saffronImage.getAttribute("fetchpriority")).toBe("high");
+  });
+
   it("rend une image exploitable pour chaque carte reçue du catalogue", () => {
     render(<Products />);
 

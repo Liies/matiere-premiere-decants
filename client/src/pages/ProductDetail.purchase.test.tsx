@@ -105,7 +105,12 @@ describe("fiche de parfum — format public unique", () => {
   it("propose uniquement le décant actif de 50 ml et affiche ses informations d’achat", () => {
     render(<ProductDetail />);
 
-    expect(screen.getByRole("img", { name: "Vanilla Powder" }).getAttribute("src")).toBe("/manus-storage/vanilla-powder-extrait_a69128dc.jpg");
+    const mainImage = screen.getByRole("img", { name: "Vanilla Powder" });
+    expect(mainImage.getAttribute("src")).toBe("/manus-storage/vanilla-powder-extrait_a69128dc.jpg");
+    expect(mainImage.getAttribute("loading")).toBe("eager");
+    expect(mainImage.getAttribute("fetchpriority")).toBe("high");
+    expect(mainImage.getAttribute("decoding")).toBe("async");
+    expect(screen.getByTestId("product-visual-motion")).toBeTruthy();
     const summary = screen.getByTestId("product-purchase-summary");
     expect(summary.textContent ?? "").toMatch(/120,00\s*€/);
     expect(summary.textContent).toContain("50 ml · Format unique");

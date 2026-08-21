@@ -6573,3 +6573,8 @@
 - [x] Auditer les coûts de bundle, de chargement et de rendu
 - [x] Appliquer les optimisations de chargement et de rendu à fort impact
 - [x] Mesurer, couvrir et publier les optimisations de performance
+
+## Qualité — Couverture unitaire et intégration
+- [x] Auditer les scénarios critiques non couverts après les dernières évolutions
+- [x] Ajouter les tests unitaires et d’intégration nécessaires
+- [x] Exécuter, valider et publier la couverture renforcée
