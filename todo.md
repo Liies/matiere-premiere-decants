@@ -6585,3 +6585,9 @@
 - [x] Refactoriser un parcours prioritaire sans modifier les contrats publics
 - [x] Renforcer les tests métier et documenter les frontières architecturales
 - [x] Valider et publier la refactorisation progressive
+
+## Qualité — Clean code
+- [x] Auditer les modules prioritaires et les responsabilités mêlées
+- [x] Refactoriser les modules ciblés avec des noms et responsabilités plus clairs
+- [x] Renforcer les régressions et documenter les conventions clean code
+- [x] Valider et publier l’amélioration de qualité

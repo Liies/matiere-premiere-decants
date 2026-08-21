@@ -1,4 +1,10 @@
 import { loadGoogleMaps } from "@/lib/googleMaps";
+import {
+  DELIVERY_MAP_DEFAULT_CENTER,
+  DELIVERY_MAP_OPTIONS,
+  formatDeliveryLocation,
+} from "@/lib/deliveryMap";
+import { useDeferredElementVisibility } from "@/hooks/useDeferredElementVisibility";
 import { MapPin } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
@@ -15,27 +21,8 @@ export default function DeliveryLocationMap({ address, city, postalCode, country
   const map = useRef<google.maps.Map | null>(null);
   const marker = useRef<google.maps.Marker | null>(null);
   const [status, setStatus] = useState<"loading" | "ready" | "unavailable">("loading");
-  const [isMapVisible, setIsMapVisible] = useState(false);
-  const formattedAddress = [address, postalCode, city, country].filter(Boolean).join(", ");
-
-  useEffect(() => {
-    const container = mapContainer.current;
-    if (!container || !formattedAddress) return;
-
-    if (!("IntersectionObserver" in window)) {
-      setIsMapVisible(true);
-      return;
-    }
-
-    setIsMapVisible(false);
-    const observer = new IntersectionObserver(([entry]) => {
-      if (!entry.isIntersecting) return;
-      setIsMapVisible(true);
-      observer.disconnect();
-    }, { rootMargin: "180px 0px" });
-    observer.observe(container);
-    return () => observer.disconnect();
-  }, [formattedAddress]);
+  const formattedAddress = formatDeliveryLocation({ address, postalCode, city, country });
+  const isMapVisible = useDeferredElementVisibility(mapContainer, Boolean(formattedAddress));
 
   useEffect(() => {
     let active = true;
@@ -45,11 +32,8 @@ export default function DeliveryLocationMap({ address, city, postalCode, country
       .then((googleMaps) => {
         if (!active || !mapContainer.current) return;
         map.current ??= new googleMaps.maps.Map(mapContainer.current, {
-          center: { lat: 46.6034, lng: 1.8883 },
-          zoom: 5,
-          disableDefaultUI: true,
-          gestureHandling: "cooperative",
-          keyboardShortcuts: false,
+          center: DELIVERY_MAP_DEFAULT_CENTER,
+          ...DELIVERY_MAP_OPTIONS,
         });
         const geocoder = new googleMaps.maps.Geocoder();
         geocoder.geocode({ address: formattedAddress }, (results, geocodeStatus) => {

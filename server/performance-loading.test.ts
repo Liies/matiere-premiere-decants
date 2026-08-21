@@ -8,6 +8,7 @@ const productDetailSource = readFileSync(new URL("../client/src/pages/ProductDet
 const productsSource = readFileSync(new URL("../client/src/pages/Products.tsx", import.meta.url), "utf8");
 const advisorChatSource = readFileSync(new URL("../client/src/components/AIChatBox.tsx", import.meta.url), "utf8");
 const deliveryMapSource = readFileSync(new URL("../client/src/components/DeliveryLocationMap.tsx", import.meta.url), "utf8");
+const deferredVisibilitySource = readFileSync(new URL("../client/src/hooks/useDeferredElementVisibility.ts", import.meta.url), "utf8");
 
 describe("stratégies de chargement", () => {
   it("charge le quiz uniquement quand le visiteur le demande", () => {
@@ -36,7 +37,8 @@ describe("stratégies de chargement", () => {
     expect(productsSource).toContain('fetchPriority={index < 2 ? "high" : "low"}');
     expect(advisorChatSource).toContain('lazy(async () =>');
     expect(advisorChatSource).toContain('await import("streamdown")');
-    expect(deliveryMapSource).toContain('IntersectionObserver');
+    expect(deliveryMapSource).toContain('useDeferredElementVisibility');
     expect(deliveryMapSource).toContain('!isMapVisible');
+    expect(deferredVisibilitySource).toContain('IntersectionObserver');
   });
 });
