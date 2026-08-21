@@ -6578,3 +6578,10 @@
 - [x] Auditer les scénarios critiques non couverts après les dernières évolutions
 - [x] Ajouter les tests unitaires et d’intégration nécessaires
 - [x] Exécuter, valider et publier la couverture renforcée
+
+## Architecture — Clean architecture
+- [x] Auditer les dépendances entre interface, métier et infrastructure
+- [x] Définir des modules métier et contrats de dépendances explicites
+- [x] Refactoriser un parcours prioritaire sans modifier les contrats publics
+- [x] Renforcer les tests métier et documenter les frontières architecturales
+- [x] Valider et publier la refactorisation progressive

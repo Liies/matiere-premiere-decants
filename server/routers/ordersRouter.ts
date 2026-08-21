@@ -19,9 +19,13 @@ import {
 } from "../db";
 import { sendOrderStatusEmail } from "../transactionalEmail";
 import { requireAdmin } from "./authorization";
-import { getDeliveryEligibility } from "../../shared/delivery-zones";
 import { invalidateAdvisorCatalogCache } from "../advisorCatalog";
 import { createStripeCheckoutSession, getStripeClient } from "../stripeCheckout";
+import {
+  CheckoutPreparationError,
+  DeliveryAddressOutOfZoneError,
+  prepareOrderCheckout,
+} from "../application/orderCheckout";
 
 const ORDER_STATUS = z.enum(["awaiting_payment", "pending", "paid", "processing", "shipped", "delivered", "cancelled"]);
 const ORDER_INPUT = z.object({
@@ -55,18 +59,10 @@ export const ordersRouter = router({
     if (input.items.length === 0) {
       throw new TRPCError({ code: "BAD_REQUEST", message: "Aucun article dans la commande" });
     }
-    const deliveryEligibility = getDeliveryEligibility({
-      country: input.shippingCountry,
-      postalCode: input.shippingPostalCode,
-    });
-    if (!deliveryEligibility.eligible) {
-      throw new TRPCError({ code: "BAD_REQUEST", message: deliveryEligibility.reason || "Cette adresse est hors zone de livraison." });
-    }
 
     const orderNumber = `MP-${Date.now()}-${nanoid(8)}`;
-    let result;
     try {
-      result = await createReservedOrder({
+      const result = await prepareOrderCheckout({
         userId: ctx.user.id,
         orderNumber,
         customerEmail: input.customerEmail,
@@ -77,45 +73,32 @@ export const ordersRouter = router({
         shippingCountry: input.shippingCountry,
         lines: input.items,
         requestedTotalAmount: input.totalAmount,
+        origin: ctx.req.headers.origin,
+      }, {
+        reserveOrder: createReservedOrder,
+        getOrderItems,
+        createCheckout: createStripeCheckoutSession,
+        attachCheckoutSession: setOrderStripeCheckoutSession,
+        releaseOrder: releaseReservedOrder,
       });
-    } catch (error) {
-      if (error instanceof InventoryUnavailableError) {
-        throw new TRPCError({ code: "CONFLICT", message: error.message });
-      }
-      if (error instanceof OrderTotalMismatchError) {
-        throw new TRPCError({ code: "BAD_REQUEST", message: error.message });
-      }
-      throw error;
-    }
-    try {
-      const origin = ctx.req.headers.origin;
-      if (!origin) throw new Error("Origine du checkout introuvable");
-      const checkout = await createStripeCheckoutSession({
-        orderId: result.orderId,
-        orderNumber,
-        userId: ctx.user.id,
-        customerEmail: input.customerEmail,
-        customerName: input.customerName,
-        shippingCost: result.shippingCost,
-        lines: (await getOrderItems(result.orderId)).map((item) => ({
-          productName: item.productName,
-          sizeMl: item.sizeMl,
-          quantity: item.quantity,
-          unitPrice: item.unitPrice,
-        })),
-        origin,
-      });
-      await setOrderStripeCheckoutSession(result.orderId, checkout.id);
       invalidateAdvisorCatalogCache();
       return {
         success: true as const,
         orderNumber,
         orderId: result.orderId,
-        checkoutUrl: checkout.url,
+        checkoutUrl: result.checkoutUrl,
       };
     } catch (error) {
-      await releaseReservedOrder(result.orderId);
-      throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Impossible de préparer le paiement sécurisé" });
+      if (error instanceof DeliveryAddressOutOfZoneError || error instanceof OrderTotalMismatchError) {
+        throw new TRPCError({ code: "BAD_REQUEST", message: error.message });
+      }
+      if (error instanceof InventoryUnavailableError) {
+        throw new TRPCError({ code: "CONFLICT", message: error.message });
+      }
+      if (error instanceof CheckoutPreparationError) {
+        throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: error.message });
+      }
+      throw error;
     }
   }),
 
