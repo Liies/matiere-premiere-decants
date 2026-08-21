@@ -3,11 +3,12 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import Header from "@/components/Header";
 import { Link } from "wouter";
-import { Trash2, Plus, Minus, ShoppingBag } from "lucide-react";
+import { Trash2, Plus, Minus, ShoppingBag, Leaf } from "lucide-react";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { useLocalCart } from "@/hooks/useLocalCart";
 import { toast } from "sonner";
 import { formatPrice } from "@shared/price";
+import { getProductImage } from "@shared/image-assets";
 
 export default function Cart() {
   const { isAuthenticated } = useAuth();
@@ -113,66 +114,82 @@ export default function Cart() {
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
               {/* Cart Items */}
               <div className="lg:col-span-2 space-y-4">
-                {displayItems?.map((item) => (
-                                      <Card key={isAuthenticated ? (item as any).id : (item as any).variantId} className="p-4 sm:p-6">
+                {displayItems?.map((item) => {
+                  const cartItem = item as any;
+                  const product = isAuthenticated ? cartItem.product : undefined;
+                  const productId = product?.id ?? cartItem.productId;
+                  const productName = product?.name ?? cartItem.name;
+                  const imageSrc = product?.imageUrl ?? cartItem.imageUrl ?? getProductImage(productId)?.compressed;
+                  const sizeMl = (isAuthenticated ? cartItem.variant?.sizeMl : cartItem.sizeMl) ?? 50;
+                  const priceCents = isAuthenticated ? cartItem.variant?.priceCents ?? product?.price ?? 0 : cartItem.price;
 
-                    <div className="mb-4 flex items-start justify-between gap-3">
-                      <div>
-                        <h3 className="text-lg font-light text-gray-900">
-                          {isAuthenticated ? (item as any).product?.name : (item as any).name}
-                        </h3>
-                        <p className="text-sm text-gray-500">Décant {(isAuthenticated ? (item as any).variant?.sizeMl : (item as any).sizeMl) ?? 50} ml</p>
+                  return (
+                    <Card key={isAuthenticated ? cartItem.id : cartItem.variantId} className="p-4 sm:p-5">
+                      <div className="flex gap-4 sm:gap-5">
+                        <div className="flex h-24 w-20 shrink-0 overflow-hidden rounded-xl border border-stone-100 bg-stone-50 sm:h-28 sm:w-24">
+                          {imageSrc ? (
+                            <img src={imageSrc} alt={productName} className="h-full w-full object-cover" loading="lazy" decoding="async" />
+                          ) : (
+                            <Leaf className="m-auto h-6 w-6 text-stone-300" aria-hidden="true" />
+                          )}
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <div className="flex items-start justify-between gap-3">
+                            <div>
+                              <h3 className="text-lg font-light text-gray-900">{productName}</h3>
+                              <p className="text-sm text-gray-500">Décant {sizeMl} ml</p>
+                            </div>
+                            <p className="shrink-0 text-lg font-light text-gray-900">{formatPrice(priceCents)}</p>
+                          </div>
+
+                          <div className="mt-6 flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                              <button
+                                onClick={() => {
+                                  if (isAuthenticated) {
+                                    handleUpdateQuantity(cartItem.id, item.quantity - 1);
+                                  } else {
+                                    updateLocalQuantity(cartItem.variantId, item.quantity - 1);
+                                  }
+                                }}
+                                className="rounded p-1 transition hover:bg-gray-100"
+                                disabled={item.quantity <= 1}
+                              >
+                                <Minus className="w-4 h-4" />
+                              </button>
+                              <span className="w-8 text-center">{item.quantity}</span>
+                              <button
+                                onClick={() => {
+                                  if (isAuthenticated) {
+                                    handleUpdateQuantity(cartItem.id, item.quantity + 1);
+                                  } else {
+                                    updateLocalQuantity(cartItem.variantId, item.quantity + 1);
+                                  }
+                                }}
+                                className="rounded p-1 transition hover:bg-gray-100"
+                              >
+                                <Plus className="w-4 h-4" />
+                              </button>
+                            </div>
+
+                            <button
+                              onClick={() => {
+                                if (isAuthenticated) {
+                                  handleRemoveItem(cartItem.id);
+                                } else {
+                                  removeLocalItem(cartItem.variantId);
+                                }
+                              }}
+                              className="rounded p-2 text-red-600 transition hover:bg-red-50"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          </div>
+                        </div>
                       </div>
-                      <p className="text-lg font-light text-gray-900">
-                        {formatPrice(isAuthenticated ? (item as any).variant?.priceCents ?? (item as any).product?.price ?? 0 : (item as any).price)}
-                      </p>
-                    </div>
-
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <button
-                          onClick={() => {
-                            if (isAuthenticated) {
-                              handleUpdateQuantity((item as any).id, item.quantity - 1);
-                            } else {
-                              updateLocalQuantity((item as any).variantId, item.quantity - 1);
-                            }
-                          }}
-                          className="p-1 hover:bg-gray-100 rounded transition"
-                          disabled={item.quantity <= 1}
-                        >
-                          <Minus className="w-4 h-4" />
-                        </button>
-                        <span className="w-8 text-center">{item.quantity}</span>
-                        <button
-                          onClick={() => {
-                            if (isAuthenticated) {
-                              handleUpdateQuantity((item as any).id, item.quantity + 1);
-                            } else {
-                              updateLocalQuantity((item as any).variantId, item.quantity + 1);
-                            }
-                          }}
-                          className="p-1 hover:bg-gray-100 rounded transition"
-                        >
-                          <Plus className="w-4 h-4" />
-                        </button>
-                      </div>
-
-                      <button
-                        onClick={() => {
-                          if (isAuthenticated) {
-                            handleRemoveItem((item as any).id);
-                          } else {
-                            removeLocalItem((item as any).variantId);
-                          }
-                        }}
-                        className="p-2 hover:bg-red-50 rounded transition text-red-600"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    </div>
-                  </Card>
-                ))}
+                    </Card>
+                  );
+                })}
               </div>
 
               {/* Summary */}

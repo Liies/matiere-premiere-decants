@@ -6629,3 +6629,7 @@
 ## Quiz olfactif — Visuels des recommandations
 - [x] Afficher les images des parfums recommandés par le quiz
 - [x] Couvrir, vérifier et publier les résultats enrichis
+
+## Panier — Visuels des parfums
+- [x] Afficher le visuel de chaque parfum dans les lignes du panier
+- [x] Couvrir, vérifier et publier les lignes de panier enrichies

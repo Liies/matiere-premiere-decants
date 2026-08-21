@@ -13,6 +13,7 @@ const state = vi.hoisted(() => ({
       sizeMl: 50,
       price: 12_000,
       quantity: 2,
+      imageUrl: "/manus-storage/vanilla-powder-current.jpg",
     },
   ] as Array<any>,
   clearLocalCart: vi.fn(),
@@ -46,6 +47,10 @@ vi.mock("@/hooks/useLocalCart", () => ({
   }),
 }));
 
+vi.mock("@shared/image-assets", () => ({
+  getProductImage: () => ({ compressed: "/manus-storage/vanilla-powder-legacy.jpg" }),
+}));
+
 vi.mock("@/components/Header", () => ({ default: () => <header>Navigation</header> }));
 vi.mock("sonner", () => ({ toast: { success: state.toastSuccess, error: vi.fn() } }));
 vi.mock("wouter", () => ({
@@ -58,7 +63,7 @@ describe("intégration panier invité", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     state.localCartItems = [
-      { productId: 1, variantId: 102, name: "Vanilla Powder", sizeMl: 50, price: 12_000, quantity: 2 },
+      { productId: 1, variantId: 102, name: "Vanilla Powder", sizeMl: 50, price: 12_000, quantity: 2, imageUrl: "/manus-storage/vanilla-powder-current.jpg" },
     ];
   });
 
@@ -68,6 +73,7 @@ describe("intégration panier invité", () => {
     render(<Cart />);
 
     expect(screen.getByText("Vanilla Powder")).toBeTruthy();
+    expect(screen.getByAltText("Vanilla Powder").getAttribute("src")).toBe("/manus-storage/vanilla-powder-current.jpg");
     expect(screen.getByTestId("cart-item-count").textContent).toContain("2 articles");
     expect(screen.getByTestId("cart-item-count").getAttribute("aria-label")).toBe("2 articles dans votre panier");
     expect(screen.getAllByText("240,00 €")).toHaveLength(2);
@@ -81,6 +87,15 @@ describe("intégration panier invité", () => {
 
     expect(state.clearLocalCart).toHaveBeenCalledTimes(1);
     expect(state.toastSuccess).toHaveBeenCalledWith("Panier vidé");
+  });
+
+  it("utilise le visuel historique uniquement si le panier local n’en possède pas", () => {
+    state.localCartItems = [
+      { productId: 1, variantId: 102, name: "Vanilla Powder", sizeMl: 50, price: 12_000, quantity: 1, imageUrl: null },
+    ];
+    render(<Cart />);
+
+    expect(screen.getByAltText("Vanilla Powder").getAttribute("src")).toBe("/manus-storage/vanilla-powder-legacy.jpg");
   });
 
   it("oriente un panier invité vide vers le catalogue", () => {
