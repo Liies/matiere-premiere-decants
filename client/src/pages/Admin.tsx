@@ -27,6 +27,15 @@ const fulfillmentStatuses = new Set<OrderStatusType>(["paid", "processing"]);
 const paymentPendingStatuses = new Set<OrderStatusType>(["awaiting_payment", "pending"]);
 const THIRTY_DAYS_MS = 30 * 24 * 60 * 60 * 1000;
 const euro = new Intl.NumberFormat("fr-FR", { style: "currency", currency: "EUR" });
+const statusTone: Record<OrderStatusType, string> = {
+  awaiting_payment: "border-amber-200 bg-amber-50 text-amber-800",
+  pending: "border-amber-200 bg-amber-50 text-amber-800",
+  paid: "border-emerald-200 bg-emerald-50 text-emerald-800",
+  processing: "border-sky-200 bg-sky-50 text-sky-800",
+  shipped: "border-violet-200 bg-violet-50 text-violet-800",
+  delivered: "border-stone-200 bg-stone-50 text-stone-700",
+  cancelled: "border-rose-200 bg-rose-50 text-rose-800",
+};
 
 export default function Admin() {
   const { user, isAuthenticated } = useAuth();
@@ -118,7 +127,7 @@ export default function Admin() {
 
   return (
     <DashboardLayout>
-      <section className="mx-auto w-full max-w-6xl space-y-8 px-1 py-4 sm:px-4 sm:py-8">
+      <section data-testid="admin-dashboard" className="mx-auto w-full max-w-6xl space-y-8 px-1 py-4 sm:px-4 sm:py-8">
         <div className="flex flex-col gap-4 border-b border-gray-200 pb-6 sm:flex-row sm:items-end sm:justify-between">
           <div>
             <p className="text-xs font-medium uppercase tracking-[0.2em] text-gray-500">Administration</p>
@@ -136,35 +145,45 @@ export default function Admin() {
         ) : (
           <>
             <section aria-label="Indicateurs de la boutique" className="grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
-              <Card className="p-5">
-                <CircleDollarSign className="h-5 w-5 text-emerald-700" aria-hidden="true" />
-                <p className="mt-4 text-xs font-medium uppercase tracking-[0.15em] text-gray-500">Chiffre d’affaires encaissé</p>
+              <Card className="border-stone-200 bg-stone-50/60 p-5">
+                <div className="flex items-start justify-between gap-3">
+                  <span className="flex h-9 w-9 items-center justify-center rounded-full bg-emerald-100 text-emerald-700"><CircleDollarSign className="h-5 w-5" aria-hidden="true" /></span>
+                  <span className="text-[10px] font-medium uppercase tracking-[0.14em] text-gray-500">30 jours</span>
+                </div>
+                <p className="mt-5 text-xs font-medium uppercase tracking-[0.15em] text-gray-500">Chiffre d’affaires encaissé</p>
                 <p className="mt-2 text-2xl font-light text-gray-900">{euro.format(dashboard.revenue / 100)}</p>
-                <p className="mt-1 text-xs text-gray-500">30 derniers jours</p>
               </Card>
-              <Card className="p-5">
-                <ReceiptText className="h-5 w-5 text-violet-700" aria-hidden="true" />
-                <p className="mt-4 text-xs font-medium uppercase tracking-[0.15em] text-gray-500">Panier moyen</p>
+              <Card className="border-stone-200 bg-stone-50/60 p-5">
+                <div className="flex items-start justify-between gap-3">
+                  <span className="flex h-9 w-9 items-center justify-center rounded-full bg-violet-100 text-violet-700"><ReceiptText className="h-5 w-5" aria-hidden="true" /></span>
+                  <span className="text-[10px] font-medium uppercase tracking-[0.14em] text-gray-500">30 jours</span>
+                </div>
+                <p className="mt-5 text-xs font-medium uppercase tracking-[0.15em] text-gray-500">Panier moyen</p>
                 <p className="mt-2 text-2xl font-light text-gray-900">{euro.format(dashboard.averageBasket / 100)}</p>
-                <p className="mt-1 text-xs text-gray-500">Commandes réglées sur 30 jours</p>
               </Card>
-              <Card className="p-5">
-                <PackageCheck className="h-5 w-5 text-amber-700" aria-hidden="true" />
-                <p className="mt-4 text-xs font-medium uppercase tracking-[0.15em] text-gray-500">À préparer</p>
+              <Card className="border-amber-100 bg-amber-50/50 p-5">
+                <div className="flex items-start justify-between gap-3">
+                  <span className="flex h-9 w-9 items-center justify-center rounded-full bg-amber-100 text-amber-700"><PackageCheck className="h-5 w-5" aria-hidden="true" /></span>
+                  <span className="text-[10px] font-medium uppercase tracking-[0.14em] text-amber-800">À agir</span>
+                </div>
+                <p className="mt-5 text-xs font-medium uppercase tracking-[0.15em] text-gray-500">À préparer</p>
                 <p className="mt-2 text-2xl font-light text-gray-900">{dashboard.toFulfill.length}</p>
-                <p className="mt-1 text-xs text-gray-500">Commandes payées ou en préparation</p>
               </Card>
-              <Card className="p-5">
-                <ClipboardList className="h-5 w-5 text-rose-700" aria-hidden="true" />
-                <p className="mt-4 text-xs font-medium uppercase tracking-[0.15em] text-gray-500">Paiements à confirmer</p>
+              <Card className="border-rose-100 bg-rose-50/50 p-5">
+                <div className="flex items-start justify-between gap-3">
+                  <span className="flex h-9 w-9 items-center justify-center rounded-full bg-rose-100 text-rose-700"><ClipboardList className="h-5 w-5" aria-hidden="true" /></span>
+                  <span className="text-[10px] font-medium uppercase tracking-[0.14em] text-rose-800">À suivre</span>
+                </div>
+                <p className="mt-5 text-xs font-medium uppercase tracking-[0.15em] text-gray-500">Paiements à confirmer</p>
                 <p className="mt-2 text-2xl font-light text-gray-900">{dashboard.paymentPending.length}</p>
-                <p className="mt-1 text-xs text-gray-500">En attente de règlement</p>
               </Card>
-              <Card className="p-5">
-                <AlertTriangle className="h-5 w-5 text-rose-700" aria-hidden="true" />
-                <p className="mt-4 text-xs font-medium uppercase tracking-[0.15em] text-gray-500">Stock à surveiller</p>
+              <Card className="border-rose-100 bg-rose-50/50 p-5">
+                <div className="flex items-start justify-between gap-3">
+                  <span className="flex h-9 w-9 items-center justify-center rounded-full bg-rose-100 text-rose-700"><AlertTriangle className="h-5 w-5" aria-hidden="true" /></span>
+                  <span className="text-[10px] font-medium uppercase tracking-[0.14em] text-rose-800">Vigilance</span>
+                </div>
+                <p className="mt-5 text-xs font-medium uppercase tracking-[0.15em] text-gray-500">Stock à surveiller</p>
                 <p className="mt-2 text-2xl font-light text-gray-900">{isLowStockLoading ? "…" : lowStock?.length ?? 0}</p>
-                <p className="mt-1 text-xs text-gray-500">Variantes actives à 3 unités ou moins</p>
               </Card>
             </section>
 
@@ -199,25 +218,23 @@ export default function Admin() {
                 )}
               </Card>
 
-              <Card className="p-5 sm:p-6">
-                <p className="text-xs font-medium uppercase tracking-[0.18em] text-gray-500">Actions rapides</p>
-                <h2 className="mt-2 text-xl font-light text-gray-900">À ne pas oublier</h2>
-                <div className="mt-5 space-y-3">
-                  <a href="/admin/catalogue" className="flex items-center justify-between border-b border-gray-100 pb-3 text-sm text-gray-800 transition hover:text-gray-500">
-                    <span>Mettre à jour le catalogue</span><ArrowUpRight className="h-4 w-4" aria-hidden="true" />
+              <Card data-testid="admin-priority-queue" className="border-stone-200 bg-stone-50/60 p-5 sm:p-6">
+                <p className="text-xs font-medium uppercase tracking-[0.18em] text-gray-500">Priorités du jour</p>
+                <h2 className="mt-2 text-xl font-light text-gray-900">À traiter maintenant</h2>
+                <p className="mt-2 text-sm leading-6 text-gray-600">Chaque action ouvre la vue correspondante pour vous concentrer sur une seule priorité.</p>
+                <div className="mt-5 grid gap-2 sm:grid-cols-2">
+                  <button type="button" onClick={() => setOrderFilter("to_fulfill")} className="flex min-h-16 items-center justify-between gap-3 rounded-xl border border-amber-200 bg-white px-4 text-left transition hover:border-amber-400 hover:bg-amber-50">
+                    <span><span className="block text-lg font-light text-gray-900">{dashboard.toFulfill.length}</span><span className="text-xs text-gray-600">à préparer</span></span><PackageCheck className="h-4 w-4 text-amber-700" aria-hidden="true" />
+                  </button>
+                  <button type="button" onClick={() => setOrderFilter("payment_pending")} className="flex min-h-16 items-center justify-between gap-3 rounded-xl border border-rose-200 bg-white px-4 text-left transition hover:border-rose-400 hover:bg-rose-50">
+                    <span><span className="block text-lg font-light text-gray-900">{dashboard.paymentPending.length}</span><span className="text-xs text-gray-600">paiement{dashboard.paymentPending.length === 1 ? "" : "s"} à confirmer</span></span><CircleDollarSign className="h-4 w-4 text-rose-700" aria-hidden="true" />
+                  </button>
+                  <a href="/admin/catalogue" className="flex min-h-16 items-center justify-between gap-3 rounded-xl border border-rose-200 bg-white px-4 text-left transition hover:border-rose-400 hover:bg-rose-50">
+                    <span><span className="block text-lg font-light text-gray-900">{isLowStockLoading ? "…" : lowStock?.length ?? 0}</span><span className="text-xs text-gray-600">stock à surveiller</span></span><AlertTriangle className="h-4 w-4 text-rose-700" aria-hidden="true" />
                   </a>
-                  <a href="/admin/catalogue" className="flex items-center justify-between border-b border-gray-100 pb-3 text-sm text-gray-800 transition hover:text-gray-500">
-                    <span>{pendingReviews?.length ?? 0} avis à modérer</span><ArrowUpRight className="h-4 w-4" aria-hidden="true" />
+                  <a href="/admin/catalogue" className="flex min-h-16 items-center justify-between gap-3 rounded-xl border border-stone-200 bg-white px-4 text-left transition hover:border-gray-400 hover:bg-gray-50">
+                    <span><span className="block text-lg font-light text-gray-900">{pendingReviews?.length ?? 0}</span><span className="text-xs text-gray-600">avis à modérer</span></span><ArrowUpRight className="h-4 w-4 text-gray-600" aria-hidden="true" />
                   </a>
-                  <button type="button" onClick={() => setOrderFilter("to_fulfill")} className="flex w-full items-center justify-between text-left text-sm text-gray-800 transition hover:text-gray-500">
-                    <span>{dashboard.toFulfill.length} commande{dashboard.toFulfill.length === 1 ? "" : "s"} à préparer</span><ClipboardList className="h-4 w-4" aria-hidden="true" />
-                  </button>
-                  <button type="button" onClick={() => setOrderFilter("payment_pending")} className="flex w-full items-center justify-between text-left text-sm text-gray-800 transition hover:text-gray-500">
-                    <span>{dashboard.paymentPending.length} paiement{dashboard.paymentPending.length === 1 ? "" : "s"} en attente</span><CircleDollarSign className="h-4 w-4" aria-hidden="true" />
-                  </button>
-                  <button type="button" onClick={() => setOrderFilter("shipping")} className="flex w-full items-center justify-between text-left text-sm text-gray-800 transition hover:text-gray-500">
-                    <span>{dashboard.shipping.length} commande{dashboard.shipping.length === 1 ? "" : "s"} expédiée{dashboard.shipping.length === 1 ? "" : "s"}</span><Truck className="h-4 w-4" aria-hidden="true" />
-                  </button>
                 </div>
               </Card>
             </section>
@@ -270,22 +287,23 @@ export default function Admin() {
             </section>
 
             <section aria-labelledby="admin-orders-title" className="space-y-4">
-              <div className="flex flex-col gap-4 border-b border-gray-200 pb-4 sm:flex-row sm:items-end sm:justify-between">
+                <div className="flex flex-col gap-4 border-b border-gray-200 pb-4 sm:flex-row sm:items-end sm:justify-between">
                 <div>
                   <p className="text-xs font-medium uppercase tracking-[0.18em] text-gray-500">Commandes</p>
                   <h2 id="admin-orders-title" className="mt-2 text-2xl font-light text-gray-900">Suivi des commandes</h2>
                 </div>
-                <div className="flex flex-wrap gap-2" aria-label="Filtrer les commandes">
+                  <div className="flex flex-wrap gap-2" aria-label="Filtrer les commandes">
                   {([
                     ["all", "Toutes"],
                     ["to_fulfill", "À préparer"],
                     ["payment_pending", "Paiements en attente"],
                     ["shipping", "Expédiées"],
                   ] as const).map(([filter, label]) => (
-                    <Button key={filter} type="button" size="sm" variant={orderFilter === filter ? "default" : "outline"} onClick={() => setOrderFilter(filter)} className={orderFilter === filter ? "bg-gray-900 text-white hover:bg-gray-800" : ""}>{label}</Button>
+                    <Button key={filter} type="button" size="sm" variant={orderFilter === filter ? "default" : "outline"} aria-pressed={orderFilter === filter} onClick={() => setOrderFilter(filter)} className={orderFilter === filter ? "bg-gray-900 text-white hover:bg-gray-800" : "border-gray-300 bg-white"}>{label}</Button>
                   ))}
                 </div>
               </div>
+              <p className="text-sm text-gray-600" aria-live="polite">{dashboard.filteredOrders.length} commande{dashboard.filteredOrders.length === 1 ? "" : "s"} affichée{dashboard.filteredOrders.length === 1 ? "" : "s"} dans cette vue.</p>
 
               {dashboard.filteredOrders.length === 0 ? (
                 <Card className="p-8 text-center text-gray-600">Aucune commande dans cette vue.</Card>
@@ -299,6 +317,7 @@ export default function Admin() {
                     <div>
                       <p className="text-xs uppercase tracking-wide text-gray-500">Numéro</p>
                       <p className="mt-1 font-medium text-gray-900">{order.orderNumber}</p>
+                      <span data-testid={`order-status-${order.orderNumber}`} className={`mt-2 inline-flex rounded-full border px-2.5 py-1 text-xs font-medium ${statusTone[order.status as OrderStatusType]}`}>{statusLabels[order.status as OrderStatusType]}</span>
                     </div>
                     <div>
                       <p className="text-xs uppercase tracking-wide text-gray-500">Client</p>

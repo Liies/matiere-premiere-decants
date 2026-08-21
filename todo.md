@@ -6675,3 +6675,8 @@
 - [x] Identifier les libellés utilisateur relatifs à la liste de souhaits
 - [x] Remplacer les libellés visibles par « Liste de favoris »
 - [x] Couvrir, vérifier et publier l’uniformisation
+
+## Administration — Lisibilité du pilotage
+- [x] Auditer l’interface, les indicateurs et les actions d’administration existants
+- [x] Clarifier la hiérarchie visuelle du tableau de bord et des raccourcis de gestion
+- [x] Couvrir, vérifier et publier la nouvelle expérience d’administration

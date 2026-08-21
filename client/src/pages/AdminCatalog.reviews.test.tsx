@@ -71,6 +71,8 @@ describe("administration des avis", () => {
   it("affiche un état vide honnête lorsqu’aucun avis vérifié ne requiert de modération", () => {
     render(<AdminCatalog />);
 
+    expect(screen.getByTestId("admin-catalog-overview").textContent).toContain("1 actif");
+    expect(screen.getByTestId("admin-catalog-overview").textContent).toContain("0 retirés");
     expect(screen.getByRole("heading", { name: /avis à modérer/i })).toBeTruthy();
     expect(screen.getByText(/aucun avis en attente de modération/i)).toBeTruthy();
     expect(screen.getByText(/seuls les avis liés à une commande vérifiée/i)).toBeTruthy();

@@ -233,12 +233,17 @@ export default function AdminCatalog() {
   return (
     <DashboardLayout>
       <section className="mx-auto w-full max-w-6xl space-y-8 px-1 py-4 sm:px-4 sm:py-8">
-        <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
-          <div>
-            <p className="text-xs font-medium uppercase tracking-[0.2em] text-gray-500">Administration</p>
-            <h1 className="mt-2 text-3xl font-light text-gray-900 sm:text-4xl">Gestion du catalogue</h1>
-            <p className="mt-2 max-w-2xl text-sm text-gray-600">Modifiez l’offre affichée à vos clients ou retirez un parfum du catalogue sans effacer son historique.</p>
-          </div>
+          <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
+            <div>
+              <p className="text-xs font-medium uppercase tracking-[0.2em] text-gray-500">Administration</p>
+              <h1 className="mt-2 text-3xl font-light text-gray-900 sm:text-4xl">Gestion du catalogue</h1>
+              <p className="mt-2 max-w-2xl text-sm text-gray-600">Modifiez l’offre affichée à vos clients ou retirez un parfum du catalogue sans effacer son historique.</p>
+              <div data-testid="admin-catalog-overview" className="mt-5 flex flex-wrap gap-2 text-sm">
+                <span className="inline-flex items-center gap-2 rounded-full border border-stone-200 bg-stone-50 px-3 py-1.5 text-gray-700"><strong className="font-medium text-gray-900">{activeProducts.length}</strong> actif{activeProducts.length === 1 ? "" : "s"}</span>
+                <span className="inline-flex items-center gap-2 rounded-full border border-stone-200 bg-white px-3 py-1.5 text-gray-700"><strong className="font-medium text-gray-900">{archivedProducts.length}</strong> retiré{archivedProducts.length === 1 ? "" : "s"}</span>
+                <span className="inline-flex items-center gap-2 rounded-full border border-amber-200 bg-amber-50 px-3 py-1.5 text-amber-800"><strong className="font-medium">{pendingReviews?.length ?? 0}</strong> avis à modérer</span>
+              </div>
+            </div>
           <a href="/products" className="inline-flex min-h-11 items-center justify-center border border-gray-300 px-4 text-sm text-gray-700 transition hover:border-gray-900 hover:text-gray-900">Voir la boutique</a>
         </div>
 
@@ -249,8 +254,11 @@ export default function AdminCatalog() {
         ) : (
           <div className="grid gap-6 lg:grid-cols-[minmax(15rem,0.8fr)_minmax(0,1.2fr)]">
             <Card className="overflow-hidden p-0">
-              <div className="border-b border-gray-200 px-5 py-4">
-                <p className="text-sm font-medium text-gray-900">Produits</p>
+              <div className="border-b border-gray-200 bg-stone-50/60 px-5 py-4">
+                <div className="flex items-center justify-between gap-3">
+                  <p className="text-sm font-medium text-gray-900">Produits</p>
+                  <p className="text-xs text-gray-500" aria-live="polite">{visibleProducts.length} référence{visibleProducts.length === 1 ? "" : "s"}</p>
+                </div>
                 <p className="mt-1 text-xs text-gray-500">Sélectionnez un parfum à modifier ou à retirer.</p>
               </div>
               <div className="border-b border-gray-200 px-3 py-3">
@@ -268,6 +276,7 @@ export default function AdminCatalog() {
                       key={product.id}
                       type="button"
                       onClick={() => setSelectedId(product.id)}
+                      aria-pressed={selected}
                       className={`flex w-full items-center justify-between gap-3 rounded-lg px-3 py-3 text-left transition ${selected ? "bg-gray-900 text-white" : "text-gray-700 hover:bg-gray-50"}`}
                     >
                       <span className="min-w-0">

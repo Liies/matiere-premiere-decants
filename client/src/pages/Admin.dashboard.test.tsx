@@ -116,10 +116,12 @@ describe("tableau de bord administrateur", () => {
     expect(screen.getByText(/240,00/)).toBeTruthy();
     expect(screen.queryByText(/360,00/)).toBeNull();
     expect(screen.getByText(/panier moyen/i)).toBeTruthy();
-    expect(screen.getByText(/1 paiement en attente/i)).toBeTruthy();
+    expect(screen.getByText("paiement à confirmer")).toBeTruthy();
     expect(screen.getByText("Vanilla Powder")).toBeTruthy();
-    expect(screen.getByText(/1 avis à modérer/i)).toBeTruthy();
+    expect(screen.getByText("avis à modérer")).toBeTruthy();
     expect(screen.getAllByText(/stock à surveiller/i).length).toBeGreaterThan(0);
+    expect(screen.getByTestId("admin-priority-queue")).toBeTruthy();
+    expect(screen.getByTestId("order-status-MP-PAID").textContent).toContain("Payée");
   });
 
   it("filtre les commandes sur les actions de préparation", () => {
@@ -129,6 +131,7 @@ describe("tableau de bord administrateur", () => {
 
     expect(screen.getByText("MP-PAID")).toBeTruthy();
     expect(screen.queryByText("MP-SHIPPED")).toBeNull();
+    expect(screen.getByRole("button", { name: "À préparer" }).getAttribute("aria-pressed")).toBe("true");
   });
 
   it("filtre les commandes nécessitant une confirmation de paiement", () => {
