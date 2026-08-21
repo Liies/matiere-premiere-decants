@@ -4,6 +4,7 @@ import Footer from "@/components/Footer";
 import Header from "@/components/Header";
 import { Link } from "wouter";
 import { ArrowRight } from "lucide-react";
+import { MASTER_PERFUMER_PROFILE } from "@shared/perfumer-profile";
 
 export default function About() {
   const { isAuthenticated } = useAuth();
@@ -71,14 +72,58 @@ export default function About() {
             </div>
           </div>
 
-          <div className="space-y-6 pt-8 border-t border-gray-200">
-            <h2 className="text-4xl font-light text-gray-900">Les Nez Derrière la Magie</h2>
-            <p className="text-lg text-gray-600 font-light leading-relaxed">
-              Nos maîtres parfumeurs sont les gardiens de la tradition olfactive française. Avec des décennies d'expérience combinées, ils créent des fragrances qui transcendent le temps et les tendances.
-            </p>
-            <p className="text-lg text-gray-600 font-light leading-relaxed">
-              Chacun apporte sa propre perspective, ses propres influences, ses propres rêves olfactifs. Ensemble, ils forment le cœur créatif de Matière Première.
-            </p>
+          <div data-testid="about-perfumer-profile" className="space-y-8 pt-8 border-t border-gray-200">
+            <div className="max-w-2xl">
+              <p className="text-xs font-medium uppercase tracking-[0.2em] text-gray-500">Le geste créatif</p>
+              <h2 className="mt-3 text-4xl font-light text-gray-900">Le parfumeur derrière la maison</h2>
+              <p className="mt-4 text-lg font-light leading-relaxed text-gray-600">
+                Une écriture de parfum commence ici par la matière : son relief, son origine et la façon dont elle se révèle sur la peau.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 gap-10 lg:grid-cols-2 lg:gap-12">
+              <article className="border-t border-gray-300 pt-7">
+                <p className="text-xs font-medium uppercase tracking-[0.2em] text-gray-400">01 — Matière Première</p>
+                <h3 className="mt-5 text-3xl font-light text-gray-900">{MASTER_PERFUMER_PROFILE.name}</h3>
+                <p className="mt-2 text-xs font-medium uppercase tracking-[0.14em] text-gray-500">{MASTER_PERFUMER_PROFILE.role}</p>
+                <p className="mt-6 max-w-md text-base font-light leading-7 text-gray-600">{MASTER_PERFUMER_PROFILE.biography}</p>
+
+                <div className="mt-8 border-l border-gray-300 pl-5">
+                  <p className="text-xs font-medium uppercase tracking-[0.16em] text-gray-500">Créations au sein de la maison</p>
+                  <p className="mt-3 text-lg font-light leading-8 text-gray-900">
+                    {MASTER_PERFUMER_PROFILE.matierePremiereCreations.join(" · ")}
+                  </p>
+                </div>
+              </article>
+
+              <article className="border-t border-gray-300 pt-7">
+                <p className="text-xs font-medium uppercase tracking-[0.2em] text-gray-400">02 — Repères de création</p>
+                <p className="mt-5 max-w-lg text-base font-light leading-7 text-gray-600">
+                  Son parcours a également contribué à des créations pour plusieurs signatures de la parfumerie contemporaine.
+                </p>
+                <ul className="mt-8 grid grid-cols-1 border-t border-gray-200 sm:grid-cols-2" aria-label="Créations externes d’Aurélien Guichard">
+                  {MASTER_PERFUMER_PROFILE.externalCreations.map((creation, index) => (
+                    <li
+                      key={`${creation.house}-${creation.name}`}
+                      className={`py-5 ${index % 2 === 0 ? "sm:border-r sm:pr-6" : "sm:pl-6"} ${index < 2 ? "border-b border-gray-200" : ""}`}
+                    >
+                      <p className="text-xs font-medium uppercase tracking-[0.16em] text-gray-500">{creation.house}</p>
+                      <p className="mt-2 text-xl font-light text-gray-900">{creation.name}</p>
+                    </li>
+                  ))}
+                </ul>
+                <p className="mt-8 text-xs leading-5 text-gray-500">
+                  Sources : {" "}
+                  <a href={MASTER_PERFUMER_PROFILE.sources.official} target="_blank" rel="noreferrer" className="underline decoration-gray-300 underline-offset-4 transition-colors hover:text-gray-900">
+                    Matière Première
+                  </a>{" "}
+                  et {" "}
+                  <a href={MASTER_PERFUMER_PROFILE.sources.interview} target="_blank" rel="noreferrer" className="underline decoration-gray-300 underline-offset-4 transition-colors hover:text-gray-900">
+                    entretien avec Aurélien Guichard
+                  </a>.
+                </p>
+              </article>
+            </div>
           </div>
         </div>
       </section>

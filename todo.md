@@ -6653,3 +6653,8 @@
 ## Catalogue — Signal de rupture de stock
 - [x] Ajouter un signal premium aux parfums indisponibles
 - [x] Couvrir, vérifier et publier l’affichage de rupture
+
+## À propos — Présentation des parfumeurs
+- [x] Retrouver et adapter la présentation historique des parfumeurs
+- [x] Ajouter la biographie et les créations marquantes à la page À propos
+- [x] Couvrir, vérifier et publier la nouvelle section
