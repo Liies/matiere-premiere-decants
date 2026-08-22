@@ -25,6 +25,7 @@ export default function Products() {
   const { isAuthenticated, user } = useAuth();
   const { addToCart: addToLocalCart } = useLocalCart();
   const { isWishlisted, toggleWishlist } = useWishlist();
+  const utils = trpc.useUtils();
   const addToCart = trpc.cart.addVariant.useMutation();
   const [selectedVariantIds, setSelectedVariantIds] = useState<Record<number, number>>({});
   const [selectedFilters, setSelectedFilters] = useState<string[]>([]);
@@ -186,6 +187,7 @@ export default function Products() {
         { variantId: variant.id, quantity },
         {
           onSuccess: () => {
+            void utils.cart.getItems.invalidate();
             handleSuccessfulAddition();
           },
           onError: (error: any) => {
@@ -300,29 +302,29 @@ export default function Products() {
             id="catalog-filters"
             aria-labelledby="olfactory-filter-title"
             data-testid="catalog-olfactory-filters"
-            className="relative mb-12 scroll-mt-24 overflow-hidden rounded-2xl border border-[#ded8ca] bg-[#f8f7f3] p-5 text-gray-900 shadow-[0_18px_50px_rgba(46,39,29,0.08)] sm:p-7 md:p-8 animate-slide-up"
+            className="relative mb-12 scroll-mt-24 overflow-hidden rounded-2xl border border-[#5f5649] bg-[radial-gradient(circle_at_top_right,rgba(190,168,125,0.14),transparent_35%),linear-gradient(135deg,#312d26_0%,#24211d_58%,#373126_100%)] p-5 text-[#f4eee3] shadow-[0_20px_56px_rgba(42,35,27,0.2)] sm:p-7 md:p-8 animate-slide-up"
           >
-            <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#c9bd9c] to-transparent" />
+            <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#c9b48b] to-transparent" />
             <div className="relative">
               <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
                 <div className="max-w-2xl">
-                  <div className="mb-3 flex items-center gap-3 text-[#756a58]">
+                  <div className="mb-3 flex items-center gap-3 text-[#d4c09a]">
                     <span className="h-px w-8 bg-current" />
                     <SlidersHorizontal className="h-4 w-4" aria-hidden="true" />
                     <p className="text-[10px] font-medium uppercase tracking-[0.24em]">Navigation olfactive</p>
                   </div>
-                  <h3 id="olfactory-filter-title" className="text-2xl font-light tracking-[-0.02em] text-gray-900 sm:text-3xl">
+                  <h3 id="olfactory-filter-title" className="text-2xl font-light tracking-[-0.02em] text-[#fffaf1] sm:text-3xl">
                     Explorez la collection par accords.
                   </h3>
-                  <p className="mt-3 max-w-xl text-sm leading-6 text-gray-600">
+                  <p className="mt-3 max-w-xl text-sm leading-6 text-[#c8bcaa]">
                     Composez librement votre sélection à partir des matières qui vous attirent.
                   </p>
                 </div>
 
-                <div className="flex min-w-[12rem] items-center justify-between gap-5 border-l border-[#ded8ca] pl-5 lg:justify-end">
+                <div className="flex min-w-[12rem] items-center justify-between gap-5 border-l border-[#675e50] pl-5 lg:justify-end">
                   <div>
-                    <p className="text-[10px] font-medium uppercase tracking-[0.2em] text-gray-500">Votre sélection</p>
-                    <p className="mt-1 text-sm text-gray-900" aria-live="polite">
+                    <p className="text-[10px] font-medium uppercase tracking-[0.2em] text-[#b8a890]">Votre sélection</p>
+                    <p className="mt-1 text-sm text-[#fffaf1]" aria-live="polite">
                       {selectedFilters.length > 0
                         ? `${selectedFilters.length} accord${selectedFilters.length > 1 ? "s" : ""} sélectionné${selectedFilters.length > 1 ? "s" : ""}`
                         : "Collection complète"}
@@ -333,7 +335,7 @@ export default function Products() {
                       type="button"
                       onClick={() => setSelectedFilters([])}
                       aria-label="Réinitialiser les filtres olfactifs"
-                      className="inline-flex min-h-11 shrink-0 items-center gap-2 border border-[#cfc6b5] bg-white px-3 text-xs uppercase tracking-[0.15em] text-[#5d5548] transition duration-200 hover:border-[#756a58] hover:bg-[#eeeae1] hover:text-gray-900 active:scale-[0.97] motion-reduce:transform-none"
+                      className="inline-flex min-h-11 shrink-0 items-center gap-2 border border-[#766b5a] bg-transparent px-3 text-xs uppercase tracking-[0.15em] text-[#efe7da] transition-[background-color,border-color,color,transform] duration-200 [transition-timing-function:cubic-bezier(0.23,1,0.32,1)] hover:border-[#cbb68c] hover:bg-[#433d33] hover:text-[#fffaf1] active:scale-[0.97] motion-reduce:transform-none motion-reduce:transition-none"
                     >
                       <X className="h-3.5 w-3.5" aria-hidden="true" />
                       Effacer
@@ -342,7 +344,7 @@ export default function Products() {
                 </div>
               </div>
 
-              <div className="mt-7 border-y border-[#ded8ca] py-4 sm:py-5">
+              <div className="mt-7 border-y border-[#5d5549] py-4 sm:py-5">
                 <ToggleGroup
                   type="multiple"
                   value={selectedFilters}
@@ -356,22 +358,22 @@ export default function Products() {
                       key={filter.id}
                       value={filter.id}
                       aria-label={`Filtrer par notes ${filter.label}`}
-                      className="olfactory-filter-chip group/filter inline-flex min-h-11 min-w-max flex-none gap-3 whitespace-nowrap border border-[#ded8ca] bg-white/75 px-3 py-2 text-xs font-medium uppercase tracking-[0.14em] text-[#5d5548] transition duration-200 hover:border-[#aa9d88] hover:bg-[#eeeae1] data-[state=on]:border-[#665d50] data-[state=on]:bg-[#665d50] data-[state=on]:text-white sm:px-4"
+                      className="olfactory-filter-chip group/filter inline-flex min-h-11 min-w-max flex-none gap-3 whitespace-nowrap border border-[#6e6557] bg-[#39342d]/85 px-3 py-2 text-xs font-medium uppercase tracking-[0.14em] text-[#e6dbca] transition-[background-color,border-color,color,transform,box-shadow] duration-200 [transition-timing-function:cubic-bezier(0.23,1,0.32,1)] hover:-translate-y-px hover:border-[#bca77e] hover:bg-[#494239] hover:text-[#fffaf1] data-[state=on]:border-[#d4bd91] data-[state=on]:bg-[#d4bd91] data-[state=on]:text-[#302a23] data-[state=on]:shadow-[0_6px_16px_rgba(0,0,0,0.18)] active:scale-[0.98] motion-reduce:transform-none motion-reduce:transition-none sm:px-4"
                     >
-                      <span className="text-[10px] text-[#978b75] group-data-[state=on]/filter:text-[#e7dfcf]">{String(index + 1).padStart(2, "0")}</span>
+                      <span className="text-[10px] text-[#b7a78c] group-data-[state=on]/filter:text-[#584b38]">{String(index + 1).padStart(2, "0")}</span>
                       <span>{filter.label}</span>
                     </ToggleGroupItem>
                   ))}
                 </ToggleGroup>
               </div>
 
-              <div className="mt-4 flex flex-col gap-2 text-xs text-gray-500 sm:flex-row sm:items-center sm:justify-between">
+              <div className="mt-4 flex flex-col gap-2 text-xs text-[#b8ad9a] sm:flex-row sm:items-center sm:justify-between">
                 <p aria-live="polite">
                   {searchQuery || selectedFilters.length > 0
                     ? `${filteredProducts.length} parfum${filteredProducts.length > 1 ? "s" : ""} correspondant${filteredProducts.length > 1 ? "s" : ""}`
                     : `${products?.length ?? 0} parfums affichés`}
                 </p>
-                <p className="text-[10px] uppercase tracking-[0.18em] text-[#8c8272]">Association libre · une ou plusieurs notes</p>
+                <p className="text-[10px] uppercase tracking-[0.18em] text-[#cabba1]">Association libre · une ou plusieurs notes</p>
               </div>
             </div>
           </section>

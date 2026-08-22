@@ -3,6 +3,8 @@ import { Leaf, ShoppingCart, User, Menu, X, Heart } from "lucide-react";
 import { useState } from "react";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { getLoginUrl } from "@/const";
+import { trpc } from "@/lib/trpc";
+import { useLocalCart } from "@/hooks/useLocalCart";
 
 const PRIMARY_NAVIGATION = [
   { href: "/", label: "Accueil" },
@@ -24,7 +26,7 @@ const mobileNavigationLinkClass = (active: boolean) => `relative flex min-h-11 i
     : "text-gray-600 before:scale-y-0 hover:bg-gray-50 hover:text-gray-900"
 }`;
 
-const cartNavigationLinkClass = "group flex h-11 w-11 items-center justify-center rounded-full text-gray-600 transition-[background-color,color,transform] duration-200 [transition-timing-function:cubic-bezier(0.23,1,0.32,1)] hover:-translate-y-0.5 hover:bg-[#f1eee7] hover:text-gray-900 active:scale-[0.97] motion-reduce:transform-none motion-reduce:transition-none";
+const cartNavigationLinkClass = "group relative flex h-11 w-11 items-center justify-center rounded-full text-gray-600 transition-[background-color,color,transform] duration-200 [transition-timing-function:cubic-bezier(0.23,1,0.32,1)] hover:-translate-y-0.5 hover:bg-[#f1eee7] hover:text-gray-900 active:scale-[0.97] motion-reduce:transform-none motion-reduce:transition-none";
 
 const loginNavigationButtonClass = "inline-flex min-h-11 items-center border border-gray-900 px-3 py-2 text-xs text-gray-900 transition-[background-color,color,transform] duration-200 [transition-timing-function:cubic-bezier(0.23,1,0.32,1)] hover:-translate-y-px hover:bg-gray-900 hover:text-white active:scale-[0.97] motion-reduce:transform-none motion-reduce:transition-none";
 
@@ -32,8 +34,16 @@ const logoutNavigationButtonClass = "relative inline-flex min-h-11 items-center 
 
 export default function Header() {
   const { isAuthenticated, user, logout } = useAuth();
+  const { data: remoteCartItems } = trpc.cart.getItems.useQuery(undefined, { enabled: isAuthenticated });
+  const { getTotalItems: getLocalCartItemCount } = useLocalCart();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [location] = useLocation();
+
+  const cartItemCount = isAuthenticated
+    ? (remoteCartItems ?? []).reduce((total, item) => total + item.quantity, 0)
+    : getLocalCartItemCount();
+  const visibleCartItemCount = cartItemCount > 99 ? "99+" : cartItemCount;
+  const cartItemLabel = cartItemCount > 1 ? "articles" : "article";
 
   const isActive = (path: string) => location === path;
   const closeMobileMenu = () => setMobileMenuOpen(false);
@@ -73,6 +83,15 @@ export default function Header() {
             className={cartNavigationLinkClass}
           >
             <ShoppingCart className="h-5 w-5 transition-transform duration-200 group-hover:scale-110 group-hover:-rotate-6 group-active:scale-95 motion-reduce:transform-none motion-reduce:transition-none" aria-hidden="true" />
+            {cartItemCount > 0 && (
+              <span
+                data-testid="header-cart-count"
+                aria-label={`${cartItemCount} ${cartItemLabel} dans votre panier`}
+                className="pointer-events-none absolute -right-1 -top-1 inline-flex h-5 min-w-5 items-center justify-center rounded-full border-2 border-white bg-[#453a2e] px-1 text-[10px] font-medium tabular-nums text-[#fffaf0] shadow-[0_2px_7px_rgba(50,42,32,0.24)]"
+              >
+                {visibleCartItemCount}
+              </span>
+            )}
           </Link>
           <Link
             href="/wishlist"

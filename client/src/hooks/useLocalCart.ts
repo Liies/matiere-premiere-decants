@@ -13,6 +13,7 @@ export interface LocalCartItem {
 export const CART_STORAGE_KEY = "matiere-premiere-cart";
 export const CART_SYNC_KEY_STORAGE_KEY = "matiere-premiere-cart-sync-key";
 export const CART_STORAGE_VERSION = 1;
+export const LOCAL_CART_UPDATED_EVENT = "matiere-premiere-cart-updated";
 
 type StoredCart = {
   version: typeof CART_STORAGE_VERSION;
@@ -42,6 +43,16 @@ function readStoredCart(value: string | null): LocalCartItem[] {
   return stored.items;
 }
 
+function notifyLocalCartUpdated() {
+  if (typeof window !== "undefined") {
+    window.dispatchEvent(new CustomEvent(LOCAL_CART_UPDATED_EVENT));
+  }
+}
+
+function areSameCartItems(left: LocalCartItem[], right: LocalCartItem[]) {
+  return JSON.stringify(left) === JSON.stringify(right);
+}
+
 export function useLocalCart() {
   const [cartItems, setCartItems] = useState<LocalCartItem[]>([]);
   const [isLoaded, setIsLoaded] = useState(false);
@@ -59,12 +70,37 @@ export function useLocalCart() {
     setIsLoaded(true);
   }, []);
 
+  useEffect(() => {
+    const syncCart = () => {
+      try {
+        const nextCartItems = readStoredCart(localStorage.getItem(CART_STORAGE_KEY));
+        setCartItems((currentCartItems) => (
+          areSameCartItems(currentCartItems, nextCartItems) ? currentCartItems : nextCartItems
+        ));
+      } catch {
+        localStorage.removeItem(CART_STORAGE_KEY);
+        setCartItems((currentCartItems) => currentCartItems.length === 0 ? currentCartItems : []);
+      }
+    };
+    const syncFromStorage = (event: StorageEvent) => {
+      if (event.key === CART_STORAGE_KEY) syncCart();
+    };
+
+    window.addEventListener(LOCAL_CART_UPDATED_EVENT, syncCart);
+    window.addEventListener("storage", syncFromStorage);
+    return () => {
+      window.removeEventListener(LOCAL_CART_UPDATED_EVENT, syncCart);
+      window.removeEventListener("storage", syncFromStorage);
+    };
+  }, []);
+
   // Save cart to localStorage whenever it changes
   useEffect(() => {
     if (isLoaded) {
       try {
         const storedCart: StoredCart = { version: CART_STORAGE_VERSION, items: cartItems };
         localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(storedCart));
+        notifyLocalCartUpdated();
       } catch (error) {
         console.error("Failed to save cart to localStorage:", error);
       }

@@ -8,6 +8,7 @@ import { WISHLIST_STORAGE_KEY } from "@shared/wishlist";
 
 vi.mock("@/lib/trpc", () => ({
   trpc: {
+    useUtils: () => ({ cart: { getItems: { invalidate: vi.fn() } } }),
     products: {
       list: {
         useQuery: () => ({
@@ -229,17 +230,19 @@ describe("intégration catalogue — panier et souhaits", () => {
     expect(within(advisorCallout).getByRole("link", { name: "Trouver mon parfum" }).getAttribute("href")).toBe("/conseil");
   });
 
-  it("présente les filtres dans une palette minérale claire et conserve leur remise à zéro", () => {
+  it("présente les filtres dans une palette minérale brute et conserve leur remise à zéro", () => {
     render(<Products />);
 
     const filterModule = screen.getByTestId("catalog-olfactory-filters");
-    expect(filterModule.className).toContain("bg-[#f8f7f3]");
+    expect(filterModule.className).toContain("bg-[radial-gradient");
+    expect(filterModule.className).toContain("border-[#5f5649]");
     expect(filterModule.className).toContain("rounded-2xl");
     expect(screen.getByRole("heading", { name: "Explorez la collection par accords." })).toBeTruthy();
     expect(screen.getByText("Collection complète")).toBeTruthy();
 
     const woodyFilter = screen.getByRole("button", { name: "Filtrer par notes Boisé" });
     expect(woodyFilter.className).toContain("olfactory-filter-chip");
+    expect(woodyFilter.className).toContain("data-[state=on]:bg-[#d4bd91]");
     fireEvent.click(woodyFilter);
 
     expect(woodyFilter.getAttribute("data-state")).toBe("on");

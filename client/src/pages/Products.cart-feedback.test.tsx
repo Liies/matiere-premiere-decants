@@ -8,6 +8,7 @@ const localCart = vi.hoisted(() => vi.fn());
 
 vi.mock("@/lib/trpc", () => ({
   trpc: {
+    useUtils: () => ({ cart: { getItems: { invalidate: vi.fn() } } }),
     products: {
       list: {
         useQuery: () => ({

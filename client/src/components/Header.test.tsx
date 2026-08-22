@@ -4,11 +4,26 @@ import React from "react";
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import Header from "./Header";
+import { CART_STORAGE_KEY, CART_STORAGE_VERSION, LOCAL_CART_UPDATED_EVENT } from "@/hooks/useLocalCart";
 
 const authState = vi.hoisted(() => ({
   isAuthenticated: false,
   user: null as { role: "admin" | "user" } | null,
   logout: vi.fn(),
+}));
+
+const cartState = vi.hoisted(() => ({
+  items: [] as Array<{ quantity: number }>,
+}));
+
+vi.mock("@/lib/trpc", () => ({
+  trpc: {
+    cart: {
+      getItems: {
+        useQuery: () => ({ data: cartState.items }),
+      },
+    },
+  },
 }));
 
 vi.mock("@/_core/hooks/useAuth", () => ({
@@ -26,8 +41,10 @@ describe("Header", () => {
 
   beforeEach(() => {
     window.history.replaceState({}, "", "/products");
+    window.localStorage.clear();
     authState.isAuthenticated = false;
     authState.user = null;
+    cartState.items = [];
     vi.clearAllMocks();
   });
 
@@ -66,6 +83,35 @@ describe("Header", () => {
     const cartIcon = cartLink.querySelector("svg");
     expect(cartIcon?.className.baseVal).toContain("group-hover:scale-110");
     expect(cartIcon?.className.baseVal).toContain("group-hover:-rotate-6");
+  });
+
+  it("affiche un compteur discret uniquement lorsque le panier contient des articles", async () => {
+    render(<Header />);
+    expect(screen.queryByTestId("header-cart-count")).toBeNull();
+
+    window.localStorage.setItem(CART_STORAGE_KEY, JSON.stringify({
+      version: CART_STORAGE_VERSION,
+      items: [
+        { productId: 1, variantId: 11, sizeMl: 50, quantity: 2, name: "Vanilla Powder", price: 12000 },
+        { productId: 2, variantId: 21, sizeMl: 50, quantity: 1, name: "Crystal Saffron", price: 12000 },
+      ],
+    }));
+    window.dispatchEvent(new CustomEvent(LOCAL_CART_UPDATED_EVENT));
+
+    const count = await screen.findByTestId("header-cart-count");
+    expect(count.textContent).toBe("3");
+    expect(count.getAttribute("aria-label")).toBe("3 articles dans votre panier");
+    expect(screen.getByRole("link", { name: "Ouvrir le panier" }).className).toContain("relative");
+  });
+
+  it("reflète le nombre d’articles du panier connecté", () => {
+    authState.isAuthenticated = true;
+    authState.user = { role: "user" };
+    cartState.items = [{ quantity: 2 }, { quantity: 1 }];
+
+    render(<Header />);
+
+    expect(screen.getByTestId("header-cart-count").textContent).toBe("3");
   });
 
   it("anime le logo sans perturber son accès à l’accueil", () => {

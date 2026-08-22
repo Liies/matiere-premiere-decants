@@ -6717,3 +6717,13 @@
 - [x] Auditer les couleurs, la hiérarchie et les interactions actuelles des cartes indisponibles
 - [x] Moderniser la signalétique, les couleurs et la composition de l’état indisponible
 - [x] Couvrir, vérifier et publier le traitement premium des indisponibilités
+
+## Catalogue — Filtres minéraux
+- [x] Auditer les couleurs et états interactifs actuels de la barre de filtres
+- [x] Définir une palette brute et luxueuse cohérente avec Matière Première
+- [x] Couvrir, vérifier et publier la nouvelle barre de filtres
+
+## Navigation — Compteur panier
+- [x] Identifier les sources de quantité du panier connecté et local
+- [x] Ajouter un compteur d’articles accessible, discret et conditionnel sur l’icône panier
+- [x] Couvrir, vérifier et publier le compteur panier
