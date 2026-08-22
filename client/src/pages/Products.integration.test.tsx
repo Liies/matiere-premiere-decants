@@ -262,11 +262,32 @@ describe("intégration catalogue — panier et souhaits", () => {
     expect(badge.textContent).toContain("Indisponible");
     expect(badge.className).toContain("bg-[#463d33]/95");
     expect(badge.className).toContain("rounded-full");
+    expect(badge.className).toContain("z-30");
+    expect(screen.getByTestId("catalog-flip-card-2").className).toContain("z-0");
     expect(screen.getByTestId("catalog-out-of-stock-card-2").className).toContain("bg-[linear-gradient(145deg,#fffdf9_0%,#f4efe5_100%)]");
     expect(screen.getByTestId("catalog-out-of-stock-panel-2").className).toContain("bg-white/70");
     expect(screen.getByTestId("catalog-out-of-stock-status-2").textContent).toContain("Momentanément indisponible");
     expect(screen.getByRole("link", { name: "Découvrir le parfum" })).toBeTruthy();
     expect(screen.getByText("2 parfums affichés")).toBeTruthy();
+  });
+
+  it("conserve le badge indisponible au-dessus du verso lorsque les notes s’affichent au survol", () => {
+    vi.useFakeTimers();
+    render(<Products />);
+
+    const unavailableFlipCard = screen.getByTestId("catalog-flip-card-2");
+    const unavailableCard = unavailableFlipCard.closest(".catalog-product-card");
+    expect(unavailableCard).toBeTruthy();
+
+    fireEvent.mouseEnter(unavailableCard!);
+    act(() => {
+      vi.advanceTimersByTime(1200);
+    });
+
+    expect(unavailableFlipCard.getAttribute("data-hover-flipped")).toBe("true");
+    const badge = screen.getByTestId("catalog-out-of-stock-badge-2");
+    expect(badge.textContent).toContain("Indisponible");
+    expect(badge.className).toContain("z-30");
   });
 
   it("filtre en temps réel, propose une suggestion, puis restaure la collection après une recherche vide", () => {

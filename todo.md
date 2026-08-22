@@ -6738,3 +6738,8 @@
 - [x] Auditer les contrôles de retrait redondants sur les cartes de favoris
 - [x] Conserver la croix d’angle comme unique action de suppression accessible
 - [x] Couvrir, vérifier et publier la carte de favoris épurée
+
+## Catalogue — Badge indisponible au verso
+- [x] Auditer la superposition du badge et du verso olfactif
+- [x] Préserver l’indication d’indisponibilité lors du retournement de la carte
+- [x] Couvrir, vérifier et publier le correctif de visibilité

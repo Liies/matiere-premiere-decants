@@ -418,7 +418,7 @@ export default function Products() {
                   onMouseLeave={() => cancelHoverFlip(product.id)}
                 >
                   <div data-testid={`catalog-card-body-${product.id}`} className="flex h-full flex-col gap-4 p-4 sm:p-5">
-                    <div className="relative">
+                    <div className="relative isolate">
                       <button
                         type="button"
                         onClick={() => handleToggleWishlist(product)}
@@ -431,7 +431,7 @@ export default function Products() {
                       {!isProductAvailable(product) && (
                         <span
                           data-testid={`catalog-out-of-stock-badge-${product.id}`}
-                          className="absolute left-3 top-3 z-20 inline-flex min-h-8 items-center gap-2 rounded-full border border-white/45 bg-[#463d33]/95 px-3.5 text-[10px] font-medium uppercase tracking-[0.16em] text-[#fffaf0] shadow-[0_5px_16px_rgba(55,46,36,0.24)] backdrop-blur-sm"
+                          className="absolute left-3 top-3 z-30 inline-flex min-h-8 items-center gap-2 rounded-full border border-white/45 bg-[#463d33]/95 px-3.5 text-[10px] font-medium uppercase tracking-[0.16em] text-[#fffaf0] shadow-[0_5px_16px_rgba(55,46,36,0.24)] backdrop-blur-sm"
                         >
                           <span className="h-1.5 w-1.5 rounded-full bg-[#e4cfa8] shadow-[0_0_0_3px_rgba(228,207,168,0.16)]" aria-hidden="true" />
                           Indisponible
@@ -441,7 +441,7 @@ export default function Products() {
                         data-testid={`catalog-flip-card-${product.id}`}
                         data-flipped={flippedProductId === product.id}
                         data-hover-flipped={hoverFlippedProductId === product.id}
-                        className="catalog-flip-card"
+                        className="catalog-flip-card z-0"
                       >
                         <div className="catalog-flip-card-inner">
                           <a href={productPath(product)} className={`catalog-flip-face catalog-flip-front luxury-image-frame product-bottle-frame relative flex h-56 w-full items-center justify-center overflow-hidden rounded-lg sm:h-64 ${isProductAvailable(product) ? "bg-gray-100" : "bg-[#e9e3d8] after:pointer-events-none after:absolute after:inset-0 after:bg-[linear-gradient(180deg,rgba(75,65,53,0.04)_0%,rgba(75,65,53,0.18)_100%)]"}`} aria-label={`Voir la fiche de ${product.name}`}>
