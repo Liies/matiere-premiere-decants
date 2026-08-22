@@ -12,6 +12,7 @@ const mocks = vi.hoisted(() => ({
 
 vi.mock("@/lib/trpc", () => ({
   trpc: {
+    useUtils: () => ({ cart: { getItems: { invalidate: vi.fn() } } }),
     products: {
       list: {
         useQuery: () => ({
@@ -23,8 +24,13 @@ vi.mock("@/lib/trpc", () => ({
         }),
       },
     },
+    cart: {
+      addVariant: { useMutation: () => ({ mutate: vi.fn(), isPending: false }) },
+    },
   },
 }));
+vi.mock("@/_core/hooks/useAuth", () => ({ useAuth: () => ({ isAuthenticated: false, user: null }) }));
+vi.mock("@/hooks/useLocalCart", () => ({ useLocalCart: () => ({ addToCart: vi.fn() }) }));
 vi.mock("@shared/image-assets", () => ({ getProductImage: () => null }));
 vi.mock("@/components/Header", () => ({ default: () => <header>Navigation</header> }));
 vi.mock("@/components/Footer", () => ({ default: () => <footer>Pied de page</footer> }));

@@ -7,6 +7,7 @@ import { WISHLIST_STORAGE_KEY } from "@shared/wishlist";
 
 vi.mock("@/lib/trpc", () => ({
   trpc: {
+    useUtils: () => ({ cart: { getItems: { invalidate: vi.fn() } } }),
     products: {
       list: {
         useQuery: () => ({
@@ -21,8 +22,13 @@ vi.mock("@/lib/trpc", () => ({
         }),
       },
     },
+    cart: {
+      addVariant: { useMutation: () => ({ mutate: vi.fn(), isPending: false }) },
+    },
   },
 }));
+vi.mock("@/_core/hooks/useAuth", () => ({ useAuth: () => ({ isAuthenticated: false, user: null }) }));
+vi.mock("@/hooks/useLocalCart", () => ({ useLocalCart: () => ({ addToCart: vi.fn() }) }));
 vi.mock("@shared/image-assets", () => ({
   getProductImage: () => ({ compressed: "/manus-storage/legacy-vanilla-bottle.png" }),
 }));

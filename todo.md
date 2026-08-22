@@ -6727,3 +6727,9 @@
 - [x] Identifier les sources de quantité du panier connecté et local
 - [x] Ajouter un compteur d’articles accessible, discret et conditionnel sur l’icône panier
 - [x] Couvrir, vérifier et publier le compteur panier
+
+## Favoris — Ajout au panier
+- [x] Auditer les données de variantes, l’état de stock et les actions actuelles des favoris
+- [x] Ajouter une action d’ajout unitaire au panier depuis les favoris
+- [x] Conserver le blocage de stock et le retour de confirmation pour chaque parfum
+- [x] Couvrir, vérifier et publier l’ajout au panier depuis les favoris

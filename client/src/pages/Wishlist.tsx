@@ -1,22 +1,76 @@
-import { Heart, Leaf, Share2, X } from "lucide-react";
+import { Heart, Leaf, Share2, ShoppingCart, X } from "lucide-react";
 import { Link } from "wouter";
+import { useEffect, useRef, useState } from "react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { trpc } from "@/lib/trpc";
+import { useAuth } from "@/_core/hooks/useAuth";
+import { useLocalCart } from "@/hooks/useLocalCart";
 import { useWishlist } from "@/hooks/useWishlist";
 import { getProductImage } from "@shared/image-assets";
+import { CART_CONFIRMATION_DURATION_MS } from "@shared/cart-feedback";
 import { createSharedWishlistPath, parseSharedWishlistIds } from "@shared/wishlist-share";
 import { toast } from "sonner";
 
 export default function Wishlist() {
   const { data: products, isLoading } = trpc.products.list.useQuery();
+  const { isAuthenticated, user } = useAuth();
+  const { addToCart: addToLocalCart } = useLocalCart();
   const { wishlistIds, toggleWishlist } = useWishlist();
+  const utils = trpc.useUtils();
+  const addVariantToCart = trpc.cart.addVariant.useMutation();
+  const [recentlyAddedProductId, setRecentlyAddedProductId] = useState<number | null>(null);
+  const addFeedbackTimer = useRef<number | null>(null);
   const sharedWishlistIds = parseSharedWishlistIds(window.location.search);
   const isSharedSelection = sharedWishlistIds.length > 0;
   const selectedIds = isSharedSelection ? sharedWishlistIds : wishlistIds;
   const wishedProducts = products?.filter((product) => selectedIds.includes(product.id)) ?? [];
+
+  useEffect(() => () => {
+    if (addFeedbackTimer.current) window.clearTimeout(addFeedbackTimer.current);
+  }, []);
+
+  type WishlistProduct = NonNullable<typeof products>[number];
+
+  const getAvailableVariant = (product: WishlistProduct) => (
+    (product.variants ?? []).find((variant: { isActive?: boolean; stock: number }) => variant.isActive !== false && variant.stock > 0) ?? null
+  );
+
+  const confirmAddedProduct = (productId: number) => {
+    if (addFeedbackTimer.current) window.clearTimeout(addFeedbackTimer.current);
+    setRecentlyAddedProductId(productId);
+    addFeedbackTimer.current = window.setTimeout(() => {
+      setRecentlyAddedProductId((currentProductId) => currentProductId === productId ? null : currentProductId);
+      addFeedbackTimer.current = null;
+    }, CART_CONFIRMATION_DURATION_MS);
+  };
+
+  const handleAddToCart = (product: WishlistProduct) => {
+    const variant = getAvailableVariant(product);
+    if (!variant) {
+      toast.error("Ce parfum est momentanément indisponible.");
+      return;
+    }
+
+    if (isAuthenticated && user) {
+      addVariantToCart.mutate(
+        { variantId: variant.id, quantity: 1 },
+        {
+          onSuccess: () => {
+            void utils.cart.getItems.invalidate();
+            confirmAddedProduct(product.id);
+          },
+          onError: (error) => toast.error(error.message || "Impossible d’ajouter ce parfum au panier."),
+        },
+      );
+      return;
+    }
+
+    addToLocalCart(product, variant, 1, { announce: false });
+    confirmAddedProduct(product.id);
+  };
 
   const shareWishlist = async () => {
     const selectionIds = wishedProducts.map((product) => product.id);
@@ -93,6 +147,9 @@ export default function Wishlist() {
               {wishedProducts.map((product) => {
                 const image = getProductImage(product.id);
                 const imageSrc = product.imageUrl ?? image?.compressed;
+                const availableVariant = getAvailableVariant(product);
+                const isAvailable = Boolean(availableVariant);
+                const wasRecentlyAdded = recentlyAddedProductId === product.id;
                 return (
                   <Card key={product.id} className="group overflow-hidden border-gray-200 transition-all duration-500 hover:-translate-y-1 hover:shadow-xl motion-reduce:transform-none motion-reduce:transition-none">
                     <div className="relative p-4 sm:p-5">
@@ -111,9 +168,21 @@ export default function Wishlist() {
                         <h2 className="mt-5 text-xl font-light text-gray-900">{product.name}</h2>
                         <p className="mt-1 text-sm text-gray-500">Décant {product.volumeMl ?? 50} ml · €{(product.price / 100).toFixed(2)}</p>
                       </Link>
-                      <button type="button" onClick={() => toggleWishlist(product.id)} className="mt-5 flex min-h-11 items-center gap-2 text-sm text-gray-600 transition hover:text-gray-900">
-                        <X className="h-4 w-4" aria-hidden="true" /> Retirer de la liste
-                      </button>
+                      <div className="mt-5 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                        <Button
+                          type="button"
+                          onClick={() => handleAddToCart(product)}
+                          disabled={!isAvailable || addVariantToCart.isPending}
+                          aria-live="polite"
+                          className={`min-h-11 w-full gap-2 bg-gray-900 px-4 text-sm font-medium text-white transition-[background-color,transform,box-shadow] duration-200 [transition-timing-function:cubic-bezier(0.23,1,0.32,1)] hover:-translate-y-px hover:bg-gray-800 hover:shadow-lg active:scale-[0.97] motion-reduce:transform-none motion-reduce:transition-none sm:w-auto ${!isAvailable ? "cursor-not-allowed bg-stone-300 text-stone-600 hover:bg-stone-300 hover:shadow-none" : ""}`}
+                        >
+                          <ShoppingCart className={`h-4 w-4 ${wasRecentlyAdded ? "cart-icon-bounce" : ""}`} aria-hidden="true" />
+                          <span>{!isAvailable ? "Indisponible" : wasRecentlyAdded ? "Ajouté au panier" : "Ajouter au panier"}</span>
+                        </Button>
+                        <button type="button" onClick={() => toggleWishlist(product.id)} className="flex min-h-11 shrink-0 items-center justify-center gap-2 text-sm text-gray-600 transition hover:text-gray-900">
+                          <X className="h-4 w-4" aria-hidden="true" /> Retirer de la liste
+                        </button>
+                      </div>
                     </div>
                   </Card>
                 );
