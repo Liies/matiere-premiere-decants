@@ -6748,3 +6748,10 @@
 - [x] Auditer l’alignement du panneau de disponibilité et du CTA sur les cartes étroites
 - [x] Adapter la composition pour conserver le CTA entièrement visible
 - [x] Couvrir, vérifier et publier la correction responsive
+
+## Thème — Mode nuit
+- [x] Auditer le système de thème existant et les surfaces publiques prioritaires
+- [x] Définir une palette nuit minérale cohérente avec Matière Première
+- [x] Ajouter une bascule accessible et mémorisée dans la navigation
+- [x] Adapter les pages et composants principaux au thème nuit
+- [x] Couvrir, vérifier et publier le mode nuit

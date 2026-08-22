@@ -14,7 +14,7 @@ export default function HomePremium() {
   const [isScentQuizOpen, setIsScentQuizOpen] = useState(false);
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-white dark:bg-[#17140f]">
       <Header />
 
       <main>
@@ -29,14 +29,14 @@ export default function HomePremium() {
               decoding="async"
             />
           </div>
-          <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-white/35 via-white/40 to-white/90" aria-hidden="true" />
+          <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-white/35 via-white/40 to-white/90 dark:from-[#17140f]/35 dark:via-[#17140f]/55 dark:to-[#17140f]/95" aria-hidden="true" />
 
           <div className="container relative z-10 mx-auto max-w-3xl text-center">
-            <p className="hero-copy-reveal text-xs font-medium uppercase tracking-[0.24em] text-gray-600" style={{ animationDelay: "80ms" }}>Matière Première</p>
-            <h1 className="hero-copy-reveal mt-5 text-4xl font-light leading-tight tracking-tight text-gray-900 sm:text-6xl" style={{ animationDelay: "160ms" }}>
+            <p className="hero-copy-reveal text-xs font-medium uppercase tracking-[0.24em] text-gray-600 dark:text-[#c9b998]" style={{ animationDelay: "80ms" }}>Matière Première</p>
+            <h1 className="hero-copy-reveal mt-5 text-4xl font-light leading-tight tracking-tight text-gray-900 dark:text-[#fff8ec] sm:text-6xl" style={{ animationDelay: "160ms" }}>
               La matière au cœur du parfum.
             </h1>
-            <p className="hero-copy-reveal mx-auto mt-5 max-w-xl text-base font-light leading-7 text-gray-600 sm:text-lg" style={{ animationDelay: "240ms" }}>
+            <p className="hero-copy-reveal mx-auto mt-5 max-w-xl text-base font-light leading-7 text-gray-600 dark:text-[#d8cdbb] sm:text-lg" style={{ animationDelay: "240ms" }}>
               Une sélection de décants 50 ml, au prix unique de 120,00 €.
             </p>
             <div className="hero-copy-reveal mt-8" style={{ animationDelay: "320ms" }}>
@@ -45,29 +45,29 @@ export default function HomePremium() {
                 <ArrowRight className="h-4 w-4" aria-hidden="true" />
               </Link>
             </div>
-            <div data-testid="home-offer-reassurance" className="hero-copy-reveal mx-auto mt-8 grid max-w-xl grid-cols-1 divide-y divide-gray-200/80 rounded-2xl border border-white/80 bg-white/65 text-left shadow-sm backdrop-blur-sm sm:grid-cols-3 sm:divide-x sm:divide-y-0" style={{ animationDelay: "400ms" }}>
-              <p className="px-4 py-3 text-xs leading-5 text-gray-600"><span className="block font-medium uppercase tracking-[0.14em] text-gray-900">Format</span>Décant 50 ml</p>
-              <p className="px-4 py-3 text-xs leading-5 text-gray-600"><span className="block font-medium uppercase tracking-[0.14em] text-gray-900">Prix</span>120,00 €</p>
-              <p className="px-4 py-3 text-xs leading-5 text-gray-600"><span className="block font-medium uppercase tracking-[0.14em] text-gray-900">Expédition</span>France & Europe</p>
+            <div data-testid="home-offer-reassurance" className="hero-copy-reveal mx-auto mt-8 grid max-w-xl grid-cols-1 divide-y divide-gray-200/80 rounded-2xl border border-white/80 bg-white/65 text-left shadow-sm backdrop-blur-sm dark:divide-[#5c5040] dark:border-[#5c5040] dark:bg-[#211c16]/80 sm:grid-cols-3 sm:divide-x sm:divide-y-0" style={{ animationDelay: "400ms" }}>
+              <p className="px-4 py-3 text-xs leading-5 text-gray-600 dark:text-[#d8cdbb]"><span className="block font-medium uppercase tracking-[0.14em] text-gray-900 dark:text-[#fff8ec]">Format</span>Décant 50 ml</p>
+              <p className="px-4 py-3 text-xs leading-5 text-gray-600 dark:text-[#d8cdbb]"><span className="block font-medium uppercase tracking-[0.14em] text-gray-900 dark:text-[#fff8ec]">Prix</span>120,00 €</p>
+              <p className="px-4 py-3 text-xs leading-5 text-gray-600 dark:text-[#d8cdbb]"><span className="block font-medium uppercase tracking-[0.14em] text-gray-900 dark:text-[#fff8ec]">Expédition</span>France & Europe</p>
             </div>
           </div>
         </section>
 
-        <section className="bg-stone-50 px-4 py-14 sm:py-20">
+        <section className="bg-stone-50 px-4 py-14 dark:bg-[#201b15] sm:py-20">
           <div className="container mx-auto grid max-w-5xl items-center gap-10 md:grid-cols-[0.9fr_1.1fr] md:gap-16">
             <ScrollReveal className="min-w-0" delayMs={20}>
-              <p className="text-xs font-medium uppercase tracking-[0.2em] text-gray-500">La collection</p>
-              <h2 className="mt-4 text-3xl font-light leading-tight text-gray-900 sm:text-5xl">Dix signatures à explorer.</h2>
-              <p className="mt-5 max-w-md text-base font-light leading-7 text-gray-600">
+              <p className="text-xs font-medium uppercase tracking-[0.2em] text-gray-500 dark:text-[#b9aa91]">La collection</p>
+              <h2 className="mt-4 text-3xl font-light leading-tight text-gray-900 dark:text-[#fff8ec] sm:text-5xl">Dix signatures à explorer.</h2>
+              <p className="mt-5 max-w-md text-base font-light leading-7 text-gray-600 dark:text-[#d8cdbb]">
                 Chaque fragrance révèle une matière première dans une composition précise et contemporaine.
               </p>
-              <Link href="/products" className="mt-7 inline-flex items-center gap-2 text-sm font-medium text-gray-900 underline decoration-gray-300 underline-offset-4 transition hover:decoration-gray-900">
+              <Link href="/products" className="mt-7 inline-flex items-center gap-2 text-sm font-medium text-gray-900 underline decoration-gray-300 underline-offset-4 transition hover:decoration-gray-900 dark:text-[#fff8ec] dark:decoration-[#8d7d63] dark:hover:decoration-[#fff8ec]">
                 Voir les 10 parfums
                 <ArrowRight className="h-4 w-4" aria-hidden="true" />
               </Link>
             </ScrollReveal>
             <ScrollReveal className="min-w-0" delayMs={110}>
-              <div className="overflow-hidden rounded-2xl bg-white shadow-[0_18px_50px_rgba(38,29,21,0.10)]">
+              <div className="overflow-hidden rounded-2xl bg-white shadow-[0_18px_50px_rgba(38,29,21,0.10)] dark:bg-[#2a241d] dark:shadow-[0_18px_50px_rgba(0,0,0,0.28)]">
               <img
                 src={HOME_COLLECTION_EDITORIAL_IMAGE}
                 alt="Six flacons Matière Première présentés sur des socles minéraux"
@@ -81,7 +81,7 @@ export default function HomePremium() {
           </div>
         </section>
 
-        <section className="bg-gray-900 px-4 py-14 text-white sm:py-20">
+        <section className="bg-gray-900 px-4 py-14 text-white dark:bg-[#100e0b] sm:py-20">
           <ScrollReveal className="container mx-auto max-w-2xl text-center" delayMs={40}>
             <p className="text-xs font-medium uppercase tracking-[0.2em] text-gray-400">Un doute ?</p>
             <h2 className="mt-4 text-3xl font-light sm:text-4xl">Trouvez votre parfum.</h2>

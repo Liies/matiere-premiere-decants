@@ -1,10 +1,11 @@
 import { Link, useLocation } from "wouter";
-import { Leaf, ShoppingCart, User, Menu, X, Heart } from "lucide-react";
+import { Leaf, ShoppingCart, User, Menu, X, Heart, Moon, Sun } from "lucide-react";
 import { useState } from "react";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { getLoginUrl } from "@/const";
 import { trpc } from "@/lib/trpc";
 import { useLocalCart } from "@/hooks/useLocalCart";
+import { useTheme } from "@/contexts/ThemeContext";
 
 const PRIMARY_NAVIGATION = [
   { href: "/", label: "Accueil" },
@@ -32,8 +33,11 @@ const loginNavigationButtonClass = "inline-flex min-h-11 items-center border bor
 
 const logoutNavigationButtonClass = "relative inline-flex min-h-11 items-center overflow-hidden px-2 py-2 text-xs text-gray-600 transition-[color,transform] duration-200 [transition-timing-function:cubic-bezier(0.23,1,0.32,1)] after:absolute after:bottom-1 after:left-2 after:h-px after:w-[calc(100%-1rem)] after:origin-left after:scale-x-0 after:bg-gray-900 after:transition-transform after:duration-200 after:[transition-timing-function:cubic-bezier(0.23,1,0.32,1)] hover:-translate-y-px hover:text-gray-900 hover:after:scale-x-100 active:scale-[0.97] motion-reduce:transform-none motion-reduce:transition-none motion-reduce:after:transition-none";
 
+const themeToggleClass = "inline-flex h-11 w-11 items-center justify-center rounded-full border border-transparent text-gray-600 transition-[background-color,border-color,color,transform] duration-200 [transition-timing-function:cubic-bezier(0.23,1,0.32,1)] hover:-translate-y-px hover:border-[#d9cfbf] hover:bg-[#f1eee7] hover:text-gray-950 active:scale-[0.97] dark:border-[#443a2e] dark:text-[#d8cdbb] dark:hover:border-[#8d7d63] dark:hover:bg-[#302a22] dark:hover:text-[#fff8ec] motion-reduce:transform-none motion-reduce:transition-none";
+
 export default function Header() {
   const { isAuthenticated, user, logout } = useAuth();
+  const { theme, toggleTheme } = useTheme();
   const { data: remoteCartItems } = trpc.cart.getItems.useQuery(undefined, { enabled: isAuthenticated });
   const { getTotalItems: getLocalCartItemCount } = useLocalCart();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -44,18 +48,20 @@ export default function Header() {
     : getLocalCartItemCount();
   const visibleCartItemCount = cartItemCount > 99 ? "99+" : cartItemCount;
   const cartItemLabel = cartItemCount > 1 ? "articles" : "article";
+  const isDarkTheme = theme === "dark";
+  const themeToggleLabel = isDarkTheme ? "Activer le mode clair" : "Activer le mode nuit";
 
   const isActive = (path: string) => location === path;
   const closeMobileMenu = () => setMobileMenuOpen(false);
 
   return (
-    <header className="sticky top-0 z-50 border-b border-gray-200 bg-white/95 backdrop-blur">
+    <header className="sticky top-0 z-50 border-b border-gray-200 bg-white/95 backdrop-blur dark:border-[#40382e] dark:bg-[#17140f]/95">
       <div className="container flex items-center justify-between gap-3 py-3 sm:py-4">
         {/* Logo */}
         <Link href="/" aria-label="Accueil — Matière Première" className="group inline-flex rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#756a58]/45 focus-visible:ring-offset-4">
           <div data-testid="header-brand" className="flex items-center gap-2 transition-transform duration-200 [transition-timing-function:cubic-bezier(0.23,1,0.32,1)] group-hover:-translate-y-px group-active:scale-[0.99] motion-reduce:transform-none motion-reduce:transition-none">
-            <Leaf className="h-5 w-5 shrink-0 text-gray-900 transition-transform duration-200 group-hover:rotate-[10deg] group-hover:scale-110 motion-reduce:transform-none motion-reduce:transition-none sm:h-6 sm:w-6" aria-hidden="true" />
-            <h1 className="text-[0.95rem] font-light tracking-[0.12em] text-gray-900 transition-transform duration-200 group-hover:translate-x-0.5 motion-reduce:transform-none motion-reduce:transition-none sm:text-xl sm:tracking-wider">
+            <Leaf className="h-5 w-5 shrink-0 text-gray-900 transition-transform duration-200 group-hover:rotate-[10deg] group-hover:scale-110 dark:text-[#fff8ec] motion-reduce:transform-none motion-reduce:transition-none sm:h-6 sm:w-6" aria-hidden="true" />
+            <h1 className="text-[0.95rem] font-light tracking-[0.12em] text-gray-900 transition-transform duration-200 group-hover:translate-x-0.5 dark:text-[#fff8ec] motion-reduce:transform-none motion-reduce:transition-none sm:text-xl sm:tracking-wider">
               Matière Première
             </h1>
           </div>
@@ -93,6 +99,15 @@ export default function Header() {
               </span>
             )}
           </Link>
+          <button
+            type="button"
+            onClick={toggleTheme}
+            aria-label={themeToggleLabel}
+            aria-pressed={isDarkTheme}
+            className={`hidden sm:inline-flex ${themeToggleClass}`}
+          >
+            {isDarkTheme ? <Sun className="h-4.5 w-4.5" aria-hidden="true" /> : <Moon className="h-4.5 w-4.5" aria-hidden="true" />}
+          </button>
           <Link
             href="/wishlist"
             aria-label="Ouvrir la liste de favoris"
@@ -150,7 +165,7 @@ export default function Header() {
 
       {/* Mobile Navigation */}
       {mobileMenuOpen && (
-        <div id="mobile-navigation" className="border-t border-gray-200 bg-white md:hidden">
+        <div id="mobile-navigation" className="border-t border-gray-200 bg-white dark:border-[#40382e] dark:bg-[#17140f] md:hidden">
           <nav className="container space-y-1 py-3" aria-label="Navigation mobile">
             {PRIMARY_NAVIGATION.map((item) => (
               <Link
@@ -166,6 +181,10 @@ export default function Header() {
             <Link href="/wishlist" onClick={closeMobileMenu} className="flex min-h-11 items-center rounded-lg px-3 text-sm text-gray-600 transition hover:bg-gray-50 hover:text-red-500">
               Liste de favoris
             </Link>
+            <button type="button" onClick={toggleTheme} aria-pressed={isDarkTheme} className="flex min-h-11 w-full items-center gap-3 rounded-lg px-3 text-left text-sm text-gray-600 transition hover:bg-gray-50 hover:text-gray-900 dark:text-[#d8cdbb] dark:hover:bg-[#302a22] dark:hover:text-[#fff8ec]">
+              {isDarkTheme ? <Sun className="h-4 w-4" aria-hidden="true" /> : <Moon className="h-4 w-4" aria-hidden="true" />}
+              {isDarkTheme ? "Mode clair" : "Mode nuit"}
+            </button>
             {isAuthenticated && (
               <Link href="/account" onClick={closeMobileMenu} className="flex min-h-11 items-center rounded-lg px-3 text-sm text-gray-600 transition hover:bg-gray-50 hover:text-gray-900">
                 Mon compte

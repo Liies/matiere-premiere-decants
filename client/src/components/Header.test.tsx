@@ -16,6 +16,11 @@ const cartState = vi.hoisted(() => ({
   items: [] as Array<{ quantity: number }>,
 }));
 
+const themeState = vi.hoisted(() => ({
+  theme: "light" as "light" | "dark",
+  toggleTheme: vi.fn(),
+}));
+
 vi.mock("@/lib/trpc", () => ({
   trpc: {
     cart: {
@@ -34,6 +39,10 @@ vi.mock("@/_core/hooks/useAuth", () => ({
   }),
 }));
 
+vi.mock("@/contexts/ThemeContext", () => ({
+  useTheme: () => ({ ...themeState, switchable: true }),
+}));
+
 describe("Header", () => {
   afterEach(() => {
     cleanup();
@@ -45,6 +54,7 @@ describe("Header", () => {
     authState.isAuthenticated = false;
     authState.user = null;
     cartState.items = [];
+    themeState.theme = "light";
     vi.clearAllMocks();
   });
 
@@ -83,6 +93,20 @@ describe("Header", () => {
     const cartIcon = cartLink.querySelector("svg");
     expect(cartIcon?.className.baseVal).toContain("group-hover:scale-110");
     expect(cartIcon?.className.baseVal).toContain("group-hover:-rotate-6");
+  });
+
+  it("propose une bascule accessible entre les modes clair et nuit", () => {
+    render(<Header />);
+
+    const nightToggle = screen.getAllByRole("button", { name: "Activer le mode nuit" })[0]!;
+    expect(nightToggle.getAttribute("aria-pressed")).toBe("false");
+    fireEvent.click(nightToggle);
+    expect(themeState.toggleTheme).toHaveBeenCalledOnce();
+
+    cleanup();
+    themeState.theme = "dark";
+    render(<Header />);
+    expect(screen.getAllByRole("button", { name: "Activer le mode clair" })[0]?.getAttribute("aria-pressed")).toBe("true");
   });
 
   it("affiche un compteur discret uniquement lorsque le panier contient des articles", async () => {
