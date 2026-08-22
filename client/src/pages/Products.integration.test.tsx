@@ -265,9 +265,13 @@ describe("intégration catalogue — panier et souhaits", () => {
     expect(badge.className).toContain("z-30");
     expect(screen.getByTestId("catalog-flip-card-2").className).toContain("z-0");
     expect(screen.getByTestId("catalog-out-of-stock-card-2").className).toContain("bg-[linear-gradient(145deg,#fffdf9_0%,#f4efe5_100%)]");
-    expect(screen.getByTestId("catalog-out-of-stock-panel-2").className).toContain("bg-white/70");
+    const unavailableActions = screen.getByTestId("catalog-card-actions-2");
+    expect(unavailableActions.className).toContain("flex-col");
+    expect(unavailableActions.className).not.toContain("sm:flex-row");
+    expect(screen.getByTestId("catalog-out-of-stock-panel-2").className).toContain("w-full");
     expect(screen.getByTestId("catalog-out-of-stock-status-2").textContent).toContain("Momentanément indisponible");
-    expect(screen.getByRole("link", { name: "Découvrir le parfum" })).toBeTruthy();
+    const discoverLink = screen.getByRole("link", { name: "Découvrir le parfum" });
+    expect(discoverLink.className).toContain("w-full");
     expect(screen.getByText("2 parfums affichés")).toBeTruthy();
   });
 

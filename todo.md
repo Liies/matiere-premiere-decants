@@ -6743,3 +6743,8 @@
 - [x] Auditer la superposition du badge et du verso olfactif
 - [x] Préserver l’indication d’indisponibilité lors du retournement de la carte
 - [x] Couvrir, vérifier et publier le correctif de visibilité
+
+## Catalogue — Actions indisponibles responsives
+- [x] Auditer l’alignement du panneau de disponibilité et du CTA sur les cartes étroites
+- [x] Adapter la composition pour conserver le CTA entièrement visible
+- [x] Couvrir, vérifier et publier la correction responsive

@@ -500,15 +500,15 @@ export default function Products() {
 
                     <p className="min-h-[3.75rem] text-sm text-gray-600 line-clamp-3">{product.description}</p>
 
-                    <div data-testid={`catalog-card-actions-${product.id}`} className={`mt-auto flex flex-col gap-3 border-t pt-4 sm:flex-row sm:items-end sm:justify-between sm:gap-4 ${isProductAvailable(product) ? "border-gray-200" : "border-[#d8d0c3]"}`}>
-                      <div className="min-w-0 shrink-0">
+                    <div data-testid={`catalog-card-actions-${product.id}`} className={`mt-auto flex flex-col gap-3 border-t pt-4 ${isProductAvailable(product) ? "border-gray-200 sm:flex-row sm:items-end sm:justify-between sm:gap-4" : "border-[#d8d0c3]"}`}>
+                      <div className={isProductAvailable(product) ? "min-w-0 shrink-0" : "w-full"}>
                         <p data-testid={`catalog-price-${product.id}`} className="text-2xl font-light text-gray-900">
                           {formatPrice(getSelectedVariant(product)?.priceCents ?? product.price)}
                         </p>
                         {isProductAvailable(product) ? (
                           <p className="text-xs font-medium text-gray-500">✓ En stock</p>
                         ) : (
-                          <div data-testid={`catalog-out-of-stock-panel-${product.id}`} className="mt-3 inline-flex min-h-11 items-center gap-3 rounded-lg border border-[#ded6c8] bg-white/70 px-3 py-2 text-left shadow-[inset_0_1px_0_rgba(255,255,255,0.8)]">
+                          <div data-testid={`catalog-out-of-stock-panel-${product.id}`} className="mt-3 flex min-h-11 w-full items-center gap-3 rounded-lg border border-[#ded6c8] bg-white/70 px-3 py-2 text-left shadow-[inset_0_1px_0_rgba(255,255,255,0.8)]">
                             <span className="flex h-6 w-6 items-center justify-center rounded-full border border-[#cfc3ad] bg-[#f4ede2]" aria-hidden="true">
                               <span className="h-1.5 w-1.5 rounded-full bg-[#7d6c56]" />
                             </span>
@@ -557,7 +557,7 @@ export default function Products() {
                           </div>
                         </div>
                       ) : (
-                        <a href={productPath(product)} className="group/unavailable-action inline-flex min-h-11 items-center justify-center gap-3 rounded-full border border-[#6c5e4d] bg-[#4a4035] px-4 text-sm font-medium text-[#fffaf1] shadow-[0_5px_16px_rgba(65,54,42,0.16)] transition-[background-color,border-color,color,transform,box-shadow] duration-200 [transition-timing-function:cubic-bezier(0.23,1,0.32,1)] hover:-translate-y-px hover:border-[#4a4035] hover:bg-[#302a23] hover:shadow-[0_8px_20px_rgba(65,54,42,0.22)] active:scale-[0.97] motion-reduce:transform-none motion-reduce:transition-none">
+                        <a href={productPath(product)} className="group/unavailable-action inline-flex min-h-11 w-full items-center justify-center gap-3 rounded-full border border-[#6c5e4d] bg-[#4a4035] px-5 text-sm font-medium text-[#fffaf1] shadow-[0_5px_16px_rgba(65,54,42,0.16)] transition-[background-color,border-color,color,transform,box-shadow] duration-200 [transition-timing-function:cubic-bezier(0.23,1,0.32,1)] hover:-translate-y-px hover:border-[#4a4035] hover:bg-[#302a23] hover:shadow-[0_8px_20px_rgba(65,54,42,0.22)] active:scale-[0.97] motion-reduce:transform-none motion-reduce:transition-none">
                           Découvrir le parfum
                           <span className="text-base transition-transform duration-200 group-hover/unavailable-action:translate-x-0.5 motion-reduce:transform-none" aria-hidden="true">→</span>
                         </a>
