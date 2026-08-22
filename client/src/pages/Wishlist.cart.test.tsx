@@ -77,6 +77,10 @@ describe("liste de favoris — ajout au panier", () => {
   it("ajoute la variante disponible au panier local depuis les favoris et confirme l’action", () => {
     render(<Wishlist />);
 
+    const removeButton = screen.getByRole("button", { name: "Retirer Vanilla Powder de la liste de favoris" });
+    expect(removeButton.className).toContain("wishlist-remove-button");
+    expect(screen.queryByText("Retirer de la liste")).toBeNull();
+
     fireEvent.click(screen.getByRole("button", { name: "Ajouter au panier" }));
 
     expect(state.addToLocalCart).toHaveBeenCalledWith(

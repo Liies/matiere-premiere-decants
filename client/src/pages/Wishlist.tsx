@@ -157,9 +157,9 @@ export default function Wishlist() {
                         type="button"
                         onClick={() => toggleWishlist(product.id)}
                         aria-label={`Retirer ${product.name} de la liste de favoris`}
-                        className="wishlist-heart-button absolute right-7 top-7 z-20 flex h-10 w-10 items-center justify-center rounded-full bg-white/90 text-red-500 shadow-sm transition hover:bg-white"
+                        className="wishlist-remove-button absolute right-7 top-7 z-20 flex h-10 w-10 items-center justify-center rounded-full border border-white/70 bg-white/90 text-gray-600 shadow-sm transition-[background-color,color,transform,box-shadow] duration-200 [transition-timing-function:cubic-bezier(0.23,1,0.32,1)] hover:-translate-y-px hover:bg-[#453a2e] hover:text-[#fffaf0] hover:shadow-md active:scale-[0.97] motion-reduce:transform-none motion-reduce:transition-none"
                       >
-                        <Heart className="wishlist-heart-pop h-5 w-5 fill-current" aria-hidden="true" />
+                        <X className="h-4 w-4" aria-hidden="true" />
                       </button>
                       <Link href={`/product/${product.id}`} className="block">
                         <div className="luxury-image-frame product-bottle-frame flex h-64 items-center justify-center rounded-lg bg-gray-100">
@@ -168,7 +168,7 @@ export default function Wishlist() {
                         <h2 className="mt-5 text-xl font-light text-gray-900">{product.name}</h2>
                         <p className="mt-1 text-sm text-gray-500">Décant {product.volumeMl ?? 50} ml · €{(product.price / 100).toFixed(2)}</p>
                       </Link>
-                      <div className="mt-5 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                      <div className="mt-5 flex">
                         <Button
                           type="button"
                           onClick={() => handleAddToCart(product)}
@@ -179,9 +179,6 @@ export default function Wishlist() {
                           <ShoppingCart className={`h-4 w-4 ${wasRecentlyAdded ? "cart-icon-bounce" : ""}`} aria-hidden="true" />
                           <span>{!isAvailable ? "Indisponible" : wasRecentlyAdded ? "Ajouté au panier" : "Ajouter au panier"}</span>
                         </Button>
-                        <button type="button" onClick={() => toggleWishlist(product.id)} className="flex min-h-11 shrink-0 items-center justify-center gap-2 text-sm text-gray-600 transition hover:text-gray-900">
-                          <X className="h-4 w-4" aria-hidden="true" /> Retirer de la liste
-                        </button>
                       </div>
                     </div>
                   </Card>

@@ -6733,3 +6733,8 @@
 - [x] Ajouter une action d’ajout unitaire au panier depuis les favoris
 - [x] Conserver le blocage de stock et le retour de confirmation pour chaque parfum
 - [x] Couvrir, vérifier et publier l’ajout au panier depuis les favoris
+
+## Favoris — Retrait épuré
+- [x] Auditer les contrôles de retrait redondants sur les cartes de favoris
+- [x] Conserver la croix d’angle comme unique action de suppression accessible
+- [x] Couvrir, vérifier et publier la carte de favoris épurée
