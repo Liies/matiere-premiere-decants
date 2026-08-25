@@ -26,7 +26,10 @@ describe("storage proxy cache", () => {
         handler = routeHandler;
       }),
     };
-    registerStorageProxy(app as never);
+    registerStorageProxy(app as never, {
+      forgeApiUrl: "https://forge.test",
+      forgeApiKey: "forge-test-key",
+    });
   });
 
   it("met en cache durable une image dont la clé est versionnée", async () => {
@@ -46,6 +49,19 @@ describe("storage proxy cache", () => {
     expect(response.set).toHaveBeenCalledWith("Content-Type", "image/png");
     expect(response.send).toHaveBeenCalledWith(Buffer.from([1, 2, 3]));
     expect(response.redirect).not.toHaveBeenCalled();
+  });
+
+  it("refuse proprement une configuration absente", async () => {
+    const app = { get: vi.fn((_path: string, routeHandler: RouteHandler) => {
+      handler = routeHandler;
+    }) };
+    registerStorageProxy(app as never, { forgeApiUrl: "", forgeApiKey: "" });
+    const response = createResponse();
+
+    await handler?.({ params: { 0: "perfumes/vanilla.png" } }, response);
+
+    expect(response.status).toHaveBeenCalledWith(500);
+    expect(response.send).toHaveBeenCalledWith("Storage proxy not configured");
   });
 
   it("ne met pas en cache durable les fichiers qui ne sont pas des images", async () => {

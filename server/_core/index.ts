@@ -9,6 +9,7 @@ import { appRouter } from "../routers";
 import { createContext } from "./context";
 import { serveStatic, setupVite } from "./vite";
 import { registerStripeWebhook } from "../stripeWebhook";
+import { getProductionReadiness } from "./env";
 
 function isPortAvailable(port: number): Promise<boolean> {
   return new Promise(resolve => {
@@ -38,6 +39,19 @@ async function startServer() {
   app.use(express.urlencoded({ limit: "50mb", extended: true }));
   registerStorageProxy(app);
   registerOAuthRoutes(app);
+
+  app.get("/healthz", (_req, res) => {
+    const readiness = getProductionReadiness();
+    const status = readiness.ready ? 200 : 503;
+    res.status(status).json({
+      status: readiness.ready ? "ok" : "not_ready",
+      checks: {
+        productionConfig: readiness.ready,
+        email: readiness.emailReady ? "ready" : readiness.emailDeliveryMode === "mock" ? "mock" : "not_ready",
+      },
+      missing: readiness.missing,
+    });
+  });
 
   // Dynamic Sitemap XML & Legacy Product Redirects
   app.get("/sitemap.xml", async (req, res) => {

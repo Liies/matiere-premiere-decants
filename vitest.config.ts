@@ -7,6 +7,10 @@ const templateRoot = path.resolve(import.meta.dirname);
 export default defineConfig({
   plugins: [react()],
   root: templateRoot,
+  define: {
+    "import.meta.env.VITE_OAUTH_PORTAL_URL": JSON.stringify("https://oauth.test"),
+    "import.meta.env.VITE_APP_ID": JSON.stringify("matiere-premiere-test"),
+  },
   resolve: {
     alias: {
       "@": path.resolve(templateRoot, "client", "src"),

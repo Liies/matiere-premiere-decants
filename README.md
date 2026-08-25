@@ -55,7 +55,7 @@ docs/
 
 ### Prérequis
 
-Le projet nécessite **Node.js 22**, **pnpm 10** et les variables système injectées par l’environnement Manus, notamment la connexion à la base de données et les paramètres OAuth.
+Le projet nécessite **Node.js 22**, **pnpm 10** et les variables système injectées par l’environnement Manus, notamment la connexion à la base de données et les paramètres OAuth. La liste des variables attendues est disponible dans [`.env.example`](.env.example). Ne copiez jamais de secrets réels dans ce fichier.
 
 ```bash
 pnpm install
@@ -74,6 +74,9 @@ L’application est alors servie par le processus Express/Vite sur le port fourn
 | `pnpm build` | Construit le frontend Vite et le serveur Node de production. |
 | `pnpm start` | Démarre l’artefact serveur de production. |
 | `pnpm db:push` | Génère et applique les migrations Drizzle dans un environnement local configuré. |
+| `curl -i http://localhost:<port>/healthz` | Vérifie la configuration de production sans révéler les valeurs des secrets. |
+
+En production, `/healthz` renvoie `200` uniquement si les variables obligatoires sont présentes et si l’envoi d’emails est configuré en mode réel. En développement, le mode email `mock` reste autorisé. La réponse ne contient que les noms des variables manquantes.
 
 Avant toute livraison, exécuter la séquence suivante :
 

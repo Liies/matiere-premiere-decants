@@ -8,7 +8,9 @@ export function isCacheableImageKey(key: string) {
   return CACHEABLE_IMAGE_KEY.test(key);
 }
 
-export function registerStorageProxy(app: Express) {
+type StorageProxyConfig = Pick<typeof ENV, "forgeApiUrl" | "forgeApiKey">;
+
+export function registerStorageProxy(app: Express, config: StorageProxyConfig = ENV) {
   app.get("/manus-storage/*", async (req, res) => {
     const params = req.params as unknown as Record<string, string>;
     const key = params[0];
@@ -17,7 +19,7 @@ export function registerStorageProxy(app: Express) {
       return;
     }
 
-    if (!ENV.forgeApiUrl || !ENV.forgeApiKey) {
+    if (!config.forgeApiUrl || !config.forgeApiKey) {
       res.status(500).send("Storage proxy not configured");
       return;
     }
@@ -25,12 +27,12 @@ export function registerStorageProxy(app: Express) {
     try {
       const forgeUrl = new URL(
         "v1/storage/presign/get",
-        ENV.forgeApiUrl.replace(/\/+$/, "") + "/",
+        config.forgeApiUrl.replace(/\/+$/, "") + "/",
       );
       forgeUrl.searchParams.set("path", key);
 
       const forgeResp = await fetch(forgeUrl, {
-        headers: { Authorization: `Bearer ${ENV.forgeApiKey}` },
+        headers: { Authorization: `Bearer ${config.forgeApiKey}` },
       });
 
       if (!forgeResp.ok) {

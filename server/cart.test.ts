@@ -13,7 +13,8 @@ const mockUser = {
   lastSignedIn: new Date(),
 };
 
-describe("Cart Router", () => {
+// These are database-backed integration tests. They run in CI/deployment when DATABASE_URL is provided.
+describe.skipIf(!process.env.DATABASE_URL)("Cart Router", () => {
   it("should get empty cart for new user", async () => {
     const caller = appRouter.createCaller({
       user: mockUser,

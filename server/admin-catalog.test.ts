@@ -21,7 +21,8 @@ function createCaller(role: "user" | "admin" | null) {
   });
 }
 
-describe("adminCatalog", () => {
+// These are database-backed integration tests. They run in CI/deployment when DATABASE_URL is provided.
+describe.skipIf(!process.env.DATABASE_URL)("adminCatalog", () => {
   it("refuse la lecture du catalogue à un visiteur non authentifié", async () => {
     await expect(createCaller(null).adminCatalog.list()).rejects.toThrow();
   });
